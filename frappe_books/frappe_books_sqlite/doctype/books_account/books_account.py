@@ -1,0 +1,65 @@
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
+
+import frappe
+from frappe import _
+from frappe.utils.nestedset import NestedSet
+
+
+class BooksAccount(NestedSet):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		account_name: DF.Data
+		account_type: DF.Literal[
+			"Accumulated Depreciation",
+			"Bank",
+			"Cash",
+			"Chargeable",
+			"Cost of Goods Sold",
+			"Depreciation",
+			"Equity",
+			"Expense Account",
+			"Expenses Included In Valuation",
+			"Fixed Asset",
+			"Income Account",
+			"Payable",
+			"Receivable",
+			"Round Off",
+			"Stock",
+			"Stock Adjustment",
+			"Stock Received But Not Billed",
+			"Tax",
+			"Temporary",
+		]
+		is_group: DF.Check
+		lft: DF.Int
+		old_parent: DF.Link | None
+		parent_books_account: DF.Link | None
+		rgt: DF.Int
+		root_type: DF.Literal["Asset", "Liability", "Equity", "Income", "Expense"]
+	# end: auto-generated types
+
+	_DOCTYPE_NAME = "Books Account"
+
+	def before_validate(self):
+		if not self.parent_books_account:
+			return
+
+		parent = frappe.db.get_value(
+			"Books Account",
+			self.parent_books_account,
+			["root_type", "is_group"],
+			as_dict=True,
+		)
+		if not parent:
+			frappe.throw(_("Parent account {0} does not exist.").format(self.parent_books_account))
+		if not parent.is_group:
+			frappe.throw(_("Parent account {0} must be a group.").format(self.parent_books_account))
+
+		self.root_type = parent.root_type

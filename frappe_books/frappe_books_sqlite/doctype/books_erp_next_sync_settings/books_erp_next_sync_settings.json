@@ -1,0 +1,163 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "creation": "2026-08-27 22:09:39.715111",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "default_section_break_1",
+  "device_id",
+  "base_url",
+  "auth_token",
+  "initial_sync_data",
+  "integration_app_version",
+  "is_enabled",
+  "data_sync_interval",
+  "sync_data_from_server",
+  "sync_data_to_server",
+  "endpoints_section_break_11",
+  "register_instance",
+  "sync_settings",
+  "sync_data_to_erp_next",
+  "fetch_from_erp_next_queue",
+  "clear_synced_docs_from_erp_next_sync_queue"
+ ],
+ "fields": [
+  {
+   "fieldname": "default_section_break_1",
+   "fieldtype": "Section Break",
+   "label": "Default"
+  },
+  {
+   "fieldname": "device_id",
+   "fieldtype": "Data",
+   "label": "Device ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_url",
+   "fieldtype": "Data",
+   "label": "API Base URL"
+  },
+  {
+   "fieldname": "auth_token",
+   "fieldtype": "Password",
+   "label": "Auth Token"
+  },
+  {
+   "default": "0",
+   "fieldname": "initial_sync_data",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Initial Sync Data"
+  },
+  {
+   "fieldname": "integration_app_version",
+   "fieldtype": "Data",
+   "label": "FBooks Integration Version",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_enabled",
+   "fieldtype": "Check",
+   "label": "Is Sync Enabled",
+   "read_only": 1
+  },
+  {
+   "default": "60",
+   "fieldname": "data_sync_interval",
+   "fieldtype": "Data",
+   "label": "Data Sync Interval (In Minutes)"
+  },
+  {
+   "fieldname": "sync_data_from_server",
+   "fieldtype": "Button",
+   "label": "Sync Data From Server"
+  },
+  {
+   "fieldname": "sync_data_to_server",
+   "fieldtype": "Button",
+   "label": "Sync Data To Server"
+  },
+  {
+   "fieldname": "endpoints_section_break_11",
+   "fieldtype": "Section Break",
+   "label": "Endpoints"
+  },
+  {
+   "default": "register_instance",
+   "fieldname": "register_instance",
+   "fieldtype": "Data",
+   "label": "Register Instance"
+  },
+  {
+   "default": "sync_settings",
+   "fieldname": "sync_settings",
+   "fieldtype": "Data",
+   "label": "Sync Settings"
+  },
+  {
+   "default": "sync.sync_transactions",
+   "fieldname": "sync_data_to_erp_next",
+   "fieldtype": "Data",
+   "label": "Sync Data To ERPNext"
+  },
+  {
+   "default": "sync.get_pending_docs",
+   "fieldname": "fetch_from_erp_next_queue",
+   "fieldtype": "Data",
+   "label": "Fetch Data From ERPNext"
+  },
+  {
+   "default": "sync.update_status",
+   "fieldname": "clear_synced_docs_from_erp_next_sync_queue",
+   "fieldtype": "Data",
+   "label": "Clear Synced Data From ERPNext SyncQueue"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-08-27 23:43:15.048627",
+ "modified_by": "Administrator",
+ "module": "Frappe Books SQLite",
+ "name": "Books Erp Next Sync Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Books Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Books User"
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

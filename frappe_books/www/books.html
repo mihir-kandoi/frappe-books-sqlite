@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ layout_direction }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f8f9fa" />
+    <link
+      rel="icon"
+      href="/assets/frappe_books/books-logo.png"
+      type="image/png"
+    />
+    <title>Frappe Books | {{ app_name }}</title>
+    <script type="module" crossorigin src="/assets/frappe_books/books/assets/index-BMXiOy4L.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/frappe_books/books/assets/index-C75PMTxR.css">
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      window.csrf_token = '{{ frappe.session.csrf_token }}';
+      window.frappe = window.frappe || {};
+      frappe.csrf_token = window.csrf_token;
+      frappe.boot = JSON.parse({{ boot }});
+      frappe.boot.layout_direction = '{{ layout_direction }}';
+      window.books_boot = {{ books_boot }};
+    </script>
+  </body>
+</html>

@@ -1,0 +1,73 @@
+"""Integration coverage for native Desk document actions and returns."""
+
+from decimal import Decimal
+
+import frappe
+from frappe.tests import IntegrationTestCase
+
+from frappe_books.document_actions import make_payment, make_return, make_sales_invoice
+from frappe_books.tests.accounting import make_account, make_invoice, make_item, make_party
+
+
+class IntegrationTestDocumentActions(IntegrationTestCase):
+	def setUp(self):
+		self.receivable = make_account("Action Receivable", account_type="Receivable")
+		self.income = make_account("Action Income", root_type="Income", account_type="Income Account")
+		self.expense = make_account("Action Expense", root_type="Expense", account_type="Expense Account")
+		self.cash = make_account("Action Cash", account_type="Cash")
+		self.party = make_party(self.receivable.name)
+		self.item = make_item(self.income.name, self.expense.name)
+		frappe.db.set_single_value("Books Defaults", "sales_payment_account", self.cash.name)
+
+	def test_quote_to_invoice_and_invoice_to_payment(self):
+		quote = frappe.get_doc(
+			{
+				"doctype": "Books Sales Quote",
+				"reference_type": "Books Party",
+				"party": self.party.name,
+				"date": frappe.utils.now_datetime(),
+				"items": [{"item": self.item.name, "rate": 75, "quantity": 2}],
+			}
+		).insert()
+		quote.submit()
+
+		invoice = frappe.get_doc(make_sales_invoice(quote.name)).insert()
+		self.assertEqual(invoice.quote, quote.name)
+		self.assertEqual(invoice.account, self.receivable.name)
+		invoice.submit()
+
+		payment = frappe.get_doc(make_payment(invoice.doctype, invoice.name))
+		self.assertEqual(payment.payment_type, "Receive")
+		self.assertEqual(Decimal(str(payment.amount)), Decimal("150"))
+		self.assertEqual(payment.payment_references[0].reference_name, invoice.name)
+
+	def test_return_limits_quantity_and_updates_original_status(self):
+		invoice = make_invoice(
+			"Books Sales Invoice",
+			self.party.name,
+			self.receivable.name,
+			self.item.name,
+			self.income.name,
+		)
+		invoice.items[0].item_discount_percent = 0
+		invoice.save()
+		invoice.submit()
+
+		credit_note = frappe.get_doc(make_return(invoice.doctype, invoice.name)).insert()
+		self.assertEqual(Decimal(str(credit_note.items[0].quantity)), Decimal("-2"))
+		credit_note.submit()
+		self.assertEqual(invoice.db_get("is_fully_returned"), 1)
+		self.assertEqual(Decimal(str(credit_note.db_get("outstanding_amount"))), Decimal("-200"))
+
+		with self.assertRaises(frappe.ValidationError):
+			make_return(invoice.doctype, invoice.name)
+
+		refund = frappe.get_doc(make_payment(credit_note.doctype, credit_note.name))
+		self.assertEqual(refund.payment_type, "Pay")
+		refund.insert().submit()
+		self.assertEqual(credit_note.db_get("outstanding_amount"), 0)
+		refund.cancel()
+
+		credit_note.cancel()
+		self.assertEqual(invoice.db_get("is_returned"), 0)
+		self.assertEqual(invoice.db_get("is_fully_returned"), 0)
