@@ -33,7 +33,6 @@
    "label": "Default"
   },
   {
-   "default": "Stores",
    "fieldname": "inventory",
    "fieldtype": "Link",
    "label": "Inventory",
@@ -46,16 +45,13 @@
    "options": "Books Pos Profile"
   },
   {
-   "default": "Cash In Hand",
    "fieldname": "cash_account",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Counter Cash Account",
-   "options": "Books Account",
-   "reqd": 1
+   "options": "Books Account"
   },
   {
-   "default": "Write Off",
    "fieldname": "write_off_account",
    "fieldtype": "Link",
    "label": "Write Off Account",
@@ -78,13 +74,11 @@
    "label": "Is POS Shift Open"
   },
   {
-   "default": "Debtors",
    "fieldname": "default_account",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Default Account",
-   "options": "Books Account",
-   "reqd": 1
+   "options": "Books Account"
   },
   {
    "fieldname": "barcode_section_break_9",

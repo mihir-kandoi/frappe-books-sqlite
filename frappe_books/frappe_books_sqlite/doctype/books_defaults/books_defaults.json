@@ -166,21 +166,18 @@
    "label": "Print Templates"
   },
   {
-   "default": "Business - Quote",
    "fieldname": "sales_quote_print_template",
    "fieldtype": "Link",
    "label": "Sales Quote Print Template",
    "options": "Books Print Template"
   },
   {
-   "default": "Business - Sales Invoice",
    "fieldname": "sales_invoice_print_template",
    "fieldtype": "Link",
    "label": "Sales Invoice Print Template",
    "options": "Books Print Template"
   },
   {
-   "default": "Business - Purchase Invoice",
    "fieldname": "purchase_invoice_print_template",
    "fieldtype": "Link",
    "label": "Purchase Invoice Print Template",
@@ -193,14 +190,12 @@
    "options": "Books Print Template"
   },
   {
-   "default": "Business - Payment",
    "fieldname": "payment_print_template",
    "fieldtype": "Link",
    "label": "Payment Print Template",
    "options": "Books Print Template"
   },
   {
-   "default": "Business - Shipment",
    "fieldname": "shipment_print_template",
    "fieldtype": "Link",
    "label": "Shipment Print Template",
@@ -219,7 +214,6 @@
    "options": "Books Print Template"
   },
   {
-   "default": "Business-POS - Sales Invoice",
    "fieldname": "pos_print_template",
    "fieldtype": "Link",
    "label": "POS Print Template",

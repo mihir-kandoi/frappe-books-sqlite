@@ -16,6 +16,14 @@ DEFAULT_PRINT_TEMPLATES = {
 	"Business - Shipment": ("Shipment", "business_shipment_print_template.html", 21, 29.7),
 	"Business-POS - Sales Invoice": ("SalesInvoice", "business_pos_print_template.html", 8, 22),
 }
+DEFAULT_PRINT_TEMPLATE_FIELDS = {
+	"sales_quote_print_template": "Business - Quote",
+	"sales_invoice_print_template": "Business - Sales Invoice",
+	"purchase_invoice_print_template": "Business - Purchase Invoice",
+	"payment_print_template": "Business - Payment",
+	"shipment_print_template": "Business - Shipment",
+	"pos_print_template": "Business-POS - Sales Invoice",
+}
 PRINT_TEMPLATE_DIRECTORY = Path(__file__).with_name("data")
 DEFAULT_NUMBER_SERIES = {
 	"JV-": "JournalEntry",
@@ -100,6 +108,16 @@ def ensure_default_records():
 	_insert_if_missing("Books Payment Method", "Cash", {"type": "Cash"})
 	for name, template_spec in DEFAULT_PRINT_TEMPLATES.items():
 		_sync_default_print_template(name, template_spec)
+	_sync_default_print_template_settings()
+
+
+def _sync_default_print_template_settings():
+	settings = frappe.get_single("Books Defaults")
+	if all(settings.get(fieldname) == value for fieldname, value in DEFAULT_PRINT_TEMPLATE_FIELDS.items()):
+		return
+
+	settings.update(DEFAULT_PRINT_TEMPLATE_FIELDS)
+	settings.save(ignore_permissions=True)
 
 
 def _sync_default_print_template(name, template_spec):
