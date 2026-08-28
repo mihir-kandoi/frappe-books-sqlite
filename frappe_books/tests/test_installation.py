@@ -1,8 +1,12 @@
 """Installation metadata regressions."""
 
+from pathlib import Path
+
 import frappe
 from frappe.tests import IntegrationTestCase
 
+import frappe_books
+from frappe_books.hooks import app_icon_route, app_icon_title, app_icon_url
 from frappe_books.setup import DEFAULT_PRINT_TEMPLATE_FIELDS, ensure_default_records
 
 POST_INSTALL_LINK_FIELDS = {
@@ -12,6 +16,22 @@ POST_INSTALL_LINK_FIELDS = {
 
 
 class IntegrationTestInstallation(IntegrationTestCase):
+	def test_apps_screen_uses_packaged_books_icon(self):
+		apps_screen = frappe.get_hooks("add_to_apps_screen", app_name="frappe_books")
+		self.assertEqual(
+			apps_screen,
+			[
+				{
+					"name": "frappe_books",
+					"logo": app_icon_url,
+					"title": app_icon_title,
+					"route": app_icon_route,
+				}
+			],
+		)
+		self.assertEqual(frappe.get_hooks("app_logo_url", app_name="frappe_books"), [app_icon_url])
+		self.assertTrue((Path(frappe_books.__file__).parent / "public" / "books-logo.png").is_file())
+
 	def test_post_install_links_have_no_doctype_defaults(self):
 		for doctype, fieldnames in POST_INSTALL_LINK_FIELDS.items():
 			meta = frappe.get_meta(doctype)

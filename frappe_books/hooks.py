@@ -4,6 +4,10 @@ app_publisher = "Frappe Technologies Pvt. Ltd."
 app_description = "Experimental Frappe Books port using SQLite"
 app_email = "hello@frappe.io"
 app_license = "agpl-3.0"
+app_logo_url = "/assets/frappe_books/books-logo.png"
+app_icon_url = app_logo_url
+app_icon_title = "Frappe Books"
+app_icon_route = "/books"
 
 # Send non-GET requests for this app's endpoints as native `application/json`
 # bodies instead of form-encoded, per-key JSON-stringified values.
@@ -17,10 +21,10 @@ use_json_request_body = True
 # Each item in the list will be shown as an app in the apps page
 add_to_apps_screen = [
 	{
-		"name": "frappe_books",
-		"logo": "/assets/frappe_books/books-logo.png",
-		"title": "Frappe Books",
-		"route": "/books",
+		"name": app_name,
+		"logo": app_icon_url,
+		"title": app_icon_title,
+		"route": app_icon_route,
 	}
 ]
 
