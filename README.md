@@ -6,7 +6,7 @@ The interface reuses the desktop components, routes, forms, lists, reports, and 
 
 Frappe runs submit and cancel actions in one server transaction. This keeps ledger, stock, payment, pricing, and loyalty updates atomic. Draft updates also reject stale modification times.
 
-The port targets Frappe Framework `develop` (version 17). SQLite support in Frappe is still experimental. Use this app for local use, evaluation, and controlled single-site deployments. Test it carefully before you use it for production accounting data.
+The port targets Frappe Framework version 16. SQLite support in Frappe is still experimental. Use this app for local use, evaluation, and controlled single-site deployments. Test it carefully before you use it for production accounting data.
 
 ## Included
 
@@ -28,7 +28,7 @@ The Electron runtime is not part of this app. The browser handles downloads, fil
 
 ## Requirements
 
-- Frappe Framework `develop` at version 17
+- Frappe Framework 16
 - Python 3.14
 - Redis
 - SQLite 3
@@ -46,11 +46,11 @@ uv python install 3.14
 uv tool install frappe-bench
 ```
 
-Create a Frappe v17 bench outside this repository:
+Create a Frappe v16 bench outside this repository:
 
 ```bash
 BOOKS_PYTHON="$(uv python find 3.14)"
-bench init --frappe-branch develop --python "$BOOKS_PYTHON" books-frappe-sqlite-bench
+bench init --frappe-branch version-16 --python "$BOOKS_PYTHON" books-frappe-sqlite-bench
 cd books-frappe-sqlite-bench
 ```
 
