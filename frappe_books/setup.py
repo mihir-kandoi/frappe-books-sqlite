@@ -9,10 +9,13 @@ from frappe_books.printing import ensure_print_formats
 DEFAULT_SERIES_START = 1001
 BOOKS_ROLES = ("Books User", "Books Manager")
 BOOKS_DESKTOP_ICON_LABEL = "Books"
+BOOKS_DESKTOP_ICON_INDEX = 0
+FRAMEWORK_DESKTOP_ICON_INDEX = -1
 BOOKS_DESKTOP_ICON_VALUES = {
 	"app": "frappe_books",
 	"hidden": 0,
 	"icon_type": "App",
+	"idx": BOOKS_DESKTOP_ICON_INDEX,
 	"link": "/books",
 	"link_type": "External",
 	"logo_url": "/assets/frappe_books/books-icon.png",
@@ -52,6 +55,10 @@ def after_install():
 	ensure_number_series()
 	ensure_default_records()
 	ensure_print_formats()
+	ensure_desktop_icons()
+
+
+def after_app_install(_app_name):
 	ensure_desktop_icons()
 
 
@@ -113,6 +120,8 @@ def _remove_duplicate_framework_icon():
 	)
 	if not standard_icon:
 		return
+
+	frappe.db.set_value("Desktop Icon", standard_icon, "idx", FRAMEWORK_DESKTOP_ICON_INDEX)
 
 	duplicate_icons = frappe.get_all(
 		"Desktop Icon",

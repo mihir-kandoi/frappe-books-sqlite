@@ -112,6 +112,7 @@ jinja = {"methods": ["frappe_books.printing.get_print_settings"]}
 
 before_install = "frappe_books.setup.ensure_roles"
 after_install = "frappe_books.setup.after_install"
+after_app_install = "frappe_books.setup.after_app_install"
 
 # Keep required bootstrap data present after schema migrations.
 after_migrate = "frappe_books.setup.after_migrate"

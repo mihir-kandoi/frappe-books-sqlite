@@ -8,8 +8,11 @@ from frappe.tests import IntegrationTestCase
 import frappe_books
 from frappe_books.hooks import app_icon_route, app_icon_title, app_icon_url
 from frappe_books.setup import (
+	BOOKS_DESKTOP_ICON_INDEX,
 	BOOKS_DESKTOP_ICON_LABEL,
 	DEFAULT_PRINT_TEMPLATE_FIELDS,
+	FRAMEWORK_DESKTOP_ICON_INDEX,
+	after_app_install,
 	ensure_default_records,
 	ensure_desktop_icons,
 )
@@ -44,21 +47,55 @@ class IntegrationTestInstallation(IntegrationTestCase):
 			frappe.get_all(
 				"Desktop Icon",
 				filters={"app": "frappe_books", "icon_type": "App"},
-				pluck="name",
+				fields=["name", "idx"],
 			),
-			[BOOKS_DESKTOP_ICON_LABEL],
+			[{"name": BOOKS_DESKTOP_ICON_LABEL, "idx": BOOKS_DESKTOP_ICON_INDEX}],
 		)
 		standard_framework_icon = frappe.db.exists(
 			"Desktop Icon",
 			{"app": "frappe", "icon_type": "App", "standard": 1},
 		)
 		if standard_framework_icon:
+			self.assertEqual(
+				frappe.db.get_value("Desktop Icon", standard_framework_icon, "idx"),
+				FRAMEWORK_DESKTOP_ICON_INDEX,
+			)
 			self.assertFalse(
 				frappe.db.exists(
 					"Desktop Icon",
 					{"app": "frappe", "icon_type": "App", "standard": 0},
 				)
 			)
+
+	def test_post_install_repair_runs_after_frappe_icon_generation(self):
+		self.assertEqual(
+			frappe.get_hooks("after_app_install", app_name="frappe_books"),
+			["frappe_books.setup.after_app_install"],
+		)
+		standard_framework_icon = frappe.db.exists(
+			"Desktop Icon",
+			{"app": "frappe", "icon_type": "App", "standard": 1},
+		)
+		if not standard_framework_icon:
+			return
+
+		frappe.get_doc(
+			{
+				"doctype": "Desktop Icon",
+				"label": "Frappe Framework",
+				"app": "frappe",
+				"icon_type": "App",
+				"idx": 0,
+			}
+		).insert(ignore_permissions=True)
+
+		after_app_install("another_app")
+
+		self.assertFalse(frappe.db.exists("Desktop Icon", "Frappe Framework"))
+		self.assertEqual(
+			frappe.db.get_value("Desktop Icon", standard_framework_icon, "idx"),
+			FRAMEWORK_DESKTOP_ICON_INDEX,
+		)
 
 	def test_post_install_links_have_no_doctype_defaults(self):
 		for doctype, fieldnames in POST_INSTALL_LINK_FIELDS.items():
