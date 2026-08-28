@@ -15,7 +15,7 @@ BOOKS_DESKTOP_ICON_VALUES = {
 	"icon_type": "App",
 	"link": "/books",
 	"link_type": "External",
-	"logo_url": "/assets/frappe_books/books-logo.png",
+	"logo_url": "/assets/frappe_books/books-icon.png",
 }
 DEFAULT_PRINT_TEMPLATES = {
 	"Business - Quote": ("SalesQuote", "business_print_template.html", 21, 29.7),

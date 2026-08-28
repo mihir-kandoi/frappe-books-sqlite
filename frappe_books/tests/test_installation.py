@@ -35,7 +35,7 @@ class IntegrationTestInstallation(IntegrationTestCase):
 			],
 		)
 		self.assertEqual(frappe.get_hooks("app_logo_url", app_name="frappe_books"), [app_icon_url])
-		self.assertTrue((Path(frappe_books.__file__).parent / "public" / "books-logo.png").is_file())
+		self.assertTrue((Path(frappe_books.__file__).parent / "public" / "books-icon.png").is_file())
 
 	def test_desktop_icons_are_canonical(self):
 		ensure_desktop_icons()
