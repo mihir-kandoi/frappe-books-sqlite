@@ -1,12 +1,12 @@
 app_name = "frappe_books"
-app_title = "Frappe Books SQLite"
+app_title = "Books"
 app_publisher = "Frappe Technologies Pvt. Ltd."
 app_description = "Experimental Frappe Books port using SQLite"
 app_email = "hello@frappe.io"
 app_license = "agpl-3.0"
 app_logo_url = "/assets/frappe_books/books-logo.png"
 app_icon_url = app_logo_url
-app_icon_title = "Frappe Books"
+app_icon_title = app_title
 app_icon_route = "/books"
 
 # Send non-GET requests for this app's endpoints as native `application/json`

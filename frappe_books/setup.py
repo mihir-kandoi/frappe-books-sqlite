@@ -8,6 +8,15 @@ from frappe_books.printing import ensure_print_formats
 
 DEFAULT_SERIES_START = 1001
 BOOKS_ROLES = ("Books User", "Books Manager")
+BOOKS_DESKTOP_ICON_LABEL = "Books"
+BOOKS_DESKTOP_ICON_VALUES = {
+	"app": "frappe_books",
+	"hidden": 0,
+	"icon_type": "App",
+	"link": "/books",
+	"link_type": "External",
+	"logo_url": "/assets/frappe_books/books-logo.png",
+}
 DEFAULT_PRINT_TEMPLATES = {
 	"Business - Quote": ("SalesQuote", "business_print_template.html", 21, 29.7),
 	"Business - Sales Invoice": ("SalesInvoice", "business_print_template.html", 21, 29.7),
@@ -43,6 +52,7 @@ def after_install():
 	ensure_number_series()
 	ensure_default_records()
 	ensure_print_formats()
+	ensure_desktop_icons()
 
 
 def before_tests():
@@ -50,6 +60,7 @@ def before_tests():
 	ensure_number_series()
 	ensure_default_records()
 	ensure_print_formats()
+	ensure_desktop_icons()
 
 
 def after_migrate():
@@ -57,6 +68,7 @@ def after_migrate():
 	ensure_number_series()
 	ensure_default_records()
 	ensure_print_formats()
+	ensure_desktop_icons()
 	normalize_ledger_dates()
 
 
@@ -82,6 +94,70 @@ def ensure_roles():
 				"desk_access": 1,
 			}
 		).insert(ignore_permissions=True)
+
+
+def ensure_desktop_icons():
+	if not frappe.db.exists("DocType", "Desktop Icon"):
+		return
+
+	_remove_duplicate_framework_icon()
+	_sync_books_desktop_icon()
+	frappe.cache.delete_key("desktop_icons")
+	frappe.cache.delete_key("bootinfo")
+
+
+def _remove_duplicate_framework_icon():
+	standard_icon = frappe.db.exists(
+		"Desktop Icon",
+		{"app": "frappe", "icon_type": "App", "standard": 1},
+	)
+	if not standard_icon:
+		return
+
+	duplicate_icons = frappe.get_all(
+		"Desktop Icon",
+		filters={"app": "frappe", "icon_type": "App", "standard": 0},
+		pluck="name",
+	)
+	for icon_name in duplicate_icons:
+		frappe.db.set_value("Desktop Icon", {"parent_icon": icon_name}, "parent_icon", standard_icon)
+		frappe.delete_doc("Desktop Icon", icon_name, force=True, ignore_permissions=True)
+
+
+def _sync_books_desktop_icon():
+	workspace_icon = frappe.db.exists(
+		"Desktop Icon",
+		{
+			"name": BOOKS_DESKTOP_ICON_LABEL,
+			"icon_type": "Link",
+			"link_to": BOOKS_DESKTOP_ICON_LABEL,
+			"hidden": 1,
+		},
+	)
+	if workspace_icon:
+		frappe.delete_doc("Desktop Icon", workspace_icon, force=True, ignore_permissions=True)
+
+	icon_names = frappe.get_all(
+		"Desktop Icon",
+		filters={"app": "frappe_books", "icon_type": "App"},
+		pluck="name",
+	)
+	if BOOKS_DESKTOP_ICON_LABEL in icon_names:
+		icon = frappe.get_doc("Desktop Icon", BOOKS_DESKTOP_ICON_LABEL)
+		icon.update(BOOKS_DESKTOP_ICON_VALUES)
+		icon.save(ignore_permissions=True)
+	else:
+		frappe.get_doc(
+			{
+				"doctype": "Desktop Icon",
+				"label": BOOKS_DESKTOP_ICON_LABEL,
+				**BOOKS_DESKTOP_ICON_VALUES,
+			}
+		).insert(ignore_permissions=True)
+
+	for icon_name in icon_names:
+		if icon_name != BOOKS_DESKTOP_ICON_LABEL:
+			frappe.delete_doc("Desktop Icon", icon_name, force=True, ignore_permissions=True)
 
 
 def ensure_number_series():
