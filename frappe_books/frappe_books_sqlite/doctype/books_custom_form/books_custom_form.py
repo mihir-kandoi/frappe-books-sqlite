@@ -4,6 +4,8 @@
 # import frappe
 from frappe.model.document import Document
 
+from frappe_books.customization import remove_custom_fields, sync_custom_form
+
 
 class BooksCustomForm(Document):
 	# begin: auto-generated types
@@ -22,3 +24,9 @@ class BooksCustomForm(Document):
 	# end: auto-generated types
 
 	_DOCTYPE_NAME = "Books Custom Form"
+
+	def on_update(self):
+		sync_custom_form(self)
+
+	def on_trash(self):
+		remove_custom_fields(self.name)

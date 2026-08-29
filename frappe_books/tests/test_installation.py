@@ -40,6 +40,14 @@ class IntegrationTestInstallation(IntegrationTestCase):
 		self.assertEqual(frappe.get_hooks("app_logo_url", app_name="frappe_books"), [app_icon_url])
 		self.assertTrue((Path(frappe_books.__file__).parent / "public" / "books-icon.png").is_file())
 
+	def test_books_pages_use_packaged_icon(self):
+		package_root = Path(frappe_books.__file__).parent
+		for relative_path in ("www/books.html", "public/books/index.html"):
+			with self.subTest(relative_path=relative_path):
+				html = (package_root / relative_path).read_text()
+				self.assertIn("/assets/frappe_books/books-icon.png", html)
+				self.assertNotIn("/assets/frappe_books/books-logo.png", html)
+
 	def test_desktop_icons_are_canonical(self):
 		ensure_desktop_icons()
 

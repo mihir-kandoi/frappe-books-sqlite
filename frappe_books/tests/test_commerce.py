@@ -1,6 +1,7 @@
 """Integration coverage for promotions, loyalty programs, and POS shifts."""
 
 from decimal import Decimal
+from unittest.mock import patch
 
 import frappe
 from frappe.tests import IntegrationTestCase
@@ -189,6 +190,7 @@ class IntegrationTestPosShift(IntegrationTestCase):
 		settings.cash_account = self.counter.name
 		settings.write_off_account = self.write_off.name
 		settings.default_account = self.counter.name
+		settings.is_shift_open = 0
 		settings.save()
 		if not frappe.db.exists("Books Account", "Cash"):
 			frappe.get_doc(
@@ -199,19 +201,28 @@ class IntegrationTestPosShift(IntegrationTestCase):
 					"account_type": "Cash",
 				}
 			).insert()
+		if not frappe.db.exists("Books Payment Method", "Bank"):
+			frappe.get_doc(
+				{
+					"doctype": "Books Payment Method",
+					"name": "Bank",
+					"type": "Bank",
+				}
+			).insert()
 
 	def test_open_and_close_shift_reconciles_cash(self):
-		opening = frappe.get_doc(
-			{
-				"doctype": "Books Pos Opening Shift",
-				"opening_date": now_datetime(),
-				"opening_cash": [{"denomination": 50, "count": 2}],
-				"opening_amounts": [
-					{"payment_method": "Cash", "amount": 100},
-					{"payment_method": "Bank", "amount": 0},
-				],
-			}
-		).insert()
+		with patch("frappe_books.commerce.pos._open_shift_name", return_value=None):
+			opening = frappe.get_doc(
+				{
+					"doctype": "Books Pos Opening Shift",
+					"opening_date": now_datetime(),
+					"opening_cash": [{"denomination": 50, "count": 2}],
+					"opening_amounts": [
+						{"payment_method": "Cash", "amount": 100},
+						{"payment_method": "Bank", "amount": 0},
+					],
+				}
+			).insert()
 		self.assertEqual(frappe.db.get_single_value("Books Pos Settings", "is_shift_open"), 1)
 
 		closing = frappe.get_doc(
@@ -248,6 +259,8 @@ class IntegrationTestPosCheckout(IntegrationTestCase):
 		settings.default_account = self.receivable.name
 		settings.cash_account = self.cash.name
 		settings.write_off_account = self.expense.name
+		settings.pos_profile = None
+		settings.can_change_rate = 0
 		settings.is_shift_open = 1
 		settings.save()
 		frappe.db.set_value("Books Payment Method", "Cash", "account", self.cash.name, update_modified=False)
@@ -268,6 +281,16 @@ class IntegrationTestPosCheckout(IntegrationTestCase):
 		self.assertEqual(invoice.grand_total, 150)
 		self.assertEqual(result["outstanding_amount"], 0)
 		self.assertEqual(len(result["payments"]), 1)
+
+	def test_checkout_honors_custom_rate_when_enabled(self):
+		frappe.db.set_single_value("Books Pos Settings", "can_change_rate", 1)
+		result = checkout(
+			cart=[{"item": self.item.name, "quantity": 2, "rate": 60}],
+			customer=self.party.name,
+			payments=[{"payment_method": "Cash", "amount": 120}],
+		)
+		invoice = frappe.get_doc("Books Sales Invoice", result["invoice"])
+		self.assertEqual(invoice.grand_total, 120)
 
 	def tearDown(self):
 		frappe.db.set_single_value("Books Pos Settings", "is_shift_open", 0)

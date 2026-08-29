@@ -136,6 +136,11 @@ class BooksBespokeQueries:
 			totals[payment.payment_method] += as_decimal(payment.amount)
 		return {method: rounded(amount) for method, amount in totals.items()}
 
+	def last_inserted(self, source_schema: str) -> int:
+		"""Return the highest numeric name used by an autoincrement Books schema."""
+		names = frappe.get_list(target_doctype(source_schema), pluck="name", limit=5000)
+		return max((int(name) for name in names if str(name).isdigit()), default=0)
+
 	def _ledger(self, from_date=None, to_date=None):
 		filters: dict[str, Any] = {"reverted": 0}
 		if from_date and to_date:
@@ -165,4 +170,5 @@ _METHODS = {
 	"getStockQuantity": "stock_quantity",
 	"getReturnBalanceItemsQty": "return_balance",
 	"getPOSTransactedAmount": "pos_transacted_amount",
+	"getLastInserted": "last_inserted",
 }

@@ -13,10 +13,10 @@
   {
    "description": "Payment Method",
    "fieldname": "payment_method",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Payment Method",
-   "options": "Cash\nTransfer\nBank",
+   "options": "Books Payment Method",
    "reqd": 1
   },
   {

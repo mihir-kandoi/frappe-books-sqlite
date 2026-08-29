@@ -19,10 +19,8 @@ def get_pos_context(search: str = "", limit: int = 80) -> dict[str, Any]:
 	settings = frappe.get_single("Books Pos Settings")
 	profile = _profile(settings)
 	location = (profile.inventory if profile else None) or settings.inventory or "Stores"
-	can_change_rate = bool((profile.can_change_rate if profile else None) or settings.can_change_rate)
-	hide_unavailable = bool(
-		(profile.hide_unavailable_items if profile else None) or settings.hide_unavailable_items
-	)
+	can_change_rate = bool(_profile_setting(profile, settings, "can_change_rate"))
+	hide_unavailable = bool(_profile_setting(profile, settings, "hide_unavailable_items"))
 
 	filters = {"item_usage": ["in", ["Sales", "Both"]]}
 	or_filters = None
@@ -92,7 +90,7 @@ def checkout(
 		frappe.throw(_("Add at least one item to the cart."))
 
 	profile = _profile(settings)
-	can_change_rate = bool((profile.can_change_rate if profile else None) or settings.can_change_rate)
+	can_change_rate = bool(_profile_setting(profile, settings, "can_change_rate"))
 	invoice = frappe.get_doc(
 		{
 			"doctype": "Books Sales Invoice",
@@ -190,6 +188,15 @@ def _profile(settings):
 	if settings.pos_profile and frappe.db.exists("Books Pos Profile", settings.pos_profile):
 		return frappe.get_doc("Books Pos Profile", settings.pos_profile)
 	return None
+
+
+def _profile_setting(profile, settings, fieldname: str):
+	"""Use an explicit profile value, including false, before the singleton fallback."""
+	if profile is not None:
+		value = profile.get(fieldname)
+		if value is not None:
+			return value
+	return settings.get(fieldname)
 
 
 def _require_permission() -> None:

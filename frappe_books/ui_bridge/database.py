@@ -9,12 +9,14 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 import frappe
-from frappe.utils import get_datetime, get_system_timezone
+from frappe.utils import flt, get_datetime, get_system_timezone
 
 from frappe_books.ui_bridge.mapping import (
 	SOURCE_META_TO_TARGET,
+	custom_field_mapping,
 	schema_mapping,
 	source_by_doctype,
+	source_field,
 	source_reference,
 	target_doctype,
 	target_field,
@@ -48,7 +50,10 @@ class BooksDatabaseBridge:
 	def get(self, source_schema: str, name: str, fields: str | list[str] | None = None) -> dict:
 		if source_schema == "SingleValue":
 			return self._get_single_value_row(name)
-		doc = frappe.get_doc(target_doctype(source_schema), name)
+		try:
+			doc = frappe.get_doc(target_doctype(source_schema), name)
+		except frappe.DoesNotExistError:
+			return {}
 		doc.check_permission("read")
 		requested = [fields] if isinstance(fields, str) else fields
 		if doc.meta.issingle:
@@ -131,7 +136,9 @@ class BooksDatabaseBridge:
 	def _child_parent_doctypes(self, child_doctype):
 		parents = []
 		for parent_doctype in source_by_doctype():
-			if any(field.options == child_doctype for field in frappe.get_meta(parent_doctype).get_table_fields()):
+			if any(
+				field.options == child_doctype for field in frappe.get_meta(parent_doctype).get_table_fields()
+			):
 				parents.append(parent_doctype)
 		return parents
 
@@ -180,6 +187,7 @@ class BooksDatabaseBridge:
 		doc.set_parent_in_children()
 		for child in doc.get_all_children():
 			child.db_insert()
+		self._sync_custom_form(source_schema, doc)
 		return self._to_source_document(source_schema, doc)
 
 	def update(self, source_schema: str, values: dict[str, Any]) -> None:
@@ -203,6 +211,7 @@ class BooksDatabaseBridge:
 		self._set_docstatus(doc, values)
 		doc.db_update()
 		self._replace_children(doc, target_values, table_fields)
+		self._sync_custom_form(source_schema, doc)
 
 	def rename(self, source_schema: str, old_name: str, new_name: str) -> None:
 		doc = frappe.get_doc(target_doctype(source_schema), old_name)
@@ -302,6 +311,20 @@ class BooksDatabaseBridge:
 					value = _iso_datetime(value)
 				values[source_name] = _source_value(meta, target_name, value)
 		values["name"] = row.get("name")
+		if source_schema == "Payment" and row.get("payment_type") == "Pay":
+			if "account" in requested:
+				values["account"] = _source_value(meta, "payment_account", row.get("payment_account"))
+			if "paymentAccount" in requested:
+				values["paymentAccount"] = _source_value(meta, "account", row.get("account"))
+		if (
+			source_schema in {"SalesInvoice", "PurchaseInvoice"}
+			and row.get("return_against")
+			and values.get("outstandingAmount") is not None
+		):
+			# The desktop Books model treats return outstanding amounts as a
+			# positive refundable balance. Frappe stores credit-note outstanding
+			# values with a negative accounting sign.
+			values["outstandingAmount"] = abs(values["outstandingAmount"])
 		return values
 
 	def _target_values(self, source_schema: str, values: dict[str, Any]) -> dict:
@@ -311,6 +334,10 @@ class BooksDatabaseBridge:
 		for source_name, value in values.items():
 			if source_name in {"name", "submitted", "cancelled", "__expectedModified"}:
 				continue
+			if source_schema == "PaymentFor" and source_name == "amount" and value is not None:
+				# Desktop Books signs a refund allocation like its credit note.
+				# Frappe stores every payment allocation as a positive magnitude.
+				value = abs(flt(value))
 			target_name = target_field(source_schema, source_name)
 			if source_name in SOURCE_META_TO_TARGET:
 				if target_name in {"creation", "modified"} and value:
@@ -327,6 +354,11 @@ class BooksDatabaseBridge:
 					mapped[target_name] = [self._target_values(child_source, row) for row in value]
 			else:
 				mapped[target_name] = _target_value(meta, target_name, value)
+		if source_schema == "Payment" and mapped.get("payment_type") == "Pay":
+			mapped["account"], mapped["payment_account"] = (
+				mapped.get("payment_account"),
+				mapped.get("account"),
+			)
 		return mapped
 
 	def _replace_children(self, doc, values, table_fields):
@@ -386,6 +418,10 @@ class BooksDatabaseBridge:
 			== "Table"
 		}
 		fields.add("name")
+		if source_schema == "Payment" and {"account", "paymentAccount"}.intersection(requested):
+			fields.update({"account", "payment_account", "payment_type"})
+		if source_schema in {"SalesInvoice", "PurchaseInvoice"} and "outstandingAmount" in requested:
+			fields.add("return_against")
 		return sorted(fields)
 
 	def _requested_source_fields(self, source_schema: str, requested) -> list[str]:
@@ -404,16 +440,21 @@ class BooksDatabaseBridge:
 			for source_name, target_name in schema_mapping()[source_schema]["fields"].items()
 			if (meta.get_field(target_name) or frappe._dict()).get("fieldtype") not in {"Table", "Password"}
 		]
-		return [
-			"name",
-			*fields,
-			"createdBy",
-			"modifiedBy",
-			"created",
-			"modified",
-			"submitted",
-			"cancelled",
-		]
+		return list(
+			dict.fromkeys(
+				[
+					"name",
+					*fields,
+					*custom_field_mapping(source_schema),
+					"createdBy",
+					"modifiedBy",
+					"created",
+					"modified",
+					"submitted",
+					"cancelled",
+				]
+			)
+		)
 
 	def _order_by(self, source_schema, order_by, order):
 		if not order_by:
@@ -430,10 +471,15 @@ class BooksDatabaseBridge:
 		return ", ".join(target_field(source_schema, field) for field in fields)
 
 	def _source_field_for_target(self, source_schema, target_name):
-		for source_name, mapped_name in schema_mapping()[source_schema]["fields"].items():
-			if mapped_name == target_name:
-				return source_name
-		return target_name
+		return source_field(source_schema, target_name)
+
+	def _sync_custom_form(self, source_schema, doc):
+		if source_schema != "CustomForm":
+			return
+
+		from frappe_books.customization import sync_custom_form
+
+		sync_custom_form(doc)
 
 	def _set_docstatus(self, doc, values):
 		if values.get("cancelled"):

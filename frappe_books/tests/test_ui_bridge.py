@@ -9,6 +9,7 @@ from frappe.utils import now_datetime
 
 from frappe_books.tests.accounting import make_account, make_item, make_party, unique_name
 from frappe_books.ui_api import lifecycle_action
+from frappe_books.ui_bridge.bespoke import BooksBespokeQueries
 from frappe_books.ui_bridge.database import BooksDatabaseBridge
 
 
@@ -22,6 +23,71 @@ class IntegrationTestUiBridge(IntegrationTestCase):
 		self.assertEqual(
 			self.bridge.get("POSSettings", "POSSettings"),
 			{"name": "POSSettings"},
+		)
+
+	def test_missing_document_matches_desktop_empty_read(self):
+		self.assertEqual(
+			self.bridge.get("PurchaseInvoice", "New Purchase Invoice 01"),
+			{},
+		)
+
+	def test_return_outstanding_uses_desktop_positive_balance_contract(self):
+		values = self.bridge._row_to_source(
+			"SalesInvoice",
+			{
+				"name": "SINV-RETURN",
+				"return_against": "SINV-ORIGINAL",
+				"outstanding_amount": -42,
+			},
+			["outstandingAmount"],
+		)
+
+		self.assertEqual(values["outstandingAmount"], 42)
+		self.assertIn(
+			"return_against",
+			self.bridge._target_fields("SalesInvoice", ["outstandingAmount"]),
+		)
+		self.assertEqual(
+			self.bridge._target_values("PaymentFor", {"amount": "-42"})["amount"],
+			42,
+		)
+
+	def test_pay_accounts_are_translated_between_desktop_and_frappe_semantics(self):
+		target = self.bridge._target_values(
+			"Payment",
+			{
+				"paymentType": "Pay",
+				"account": "Cash",
+				"paymentAccount": "Creditors",
+			},
+		)
+		self.assertEqual(target["account"], "Creditors")
+		self.assertEqual(target["payment_account"], "Cash")
+
+		source = self.bridge._row_to_source(
+			"Payment",
+			{
+				"name": "PAY-RETURN",
+				"payment_type": "Pay",
+				"account": "Creditors",
+				"payment_account": "Cash",
+			},
+			["paymentType", "account", "paymentAccount"],
+		)
+		self.assertEqual(source["account"], "Cash")
+		self.assertEqual(source["paymentAccount"], "Creditors")
+
+	def test_autoincrement_query_returns_latest_numeric_name(self):
+		first = frappe.get_doc({"doctype": "Books Item Enquiry", "item": "First bridge enquiry"}).insert(
+			ignore_permissions=True
+		)
+		second = frappe.get_doc({"doctype": "Books Item Enquiry", "item": "Second bridge enquiry"}).insert(
+			ignore_permissions=True
+		)
+
+		self.assertEqual(
+			BooksBespokeQueries().call("getLastInserted", ["ItemEnquiry"]),
+			max(int(first.name), int(second.name)),
 		)
 
 	def test_crud_uses_desktop_names_and_iso_datetimes(self):
@@ -171,6 +237,58 @@ class IntegrationTestUiBridge(IntegrationTestCase):
 
 		self.assertEqual(listed["unit"], "Unit")
 		self.assertEqual(listed["rate"], 42)
+
+	def test_custom_fields_are_materialized_and_round_trip(self):
+		fieldname = "hostedBridgeTestValue"
+		color_name = unique_name("Bridge Custom Color")
+
+		self.assertFalse(frappe.db.exists("Books Custom Form", "Color"))
+		self.addCleanup(self._cleanup_custom_field_test, color_name)
+		self.bridge.insert(
+			"CustomForm",
+			{
+				"name": "Color",
+				"customFields": [
+					{
+						"label": "Hosted Bridge Test Value",
+						"fieldname": fieldname,
+						"fieldtype": "Data",
+						"section": "Default",
+						"tab": "Custom",
+					}
+				],
+			},
+		)
+		self.assertTrue(
+			frappe.db.exists(
+				"Custom Field",
+				{
+					"dt": "Books Color",
+					"fieldname": "custom_books_hostedbridgetestvalue",
+				},
+			)
+		)
+
+		inserted = self.bridge.insert(
+			"Color",
+			{
+				"name": color_name,
+				"hexvalue": "#123456",
+				fieldname: "persisted",
+			},
+		)
+
+		self.assertEqual(inserted[fieldname], "persisted")
+		self.assertEqual(self.bridge.get("Color", color_name)[fieldname], "persisted")
+
+	def _cleanup_custom_field_test(self, color_name):
+		if frappe.db.exists("Books Color", color_name):
+			self.bridge.delete("Color", color_name)
+		if frappe.db.exists("Books Custom Form", "Color"):
+			self.bridge.delete("CustomForm", "Color")
+		if frappe.db.has_column("Books Color", "custom_books_hostedbridgetestvalue"):
+			frappe.db.sql_ddl("alter table `tabBooks Color` drop column `custom_books_hostedbridgetestvalue`")
+		frappe.db.commit()
 
 	def test_double_encoded_attach_images_are_normalized(self):
 		receivable = make_account("Bridge Image Receivable", account_type="Receivable")

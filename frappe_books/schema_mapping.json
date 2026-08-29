@@ -513,6 +513,7 @@
         "inventory": "inventory",
         "isShiftOpen": "is_shift_open",
         "itemCodeDigits": "item_code_digits",
+        "itemWeightDigits": "item_weight_digits",
         "itemVisibility": "item_visibility",
         "itemVisibilityERP": "item_visibility_erp",
         "name": "name",

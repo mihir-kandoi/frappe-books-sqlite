@@ -4,6 +4,7 @@ from pathlib import Path
 
 import frappe
 
+from frappe_books.customization import sync_all_custom_forms
 from frappe_books.printing import ensure_print_formats
 
 DEFAULT_SERIES_START = 1001
@@ -76,6 +77,7 @@ def after_migrate():
 	ensure_default_records()
 	ensure_print_formats()
 	ensure_desktop_icons()
+	sync_all_custom_forms()
 	normalize_ledger_dates()
 
 

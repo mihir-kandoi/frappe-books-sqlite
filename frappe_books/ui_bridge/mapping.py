@@ -21,6 +21,7 @@ SOURCE_META_TO_TARGET = {
 	"parentFieldname": "parentfield",
 	"parentSchemaName": "parenttype",
 }
+CUSTOM_FIELD_PREFIX = "custom_books_"
 
 
 @lru_cache(maxsize=1)
@@ -50,9 +51,14 @@ def target_field(source_schema: str, source_field: str) -> str:
 	if source_field in {"submitted", "cancelled"}:
 		return "docstatus"
 	fields = schema_mapping()[source_schema]["fields"]
-	if source_field not in fields:
-		frappe.throw(f"Unsupported field {source_field} for Books schema {source_schema}")
-	return fields[source_field]
+	if source_field in fields:
+		return fields[source_field]
+
+	custom_fields = custom_field_mapping(source_schema)
+	if source_field in custom_fields:
+		return custom_fields[source_field]
+
+	frappe.throw(f"Unsupported field {source_field} for Books schema {source_schema}")
 
 
 def source_field(source_schema: str, target_fieldname: str) -> str:
@@ -62,7 +68,31 @@ def source_field(source_schema: str, target_fieldname: str) -> str:
 	for source_name, target_name in schema_mapping()[source_schema]["fields"].items():
 		if target_name == target_fieldname:
 			return source_name
+	for source_name, target_name in custom_field_mapping(source_schema).items():
+		if target_name == target_fieldname:
+			return source_name
 	return target_fieldname
+
+
+def custom_field_mapping(source_schema: str) -> dict[str, str]:
+	"""Return Books custom field names mapped to their hosted columns."""
+	if not frappe.db.table_exists("Books Custom Field"):
+		return {}
+
+	rows = frappe.get_all(
+		"Books Custom Field",
+		filters={
+			"parent": source_schema,
+			"parenttype": "Books Custom Form",
+			"parentfield": "custom_fields",
+		},
+		pluck="fieldname",
+	)
+	return {fieldname: custom_target_field(fieldname) for fieldname in rows}
+
+
+def custom_target_field(source_field: str) -> str:
+	return f"{CUSTOM_FIELD_PREFIX}{frappe.scrub(source_field)}"
 
 
 def target_reference(value: Any) -> Any:

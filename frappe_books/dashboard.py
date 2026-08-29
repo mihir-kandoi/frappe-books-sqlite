@@ -80,6 +80,6 @@ def _unpaid(doctype: str) -> list[dict[str, Any]]:
 		doctype,
 		filters={"docstatus": 1, "outstanding_amount": ["!=", 0]},
 		fields=["name", "party", "date", "grand_total", "outstanding_amount"],
-		order_by="date asc",
+		order_by="date desc, creation desc",
 		limit=8,
 	)
