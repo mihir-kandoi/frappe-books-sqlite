@@ -20,7 +20,11 @@ def create_auto_transfer(invoice) -> str | None:
 	is_sales = invoice.transaction_type == "sales"
 	doctype = "Books Shipment" if is_sales else "Books Purchase Receipt"
 	location_field = "shipment_location" if is_sales else "purchase_receipt_location"
-	location = frappe.db.get_single_value("Books Defaults", location_field) or "Stores"
+	location = (
+		invoice.flags.get("stock_location")
+		or frappe.db.get_single_value("Books Defaults", location_field)
+		or "Stores"
+	)
 	return_against = None
 	if invoice.get("return_against"):
 		return_against = frappe.db.get_value(invoice.doctype, invoice.return_against, "back_reference")

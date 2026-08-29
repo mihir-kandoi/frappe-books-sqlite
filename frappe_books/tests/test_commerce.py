@@ -9,6 +9,10 @@ from frappe.utils import add_days, getdate, now_datetime, nowdate
 
 from frappe_books.commerce.loyalty import expire_programs_and_points
 from frappe_books.commerce.pos_api import checkout, get_pos_context
+from frappe_books.frappe_books_sqlite.doctype.books_stock_movement.test_books_stock_movement import (
+	make_movement,
+)
+from frappe_books.inventory.stock import stock_quantity
 from frappe_books.tests.accounting import (
 	ledger_entries,
 	make_account,
@@ -61,6 +65,30 @@ class IntegrationTestCommerce(IntegrationTestCase):
 		self.assertEqual(frappe.db.get_value("Books Coupon Code", coupon.name, "used"), 1)
 		invoice.cancel()
 		self.assertEqual(frappe.db.get_value("Books Coupon Code", coupon.name, "used"), 0)
+
+	def test_coupon_accepts_iso_date_values(self):
+		valid_from = getdate(add_days(nowdate(), -1))
+		valid_to = getdate(add_days(nowdate(), 30))
+		rule = self._pricing_rule(
+			is_coupon_code_based=1,
+			price_discount_type="percentage",
+			discount_percentage=10,
+			valid_from=valid_from,
+			valid_to=valid_to,
+		)
+		coupon = frappe.get_doc(
+			{
+				"doctype": "Books Coupon Code",
+				"coupon_name": unique_name("ISO Date Coupon"),
+				"pricing_rule": rule.name,
+				"valid_from": valid_from.isoformat(),
+				"valid_to": valid_to.isoformat(),
+				"maximum_use": 1,
+			}
+		).insert()
+
+		self.assertEqual(getdate(coupon.valid_from), valid_from)
+		self.assertEqual(getdate(coupon.valid_to), valid_to)
 
 	def test_product_discount_adds_free_item(self):
 		frappe.db.set_single_value("Books Accounting Settings", "enable_pricing_rule", 1)
@@ -291,6 +319,44 @@ class IntegrationTestPosCheckout(IntegrationTestCase):
 		)
 		invoice = frappe.get_doc("Books Sales Invoice", result["invoice"])
 		self.assertEqual(invoice.grand_total, 120)
+
+	def test_checkout_transfers_stock_from_pos_profile_location(self):
+		stock = make_account("POS Stock", account_type="Stock")
+		frappe.db.set_single_value("Books Inventory Settings", "stock_in_hand", stock.name)
+		frappe.db.set_single_value("Books Inventory Settings", "cost_of_goods_sold", self.expense.name)
+		frappe.db.set_single_value("Books Accounting Settings", "enable_inventory", 1)
+		location = frappe.get_doc(
+			{"doctype": "Books Location", "name": unique_name("POS Warehouse")}
+		).insert()
+		item = make_item(self.income.name, self.expense.name, rate=75, track_item=1)
+		receipt = make_movement(
+			"MaterialReceipt",
+			[{"item": item.name, "to_location": location.name, "quantity": 2, "rate": 40}],
+		)
+		receipt.submit()
+		profile = frappe.get_doc(
+			{
+				"doctype": "Books Pos Profile",
+				"name": unique_name("POS Profile"),
+				"inventory": location.name,
+				"pos_customer": self.party.name,
+			}
+		).insert()
+		frappe.db.set_single_value("Books Pos Settings", "pos_profile", profile.name)
+
+		context = get_pos_context(search=item.name)
+		result = checkout(
+			cart=[{"item": item.name, "quantity": 1}],
+			customer=self.party.name,
+			payments=[{"payment_method": "Cash", "amount": 75}],
+		)
+
+		invoice = frappe.get_doc("Books Sales Invoice", result["invoice"])
+		shipment = frappe.get_doc("Books Shipment", invoice.reload().back_reference)
+		self.assertEqual(context["location"], location.name)
+		self.assertEqual(shipment.items[0].location, location.name)
+		self.assertEqual(stock_quantity(item.name, location.name), 1)
+		self.assertEqual(stock_quantity(item.name, "Stores"), 0)
 
 	def tearDown(self):
 		frappe.db.set_single_value("Books Pos Settings", "is_shift_open", 0)

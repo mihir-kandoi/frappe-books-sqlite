@@ -35,6 +35,7 @@ FIELD_TYPE_MAP = {
 	"Secret": "Password",
 }
 NUMBER_SERIES_DIGITS = 5
+AUTOINCREMENT_DIGITS = 10
 
 
 def build_doctype(schema: Schema, schema_names: Iterable[str]) -> dict[str, Any]:
@@ -166,7 +167,7 @@ def build_naming(schema: Schema) -> dict[str, Any]:
 	if naming == "manual":
 		return {"autoname": "Prompt"}
 	if naming == "autoincrement":
-		return {"autoname": "autoincrement"}
+		return {"autoname": f"format:{{{'#' * AUTOINCREMENT_DIGITS}}}"}
 	if naming == "numberSeries":
 		prefix = _number_series_prefix(schema)
 		return {"autoname": f"format:{prefix}{{{'#' * NUMBER_SERIES_DIGITS}}}"}

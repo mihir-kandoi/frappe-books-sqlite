@@ -18,7 +18,7 @@ def get_pos_context(search: str = "", limit: int = 80) -> dict[str, Any]:
 	_require_permission()
 	settings = frappe.get_single("Books Pos Settings")
 	profile = _profile(settings)
-	location = (profile.inventory if profile else None) or settings.inventory or "Stores"
+	location = _inventory_location(settings, profile)
 	can_change_rate = bool(_profile_setting(profile, settings, "can_change_rate"))
 	hide_unavailable = bool(_profile_setting(profile, settings, "hide_unavailable_items"))
 
@@ -90,6 +90,7 @@ def checkout(
 		frappe.throw(_("Add at least one item to the cart."))
 
 	profile = _profile(settings)
+	location = _inventory_location(settings, profile)
 	can_change_rate = bool(_profile_setting(profile, settings, "can_change_rate"))
 	invoice = frappe.get_doc(
 		{
@@ -107,6 +108,7 @@ def checkout(
 			"items": [_cart_row(row, can_change_rate) for row in cart],
 		}
 	).insert()
+	invoice.flags.stock_location = location
 	invoice.submit()
 
 	if len(payments) == 1 and not as_decimal(payments[0].get("amount")):
@@ -188,6 +190,10 @@ def _profile(settings):
 	if settings.pos_profile and frappe.db.exists("Books Pos Profile", settings.pos_profile):
 		return frappe.get_doc("Books Pos Profile", settings.pos_profile)
 	return None
+
+
+def _inventory_location(settings, profile):
+	return (profile.inventory if profile else None) or settings.inventory or "Stores"
 
 
 def _profile_setting(profile, settings, fieldname: str):

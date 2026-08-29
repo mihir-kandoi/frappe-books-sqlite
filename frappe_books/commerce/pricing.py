@@ -38,9 +38,9 @@ def validate_coupon(coupon):
 		frappe.throw(_("Coupon minimum amount cannot be below the pricing-rule minimum."))
 	if as_decimal(rule.max_amount) and as_decimal(coupon.max_amount) > as_decimal(rule.max_amount):
 		frappe.throw(_("Coupon maximum amount cannot exceed the pricing-rule maximum."))
-	if rule.valid_from and coupon.valid_from < rule.valid_from:
+	if rule.valid_from and frappe.utils.getdate(coupon.valid_from) < frappe.utils.getdate(rule.valid_from):
 		frappe.throw(_("Coupon validity cannot start before its pricing rule."))
-	if rule.valid_to and coupon.valid_to > rule.valid_to:
+	if rule.valid_to and frappe.utils.getdate(coupon.valid_to) > frappe.utils.getdate(rule.valid_to):
 		frappe.throw(_("Coupon validity cannot end after its pricing rule."))
 
 

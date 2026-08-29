@@ -3,11 +3,18 @@
 from pathlib import Path
 
 import frappe
+from frappe.query_builder.functions import Cast_, Max
 
 from frappe_books.customization import sync_all_custom_forms
 from frappe_books.printing import ensure_print_formats
 
 DEFAULT_SERIES_START = 1001
+NUMERIC_NAME_DOCTYPES = (
+	"Books Integration Error Log",
+	"Books Item Enquiry",
+	"Books Ledger Entry",
+	"Books Stock Ledger Entry",
+)
 BOOKS_ROLES = ("Books User", "Books Manager")
 BOOKS_DESKTOP_ICON_LABEL = "Books"
 BOOKS_DESKTOP_ICON_INDEX = 0
@@ -66,6 +73,7 @@ def after_app_install(_app_name):
 def before_tests():
 	ensure_roles()
 	ensure_number_series()
+	ensure_numeric_name_series()
 	ensure_default_records()
 	ensure_print_formats()
 	ensure_desktop_icons()
@@ -74,11 +82,36 @@ def before_tests():
 def after_migrate():
 	ensure_roles()
 	ensure_number_series()
+	ensure_numeric_name_series()
 	ensure_default_records()
 	ensure_print_formats()
 	ensure_desktop_icons()
 	sync_all_custom_forms()
 	normalize_ledger_dates()
+
+
+def ensure_numeric_name_series():
+	"""Keep formatted numeric names ahead of legacy autoincrement rows."""
+	maximum = max((_max_numeric_name(doctype) for doctype in NUMERIC_NAME_DOCTYPES), default=0)
+	if not maximum:
+		return
+
+	series = frappe.qb.DocType("Series")
+	current = frappe.qb.from_(series).select(series.current).where(series.name == "").run()
+	if current:
+		if int(current[0][0] or 0) < maximum:
+			frappe.qb.update(series).set(series.current, maximum).where(series.name == "").run()
+		return
+
+	frappe.qb.into(series).columns(series.name, series.current).insert("", maximum).run()
+
+
+def _max_numeric_name(doctype):
+	if not frappe.db.table_exists(doctype):
+		return 0
+	table = frappe.qb.DocType(doctype)
+	maximum = frappe.qb.from_(table).select(Max(Cast_(table.name, "integer"))).run()[0][0]
+	return int(maximum or 0)
 
 
 def normalize_ledger_dates():

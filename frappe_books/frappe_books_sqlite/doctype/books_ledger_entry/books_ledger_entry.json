@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_bulk_edit": 1,
- "autoname": "autoincrement",
+ "autoname": "format:{##########}",
  "creation": "2026-08-27 21:50:16.621455",
  "doctype": "DocType",
  "editable_grid": 1,
