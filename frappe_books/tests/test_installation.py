@@ -50,7 +50,7 @@ class IntegrationTestInstallation(IntegrationTestCase):
 		bootinfo = frappe._dict(
 			app_data=[
 				frappe._dict(app_name="frappe_books", sequence_id=10),
-				frappe._dict(app_name="raven", sequence_id=100),
+				frappe._dict(app_name="another_app", sequence_id=100),
 				frappe._dict(app_name="frappe", sequence_id=1000),
 			]
 		)
@@ -59,7 +59,7 @@ class IntegrationTestInstallation(IntegrationTestCase):
 
 		self.assertEqual(
 			[app.app_name for app in sorted(bootinfo.app_data, key=lambda app: app.sequence_id)],
-			["frappe", "frappe_books", "raven"],
+			["frappe", "frappe_books", "another_app"],
 		)
 
 	def test_books_pages_use_packaged_icon(self):
