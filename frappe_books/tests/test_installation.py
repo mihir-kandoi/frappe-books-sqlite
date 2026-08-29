@@ -6,6 +6,7 @@ import frappe
 from frappe.tests import IntegrationTestCase
 
 import frappe_books
+from frappe_books.boot import boot_session
 from frappe_books.hooks import app_icon_route, app_icon_title, app_icon_url
 from frappe_books.setup import (
 	BOOKS_DESKTOP_ICON_INDEX,
@@ -34,11 +35,32 @@ class IntegrationTestInstallation(IntegrationTestCase):
 					"logo": app_icon_url,
 					"title": app_icon_title,
 					"route": app_icon_route,
+					"sequence_id": 10,
 				}
 			],
 		)
 		self.assertEqual(frappe.get_hooks("app_logo_url", app_name="frappe_books"), [app_icon_url])
 		self.assertTrue((Path(frappe_books.__file__).parent / "public" / "books-icon.png").is_file())
+
+	def test_boot_session_places_framework_before_installed_apps(self):
+		self.assertEqual(
+			frappe.get_hooks("boot_session", app_name="frappe_books"),
+			["frappe_books.boot.boot_session"],
+		)
+		bootinfo = frappe._dict(
+			app_data=[
+				frappe._dict(app_name="frappe_books", sequence_id=10),
+				frappe._dict(app_name="raven", sequence_id=100),
+				frappe._dict(app_name="frappe", sequence_id=1000),
+			]
+		)
+
+		boot_session(bootinfo)
+
+		self.assertEqual(
+			[app.app_name for app in sorted(bootinfo.app_data, key=lambda app: app.sequence_id)],
+			["frappe", "frappe_books", "raven"],
+		)
 
 	def test_books_pages_use_packaged_icon(self):
 		package_root = Path(frappe_books.__file__).parent

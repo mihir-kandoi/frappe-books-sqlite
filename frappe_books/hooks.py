@@ -25,8 +25,13 @@ add_to_apps_screen = [
 		"logo": app_icon_url,
 		"title": app_icon_title,
 		"route": app_icon_route,
+		"sequence_id": 10,
 	}
 ]
+
+# Frappe v16 gives its own Framework tile a late default sequence. Reorder it in the
+# completed boot payload so it remains the first tile on sites that install Books.
+boot_session = "frappe_books.boot.boot_session"
 
 # Companion apps that extend a host app (instead of taking their own apps-screen icon) can pin
 # their workspaces into the host app's workspace dock (rail) with this hook. Declaring it keeps
