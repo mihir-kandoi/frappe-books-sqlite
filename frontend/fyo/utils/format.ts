@@ -3,7 +3,7 @@ import { Doc } from 'fyo/model/doc';
 import { DateTime } from 'luxon';
 import { Field, FieldType, FieldTypeEnum } from 'schemas/types';
 import { getIsNullOrUndef, safeParseFloat, titleCase } from 'utils';
-import { isPesa } from '.';
+import { getOptionList, isPesa } from '.';
 import {
   DEFAULT_CURRENCY,
   DEFAULT_DATE_FORMAT,
@@ -49,6 +49,13 @@ export function format(
 
   if (getIsNullOrUndef(value)) {
     return '';
+  }
+
+  if (field.fieldtype === FieldTypeEnum.Select) {
+    const option = getOptionList(field, doc).find(
+      ({ value: optionValue }) => optionValue === value
+    );
+    return option?.label ?? String(value);
   }
 
   return String(value);
