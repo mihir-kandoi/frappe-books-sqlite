@@ -24,7 +24,7 @@
           field.fieldtype === 'Table' ? 'col-span-2 text-base' : '',
           field.fieldtype === 'AttachImage' ? 'row-span-2' : '',
           field.fieldtype === 'Check'
-            ? 'flex min-h-[54px] w-full items-end self-stretch'
+            ? 'flex min-h-15 w-full items-end self-stretch'
             : 'self-start w-full',
           field.fieldname === 'termsAndConditions' ? 'col-span-2' : '',
           field.invisible ? 'invisible' : '',

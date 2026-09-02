@@ -2,7 +2,7 @@
   <div class="mt-6 w-full">
     <FrappeButton
       class="w-full"
-      theme="blue"
+      theme="gray"
       variant="solid"
       size="md"
       :disabled="isReadOnly"
