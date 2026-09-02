@@ -17,7 +17,6 @@ export default {
   content: [
     ...frappeUIContent,
     './src/**/*.{vue,js,ts,jsx,tsx}',
-    './templates/**/*.html',
     '../frappe_books/data/**/*.html',
   ],
   darkMode: 'class',

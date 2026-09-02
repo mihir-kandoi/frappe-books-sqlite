@@ -1,4 +1,4 @@
-import { PropertyEnum } from "utils/types";
+import { PropertyEnum } from 'utils/types';
 
 export type FieldType =
   | 'Data'
@@ -49,6 +49,20 @@ type BaseFieldType = Exclude<
 >;
 
 export type RawValue = string | number | boolean | null;
+
+export type RawCustomField = {
+  parent: string;
+  label: string;
+  fieldname: string;
+  fieldtype: FieldType;
+  isRequired?: boolean;
+  section?: string;
+  tab?: string;
+  options?: string;
+  target?: string;
+  references?: string;
+  default?: string;
+};
 
 export interface BaseField {
   fieldname: string;             // Column name in the db

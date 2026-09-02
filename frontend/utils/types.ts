@@ -1,4 +1,4 @@
-import type { ConfigFile, RawValueMap } from 'fyo/core/types';
+import type { RawValueMap } from 'fyo/core/types';
 
 export type UnknownMap = Record<string, unknown>;
 export type Translation = { translation: string; context?: string };
@@ -18,13 +18,6 @@ export interface CountryInfo {
   locale: string;
 }
 
-export interface VersionParts {
-  major: number;
-  minor: number;
-  patch: number;
-  beta?: number;
-}
-
 export type Creds = {
   errorLogUrl: string;
   telemetryUrl: string;
@@ -41,14 +34,6 @@ export type UnexpectedLogObject = {
 export interface SelectFileOptions {
   title: string;
   filters?: { name: string; extensions: string[] }[];
-}
-
-export interface SelectFileReturn {
-  name: string;
-  filePath: string;
-  success: boolean;
-  data: Buffer;
-  canceled: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -74,10 +59,6 @@ interface ModMap {
   meta: boolean;
   shift: boolean;
   repeat: boolean;
-}
-
-export interface ConfigFilesWithModified extends ConfigFile {
-  modified: string;
 }
 
 export const searchGroups = [

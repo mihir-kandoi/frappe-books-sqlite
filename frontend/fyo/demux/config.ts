@@ -1,14 +1,7 @@
 import { ConfigMap } from 'fyo/core/types';
-import type { IPC } from 'main/preload';
 
 export class Config {
-  config: Map<string, unknown> | IPC['store'];
-  constructor(isElectron: boolean) {
-    this.config = new Map();
-    if (isElectron) {
-      this.config = ipc.store;
-    }
-  }
+  config = new Map<keyof ConfigMap, ConfigMap[keyof ConfigMap]>();
 
   get<K extends keyof ConfigMap>(
     key: K,

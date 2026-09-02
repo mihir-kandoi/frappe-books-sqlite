@@ -1,12 +1,6 @@
-/**
- * The types in this file will be used by the main db class (core.ts) in the
- * backend process and the the frontend db class (dbHandler.ts).
- *
- * DatabaseBase is an abstract class so that the function signatures
- * match on both ends i.e. DatabaseCore and DatabaseHandler.
- */
+// These classes define the boundary between Fyo and the Frappe database API.
 
-import { SchemaMap } from 'schemas/types';
+import type { SchemaMap } from 'schemas/types';
 
 type UnknownMap = Record<string, unknown>;
 export abstract class DatabaseBase {
@@ -48,7 +42,10 @@ export abstract class DatabaseBase {
   // Delete
   abstract delete(schemaName: string, name: string): Promise<void>;
 
-  abstract deleteAll(schemaName:string, filters:QueryFilter): Promise<number>;
+  abstract deleteAll(
+    schemaName: string,
+    filters: QueryFilter
+  ): Promise<number>;
 
   // Other
   abstract close(): Promise<void>;
@@ -73,13 +70,13 @@ export type QueryFilter = Record<
   boolean | string | null | (string | number | (string | number | null)[])[]
 >;
 
-/**
- * DatabaseDemuxBase is an abstract class that ensures that the function signatures
- * match between the DatabaseManager and the DatabaseDemux.
- *
- * This allows testing the frontend code while directly plugging in the DatabaseManager
- * and bypassing all the API and IPC calls.
- */
+export type SingleValue<T> = {
+  fieldname: string;
+  parent: string;
+  value: T;
+}[];
+
+// The Frappe adapter implements this database boundary.
 export abstract class DatabaseDemuxBase {
   readonly supportsServerLifecycle: boolean = false;
 

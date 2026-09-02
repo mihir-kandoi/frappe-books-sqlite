@@ -1,6 +1,4 @@
-import { SingleValue } from 'backend/database/types';
 import { Fyo } from 'fyo';
-import { DatabaseDemux } from 'fyo/demux/db';
 import { ValueError } from 'fyo/utils/errors';
 import Observable from 'fyo/utils/observable';
 import { translateSchema } from 'fyo/utils/translation';
@@ -13,6 +11,7 @@ import {
   GetAllOptions,
   IncomeExpense,
   QueryFilter,
+  SingleValue,
   TopExpenses,
   TotalCreditAndDebit,
   TotalOutstanding,
@@ -41,16 +40,12 @@ export class DatabaseHandler extends DatabaseBase {
   #fieldMap: FieldMap = {};
   observer: Observable<never> = new Observable();
 
-  constructor(fyo: Fyo, Demux?: DatabaseDemuxConstructor) {
+  constructor(fyo: Fyo, Demux: DatabaseDemuxConstructor) {
     super();
     this.#fyo = fyo;
     this.converter = new Converter(this, this.#fyo);
 
-    if (Demux !== undefined) {
-      this.#demux = new Demux(fyo.isElectron);
-    } else {
-      this.#demux = new DatabaseDemux(fyo.isElectron);
-    }
+    this.#demux = new Demux();
   }
 
   get schemaMap(): Readonly<SchemaMap> {
@@ -274,15 +269,7 @@ export class DatabaseHandler extends DatabaseBase {
     await this.#demux.call('close');
   }
 
-  /**
-   * Bespoke function
-   *
-   * These are functions to run custom queries that are too complex for
-   * DatabaseCore and require use of knex or raw queries. The output
-   * of these is not converted to DocValue and is used as is (RawValue).
-   *
-   * The query logic for these is in backend/database/bespoke.ts
-   */
+  // The Frappe adapter runs these complex queries on the server.
 
   async getLastInserted(schemaName: string): Promise<number> {
     if (this.schemaMap[schemaName]?.naming !== 'autoincrement') {

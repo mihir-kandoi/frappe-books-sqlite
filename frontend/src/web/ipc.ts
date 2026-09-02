@@ -1,4 +1,4 @@
-import type { IPC } from 'main/preload';
+import type { TemplateFile } from 'utils/types';
 
 type FileSelection = {
   name: string;
@@ -9,40 +9,71 @@ type FileSelection = {
 };
 
 type FileSelectionOptions = {
+  title?: string;
   accept?: string;
-  filters?: { extensions?: string[] }[];
+  defaultPath?: string;
+  properties?: string[];
+  filters?: { name?: string; extensions?: string[] }[];
 };
+
+type SaveFileSelection = {
+  canceled: boolean;
+  filePath: string;
+};
+
+export interface WebIPC {
+  desktop: boolean;
+  openLink(url: string): Window | null;
+  openExternalUrl(url: string): Window | null;
+  reloadWindow(): void;
+  sendError(body: string): Promise<void>;
+  showError(title: string, content: string): Promise<void>;
+  sendAPIRequest(url: string, options?: RequestInit): Promise<unknown>;
+  selectFile(options?: FileSelectionOptions): Promise<FileSelection>;
+  getOpenFilePath(options?: FileSelectionOptions): Promise<FileSelection>;
+  getSaveFilePath(options?: FileSelectionOptions): Promise<SaveFileSelection>;
+  saveData(data: string | Uint8Array, filePath?: string): Promise<void>;
+  makePDF(
+    html: string,
+    filePath?: string,
+    width?: number,
+    height?: number
+  ): Promise<boolean>;
+  printDocument(
+    html: string,
+    width?: number,
+    height?: number
+  ): Promise<boolean>;
+  getTemplates(posTemplateWidth?: number): Promise<TemplateFile[]>;
+  showItemInFolder(filePath: string): void;
+  deleteFile(filePath: string): Promise<{
+    error: null | {
+      message: string;
+      name: string;
+      stack?: string;
+      code?: string;
+    };
+  }>;
+}
+
+declare global {
+  const ipc: WebIPC;
+
+  interface Window {
+    ipc?: WebIPC;
+  }
+}
 
 export function installWebIpc() {
   if (window.ipc) return;
 
-  const webIpc = {
+  window.ipc = {
     desktop: false,
-    getEnv: () =>
-      Promise.resolve({
-        isDevelopment: window.books_boot?.developer_mode || false,
-        platform: 'web',
-        version: window.books_boot?.app_version || '0.0.0',
-      }),
-    getLanguageMap: () =>
-      Promise.resolve({ success: true, message: '', languageMap: {} }),
-    getCreds: () =>
-      Promise.resolve({ errorLogUrl: '', tokenString: '', telemetryUrl: '' }),
     openLink: (url: string) =>
       window.open(url, '_blank', 'noopener,noreferrer'),
     openExternalUrl: (url: string) =>
       window.open(url, '_blank', 'noopener,noreferrer'),
     reloadWindow: () => window.location.reload(),
-    minimizeWindow: () => undefined,
-    toggleMaximize: () => undefined,
-    closeWindow: () => undefined,
-    isMaximized: () => Promise.resolve(false),
-    isFullscreen: () => Promise.resolve(false),
-    checkForUpdates: () => Promise.resolve(),
-    initScheduler: () => Promise.resolve(),
-    registerMainProcessErrorListener: () => undefined,
-    registerTriggerFrontendActionListener: () => undefined,
-    registerConsoleLogListener: () => undefined,
     sendError: () => Promise.resolve(),
     showError: (title: string, content: string) => {
       window.alert(`${title}\n\n${content}`);
@@ -54,28 +85,34 @@ export function installWebIpc() {
       selectFile(options?.accept || extensionAccept(options?.filters)),
     getOpenFilePath: (options?: { filters?: { extensions?: string[] }[] }) =>
       selectFile(extensionAccept(options?.filters)),
-    getSaveFilePath: (options?: { defaultPath?: string }) =>
-      Promise.resolve({
-        success: true,
+    getSaveFilePath: (options?: FileSelectionOptions) =>
+      Promise.resolve<SaveFileSelection>({
         canceled: false,
         filePath: options?.defaultPath || 'frappe-books-export',
       }),
-    saveData: (data: string | Uint8Array, filePath = 'frappe-books-export') => {
+    saveData: async (
+      data: string | Uint8Array,
+      filePath = 'frappe-books-export'
+    ) => {
       download(data, filePath);
-      return Promise.resolve();
     },
-    makePDF: async (html: string, filePath = 'frappe-books.pdf') =>
+    makePDF: async (
+      html: string,
+      filePath = 'frappe-books.pdf',
+      _width?: number,
+      _height?: number
+    ) =>
       Boolean(filePath) && (await printHtml(html)),
-    printDocument: (html: string) => printHtml(html),
-    getTemplates: () => Promise.resolve([]),
-    getDbList: () => Promise.resolve([]),
-    getDbDefaultPath: () => Promise.resolve('frappe-site'),
-    checkDbAccess: () => Promise.resolve(true),
+    printDocument: (
+      html: string,
+      _width?: number,
+      _height?: number
+    ) => printHtml(html),
+    getTemplates: (_posTemplateWidth?: number) =>
+      Promise.resolve<TemplateFile[]>([]),
     showItemInFolder: () => undefined,
     deleteFile: () => Promise.resolve({ error: null }),
-  } as unknown as IPC;
-
-  window.ipc = webIpc;
+  };
 }
 
 function selectFile(accept = '*/*'): Promise<FileSelection> {

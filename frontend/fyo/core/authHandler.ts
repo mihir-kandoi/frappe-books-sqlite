@@ -2,7 +2,6 @@ import { Fyo } from 'fyo';
 import { AuthDemux } from 'fyo/demux/auth';
 import { AuthDemuxBase } from 'utils/auth/types';
 import { Creds } from 'utils/types';
-import { AuthDemuxConstructor } from './types';
 
 interface AuthConfig {
   serverURL: string;
@@ -22,7 +21,7 @@ export class AuthHandler {
   #demux: AuthDemuxBase;
   #creds?: Creds;
 
-  constructor(fyo: Fyo, Demux?: AuthDemuxConstructor) {
+  constructor(fyo: Fyo) {
     this.fyo = fyo;
     this.#config = {
       serverURL: '',
@@ -35,11 +34,7 @@ export class AuthHandler {
       token: '',
     };
 
-    if (Demux !== undefined) {
-      this.#demux = new Demux(fyo.isElectron);
-    } else {
-      this.#demux = new AuthDemux(fyo.isElectron);
-    }
+    this.#demux = new AuthDemux();
   }
 
   set user(value: string) {

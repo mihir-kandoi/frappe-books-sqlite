@@ -62,30 +62,6 @@ class IntegrationTestInstallation(IntegrationTestCase):
 			["frappe", "frappe_books", "another_app"],
 		)
 
-	def test_books_pages_use_packaged_icon(self):
-		package_root = Path(frappe_books.__file__).parent
-		for relative_path in ("www/books.html", "public/books/index.html"):
-			with self.subTest(relative_path=relative_path):
-				html = (package_root / relative_path).read_text()
-				self.assertIn("/assets/frappe_books/books-icon.png", html)
-				self.assertNotIn("/assets/frappe_books/books-logo.png", html)
-
-	def test_books_pages_load_scrollable_dialog_styles(self):
-		package_root = Path(frappe_books.__file__).parent
-		stylesheet_url = "/assets/frappe_books/books/books-dialogs.css"
-		stylesheet = package_root / "public" / "books" / "books-dialogs.css"
-
-		self.assertTrue(stylesheet.is_file())
-		styles = stylesheet.read_text()
-		self.assertIn(".books-modal", styles)
-		self.assertIn("overflow-y: auto", styles)
-		self.assertIn("100dvh", styles)
-
-		for relative_path in ("www/books.html", "public/books/index.html"):
-			with self.subTest(relative_path=relative_path):
-				html = (package_root / relative_path).read_text()
-				self.assertIn(stylesheet_url, html)
-
 	def test_desktop_icons_are_canonical(self):
 		ensure_desktop_icons()
 

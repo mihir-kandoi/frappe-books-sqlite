@@ -27,7 +27,6 @@ export class Fyo {
   T = T;
 
   errors = errors;
-  isElectron: boolean;
 
   pesa: MoneyMaker;
 
@@ -43,15 +42,11 @@ export class Fyo {
   currencyFormatter?: Intl.NumberFormat;
   currencySymbols: Record<string, string | undefined> = {};
 
-  isTest: boolean;
   telemetry: TelemetryManager;
   config: Config;
 
-  constructor(conf: FyoConfig = {}) {
-    this.isTest = conf.isTest ?? false;
-    this.isElectron = conf.isElectron ?? true;
-
-    this.auth = new AuthHandler(this, conf.AuthDemux);
+  constructor(conf: FyoConfig) {
+    this.auth = new AuthHandler(this);
     this.db = new DatabaseHandler(this, conf.DatabaseDemux);
     this.doc = new DocHandler(this);
 
@@ -63,7 +58,7 @@ export class Fyo {
     });
 
     this.telemetry = new TelemetryManager(this);
-    this.config = new Config(this.isElectron && !this.isTest);
+    this.config = new Config();
   }
 
   get initialized() {
@@ -92,14 +87,6 @@ export class Fyo {
 
   format(value: unknown, field: FieldType | Field, doc?: Doc) {
     return format(value, field, doc ?? null, this);
-  }
-
-  setIsElectron() {
-    try {
-      this.isElectron = !!window?.ipc;
-    } catch {
-      this.isElectron = false;
-    }
   }
 
   async initializeAndRegister(

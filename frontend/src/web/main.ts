@@ -2,7 +2,7 @@ import { createApp } from 'vue';
 import { FrappeUI } from 'frappe-ui';
 import Badge from 'src/components/Badge.vue';
 import FeatherIcon from 'src/components/FeatherIcon.vue';
-import { outsideClickDirective } from 'src/renderer/helpers';
+import { outsideClickDirective } from 'src/utils/outsideClick';
 import { fyo } from 'src/initFyo';
 import router from 'src/router';
 import WebApp from './WebApp.vue';

@@ -1,6 +1,5 @@
-import type { RawCustomField } from 'backend/database/types';
 import { getSchemas } from 'schemas';
-import type { SchemaMap } from 'schemas/types';
+import type { RawCustomField, SchemaMap } from 'schemas/types';
 import { DatabaseDemuxBase, DatabaseMethod } from 'utils/db/types';
 import { call } from './api';
 

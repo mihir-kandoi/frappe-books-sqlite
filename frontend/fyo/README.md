@@ -3,13 +3,8 @@
 This is the underlying framework that runs **Books**, at some point it may be
 removed into a separate repo, but as of now it's in gestation.
 
-The reason for maintaining a framework is to allow for varied backends.
-Currently Books runs on the electron renderer process and all db stuff happens
-on the electron main process which has access to nodelibs. As the development
-of `Fyo` progresses it will allow for a browser frontend and a node server
-backend.
-
-This platform variablity will be handled by code in the `fyo/demux` subdirectory.
+The framework separates the Books interface from its data backend. This app
+uses a Frappe database adapter for all document and query operations.
 
 ## Pre Req
 
@@ -74,18 +69,6 @@ other things.
 
 _Note: since **SystemSettings** are initialized on `fyo.initializeAndRegister`
 db needs to be set first else an error will be thrown_
-
-## Testing
-
-For testing the `fyo` class, `mocha` is used (`node` side). So for this the
-demux classes are directly replaced by `node` side managers such as
-`DatabaseManager`.
-
-For this to work the class signatures of the demux class and the manager have to
-be the same which is maintained by abstract demux classes.
-
-`DatabaseManager` is used as the `DatabaseDemux` for testing without API or IPC
-calls. For `AuthDemux` the `DummyAuthDemux` class is used.
 
 ## Translations
 

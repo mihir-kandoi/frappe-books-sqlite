@@ -27,20 +27,12 @@ changes this too will have to be changed.
 The data stored by the models is decided by the schema passed to it's
 constructor. Check `schemas/README.md` for info on this.
 
-## Adding Stuff
+## Adding models
 
-When adding stuff to `models/**` make sure that it isn't importing any Vue code
-or other frontend specific code globally. This is cause model file tests will
-directly use the the `Fyo` class and will be run using `mocha` on `node`.
+Keep model modules independent from Vue and the global Fyo instance. Pass the
+Fyo instance to a model when the model needs it.
 
-Importing frontend code will break all the tests. This also implies that one
-should be wary about transitive dependencies.
-
-It should also not import the `Fyo` object (singleton) from `src`, where ever
-`fyo` is required in models it should be passed to it.
-
-_Note: Frontend specific code can be imported but they should be done so, only
-using dynamic imports i.e. `await import('...')`._
+Use a dynamic import when a model action must open part of the interface.
 
 ## Regional Models
 
