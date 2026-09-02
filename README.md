@@ -35,7 +35,9 @@ The Electron runtime is not part of this app. The browser handles downloads, fil
 
 This app does not require MariaDB or PostgreSQL. It is not intended for Frappe Cloud.
 
-The repository includes the built Vue assets. You do not need Node.js or Yarn to install the app.
+Production installation requires Node.js and Yarn. Bench installs the frontend dependencies and builds the Vue app during deployment.
+
+The repository stores the Vue source and its lockfile. It does not store generated JavaScript, CSS, or the generated Frappe website entry.
 
 ## Install the app
 
@@ -74,6 +76,24 @@ bench start
 ```
 
 Open `http://books-sqlite.localhost:8000/books`. Sign in and complete the original Books setup wizard.
+
+## Build the web app
+
+Install the frontend dependencies from the app root:
+
+```bash
+yarn install
+```
+
+Build the production assets:
+
+```bash
+yarn build
+```
+
+Vite writes the asset graph to `frappe_books/public/books`. The build then copies the generated HTML entry to `frappe_books/www/books.html`.
+
+Bench uses the root `build` script during `bench build --app frappe_books`. This follows the same source-to-generated-output pattern as ERPNext Banking.
 
 The app also keeps these Desk routes for administration and migration:
 

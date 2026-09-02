@@ -1,0 +1,55 @@
+<template>
+  <div class="mt-6 w-full">
+    <FrappeButton
+      class="w-full"
+      theme="blue"
+      variant="solid"
+      size="md"
+      :disabled="isReadOnly"
+      @click="onClick"
+    >
+      {{ df.label }}
+    </FrappeButton>
+  </div>
+</template>
+
+<script lang="ts">
+import { Button as FrappeButton } from 'frappe-ui';
+import { defineComponent } from 'vue';
+import Base from './Base.vue';
+
+export default defineComponent({
+  name: 'Button',
+  components: { FrappeButton },
+  extends: Base,
+  props: {
+    spaceBetween: {
+      type: Boolean,
+      default: true,
+    },
+    labelRight: {
+      type: Boolean,
+      default: false,
+    },
+    labelClass: {
+      type: String,
+      default: '',
+    },
+    showLabel: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  computed: {
+    labelClasses() {
+      return this.labelClass || 'text-gray-600 text-base';
+    },
+  },
+  methods: {
+    onClick(e: Event) {
+      if (this.isReadOnly) return;
+      this.triggerChange(true);
+    },
+  },
+});
+</script>

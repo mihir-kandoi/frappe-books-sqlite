@@ -1,0 +1,83 @@
+<template>
+  <component
+    :is="pickerComponent"
+    ref="input"
+    :model-value="inputValue"
+    :label="showLabel ? df.label : undefined"
+    :description="showLabel ? df.sub_label : undefined"
+    :placeholder="inputPlaceholder"
+    :disabled="isReadOnly"
+    :required="isRequired"
+    :clearable="true"
+    :format="frappeDateFormat"
+    :size="frappeSize"
+    :variant="frappeVariant"
+    :class="controlClasses"
+    :style="containerStyles"
+    side="bottom"
+    align="start"
+    @change="onPickerChange"
+    @focus="onFocus"
+  />
+</template>
+
+<script lang="ts">
+import { DatePicker, DateTimePicker } from 'frappe-ui';
+import { DateTime } from 'luxon';
+import { fyo } from 'src/initFyo';
+import { defineComponent } from 'vue';
+import Base from './Base.vue';
+
+export default defineComponent({
+  name: 'Date',
+  components: {
+    FrappeDatePicker: DatePicker,
+    FrappeDateTimePicker: DateTimePicker,
+  },
+  extends: Base,
+  emits: ['input', 'focus'],
+  computed: {
+    pickerComponent(): string {
+      return 'FrappeDatePicker';
+    },
+    inputValue(): string {
+      const date = this.toDateTime(this.value);
+      return date?.isValid ? date.toFormat('yyyy-MM-dd') : '';
+    },
+    frappeDateFormat(): string {
+      const format = fyo.singles.SystemSettings?.dateFormat ?? 'MMM d, y';
+      return String(format)
+        .replace(/yyyy|y/g, 'YYYY')
+        .replace(/dd|d/g, 'DD');
+    },
+  },
+  methods: {
+    toDateTime(value: unknown): DateTime | null {
+      if (value instanceof Date) {
+        return DateTime.fromJSDate(value);
+      }
+      if (typeof value === 'string') {
+        return DateTime.fromISO(value.replace(' ', 'T'));
+      }
+
+      return null;
+    },
+    onPickerChange(value: string) {
+      if (!value) {
+        this.triggerChange(null);
+        return;
+      }
+
+      const date = DateTime.fromISO(value.replace(' ', 'T'));
+      this.triggerChange(date.isValid ? date.toJSDate() : null);
+    },
+    focus(): void {
+      const control = this.$refs.input as { open?: () => void } | undefined;
+      control?.open?.();
+    },
+    getInputElement(): null {
+      return null;
+    },
+  },
+});
+</script>

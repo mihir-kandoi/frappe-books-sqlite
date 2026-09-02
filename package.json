@@ -1,0 +1,9 @@
+{
+  "name": "frappe-books-sqlite",
+  "private": true,
+  "scripts": {
+    "postinstall": "yarn --cwd frontend install --frozen-lockfile",
+    "dev": "yarn --cwd frontend dev",
+    "build": "yarn --cwd frontend build"
+  }
+}

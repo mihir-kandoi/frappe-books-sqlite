@@ -1,0 +1,49 @@
+import vue from '@vitejs/plugin-vue';
+import path from 'node:path';
+import { defineConfig } from 'vite';
+
+const frontendRoot = __dirname;
+const appRoot = path.resolve(frontendRoot, '..');
+
+export default defineConfig(async () => {
+  const { lucideIconsPlugin } = await import(
+    'frappe-ui/vite/lucideIconsPlugin'
+  );
+
+  return {
+    base: '/assets/frappe_books/books/',
+    plugins: [lucideIconsPlugin(), vue()],
+    resolve: {
+      alias: {
+        vue: 'vue/dist/vue.esm-bundler.js',
+        fyo: path.resolve(frontendRoot, 'fyo'),
+        src: path.resolve(frontendRoot, 'src'),
+        schemas: path.resolve(frontendRoot, 'schemas'),
+        backend: path.resolve(frontendRoot, 'backend'),
+        models: path.resolve(frontendRoot, 'models'),
+        utils: path.resolve(frontendRoot, 'utils'),
+        regional: path.resolve(frontendRoot, 'regional'),
+        reports: path.resolve(frontendRoot, 'reports'),
+        fixtures: path.resolve(frontendRoot, 'fixtures'),
+      },
+    },
+    define: {
+      'import.meta.env.VITE_ROUTER_BASE': JSON.stringify('/books/'),
+    },
+    build: {
+      outDir: path.resolve(appRoot, 'frappe_books/public/books'),
+      emptyOutDir: true,
+      target: 'es2020',
+      sourcemap: false,
+    },
+    server: {
+      host: '0.0.0.0',
+      port: 6969,
+      proxy: {
+        '/api': 'http://books-sqlite.localhost:8000',
+        '/assets': 'http://books-sqlite.localhost:8000',
+        '/files': 'http://books-sqlite.localhost:8000',
+      },
+    },
+  };
+});

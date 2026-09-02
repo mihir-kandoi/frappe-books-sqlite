@@ -37,6 +37,10 @@ venv.bak/
 node_modules/
 jspm_packages/
 
+# Generated Books web assets
+frappe_books/public/books/
+frappe_books/www/books.html
+
 # IDEs and editors
 .vscode/
 .vs/

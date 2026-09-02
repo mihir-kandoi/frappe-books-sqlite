@@ -1,0 +1,48 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "esnext",
+    "strict": true,
+    "allowJs": true,
+    "allowImportingTsExtensions": true,
+    "jsx": "preserve",
+    "importHelpers": true,
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "types": ["webpack-env"],
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["src/*"],
+      "schemas/*": ["schemas/*"],
+      "main/*": ["main/*"],
+      "backend/*": ["backend/*"],
+      "regional/*": ["regional/*"],
+      "fixtures/*": ["fixtures/*"],
+      "reports/*": ["reports/*"],
+      "models/*": ["models/*"],
+      "utils/*": ["utils/*"]
+    },
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+  },
+  "ts-node": {
+    "files": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "schemas/**/*.ts",
+    "backend/**/*.ts",
+    "fyo/**/*.ts",
+    "models/**/*.ts",
+    "reports/**/*.ts",
+    "scripts/**/*.ts",
+    "regional/**/*.ts",
+    "utils/**/*.ts",
+    "vite.config.ts"
+  ],
+  "exclude": ["node_modules"]
+}
