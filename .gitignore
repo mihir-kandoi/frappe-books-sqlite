@@ -38,6 +38,7 @@ node_modules/
 jspm_packages/
 
 # Generated Books web assets
+frappe_books/public/node_modules
 frappe_books/public/books/
 frappe_books/www/books.html
 
