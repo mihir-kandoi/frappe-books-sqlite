@@ -41,7 +41,7 @@
           @select="setPaymentMethodAndAmount"
         />
 
-        <div class="min-h-14">
+        <div class="min-h-15">
           <div
             v-if="showReferenceField || showClearanceDate"
             class="grid gap-4 sm:grid-cols-2"
