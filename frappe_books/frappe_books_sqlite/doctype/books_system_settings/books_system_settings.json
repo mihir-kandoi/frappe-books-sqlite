@@ -9,7 +9,6 @@
   "default_section_break_1",
   "date_format",
   "hide_get_started",
-  "version",
   "allow_filter_bypass",
   "remove_filter",
   "number_display_section_break_7",
@@ -18,7 +17,6 @@
   "currency",
   "internal_precision",
   "country_code",
-  "instance_id",
   "theme_section_break_14",
   "dark_mode",
   "customizations_section_break_16",
@@ -44,13 +42,6 @@
    "fieldname": "hide_get_started",
    "fieldtype": "Check",
    "label": "Hide Get Started"
-  },
-  {
-   "default": "0.0.0",
-   "fieldname": "version",
-   "fieldtype": "Data",
-   "label": "Version",
-   "read_only": 1
   },
   {
    "default": "0",
@@ -107,13 +98,6 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Country Code"
-  },
-  {
-   "fieldname": "instance_id",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Instance Id",
-   "read_only": 1
   },
   {
    "fieldname": "theme_section_break_14",

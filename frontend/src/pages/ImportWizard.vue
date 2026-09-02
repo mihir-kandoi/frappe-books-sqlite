@@ -424,7 +424,6 @@
 <script lang="ts">
 import { DocValue } from 'fyo/core/types';
 import { Action } from 'fyo/model/types';
-import { Verb } from 'fyo/telemetry/types';
 import { ValidationError } from 'fyo/utils/errors';
 import { ModelNameEnum } from 'models/types';
 import { OptionField, RawValue, SelectOption } from 'schemas/types';
@@ -440,10 +439,11 @@ import Modal from 'src/components/Modal.vue';
 import PageHeader from 'src/components/PageHeader.vue';
 import { Importer, TemplateField, getColumnLabel } from 'src/importer';
 import { fyo } from 'src/initFyo';
+import { downloadFile } from 'src/utils/browser';
 import { showDialog } from 'src/utils/interactive';
 import { docsPathMap } from 'src/utils/misc';
 import { docsPathRef } from 'src/utils/refs';
-import { getSavePath, selectTextFile } from 'src/utils/ui';
+import { selectTextFile } from 'src/utils/ui';
 import { defineComponent } from 'vue';
 import Loading from '../components/Loading.vue';
 
@@ -841,13 +841,7 @@ export default defineComponent({
     async saveTemplate(): Promise<void> {
       const template = this.importer.getCSVTemplate();
       const templateName = this.importType + ' ' + this.t`Template`;
-      const { canceled, filePath } = await getSavePath(templateName, 'csv');
-
-      if (canceled || !filePath) {
-        return;
-      }
-
-      await ipc.saveData(template, filePath);
+      downloadFile(template, `${templateName}.csv`, 'text/csv;charset=utf-8');
     },
     async preImportValidations(): Promise<boolean> {
       const title = this.t`Cannot Import`;
@@ -917,7 +911,6 @@ export default defineComponent({
         }
       }
 
-      this.fyo.telemetry.log(Verb.Imported, this.importer.schemaName);
       this.isMakingEntries = false;
       this.complete = true;
     },

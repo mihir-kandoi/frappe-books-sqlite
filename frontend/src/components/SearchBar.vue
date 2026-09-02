@@ -345,7 +345,11 @@ export default defineComponent({
   },
   methods: {
     openDocs() {
-      ipc.openLink('https://docs.frappe.io/' + docsPathMap.Search);
+      window.open(
+        'https://docs.frappe.io/' + docsPathMap.Search,
+        '_blank',
+        'noopener,noreferrer'
+      );
     },
     getShortcuts() {
       const shortcuts: { shortcut: string; callback: () => void }[] = [];

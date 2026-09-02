@@ -69,7 +69,6 @@
             </p>
           </div>
           <p
-            v-if="itemVisibility !== 'ERP Sync Items'"
             class="
               absolute
               top-1

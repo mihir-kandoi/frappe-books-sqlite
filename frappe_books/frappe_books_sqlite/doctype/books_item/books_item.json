@@ -31,8 +31,7 @@
   "has_serial_number",
   "serial_number_series",
   "uom_conversions",
-  "default_section_break_24",
-  "datafrom_erp"
+  "default_section_break_24"
  ],
  "fields": [
   {
@@ -184,14 +183,6 @@
    "fieldname": "default_section_break_24",
    "fieldtype": "Section Break",
    "label": "Default"
-  },
-  {
-   "default": "0",
-   "fieldname": "datafrom_erp",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Datafrom Erp",
-   "read_only": 1
   }
  ],
  "grid_page_length": 50,

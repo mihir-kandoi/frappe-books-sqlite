@@ -114,7 +114,7 @@ export default defineComponent({
   methods: {
     async handleDocumentation({ key, documentation }: ListItem) {
       if (documentation) {
-        ipc.openLink(documentation);
+        window.open(documentation, '_blank', 'noopener,noreferrer');
       }
 
       switch (key) {

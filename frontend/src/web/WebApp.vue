@@ -125,14 +125,12 @@ export default defineComponent({
         return;
       }
       fyo.store.isDevelopment = window.books_boot.developer_mode;
-      fyo.store.skipTelemetryLogging = true;
       fyo.store.appVersion = window.books_boot.app_version;
-      fyo.store.platform = 'web';
       fyo.store.language = boot.lang || 'English';
-      fyo.auth.user = boot.user.name;
+      fyo.user = boot.user.name;
 
       const countryCode = window.books_boot.country_code || '-';
-      await fyo.db.connectToDatabase('frappe-site', countryCode);
+      await fyo.db.connect(countryCode);
       await fyo.initializeAndRegister(
         models,
         await getRegionalModels(countryCode)

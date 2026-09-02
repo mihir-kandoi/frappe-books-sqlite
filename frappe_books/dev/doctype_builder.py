@@ -1,4 +1,4 @@
-"""Translate desktop Books schemas into standard Frappe DocType definitions."""
+"""Translate Books interface schemas into Frappe DocType definitions."""
 
 from __future__ import annotations
 

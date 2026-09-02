@@ -80,7 +80,6 @@ export default defineComponent({
             ModelNameEnum.NumberSeries,
             ModelNameEnum.SingleValue,
             ModelNameEnum.SetupWizard,
-            ModelNameEnum.PatchRun,
           ].includes(schemaName as ModelNameEnum);
         }
       );

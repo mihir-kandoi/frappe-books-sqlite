@@ -78,34 +78,19 @@ export type SingleValue<T> = {
 
 // The Frappe adapter implements this database boundary.
 export abstract class DatabaseDemuxBase {
-  readonly supportsServerLifecycle: boolean = false;
-
   abstract getSchemaMap(): Promise<SchemaMap> | SchemaMap;
 
-  abstract createNewDatabase(
-    dbPath: string,
-    countryCode: string
-  ): Promise<string>;
-
-  abstract connectToDatabase(
-    dbPath: string,
-    countryCode?: string
-  ): Promise<string>;
+  abstract connect(countryCode?: string): Promise<string>;
 
   abstract call(method: DatabaseMethod, ...args: unknown[]): Promise<unknown>;
 
   abstract callBespoke(method: string, ...args: unknown[]): Promise<unknown>;
 
-  runLifecycleAction(
-    _action: 'submit' | 'cancel',
-    _schemaName: string,
-    _name: string
-  ): Promise<unknown> {
-    void _action;
-    void _schemaName;
-    void _name;
-    return Promise.reject(new Error('Server document lifecycle is unavailable'));
-  }
+  abstract runLifecycleAction(
+    action: 'submit' | 'cancel',
+    schemaName: string,
+    name: string
+  ): Promise<unknown>;
 }
 
 // Return types of Bespoke Queries

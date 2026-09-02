@@ -1,5 +1,4 @@
 import { Fyo } from 'fyo';
-import { ConfigFile } from 'fyo/core/types';
 import { translateSchema } from 'fyo/utils/translation';
 import { cloneDeep } from 'lodash';
 import { DateTime } from 'luxon';
@@ -75,30 +74,6 @@ export function getSetupWizardDoc(languageMap?: LanguageMap) {
     schema as Schema,
     SetupWizard
   );
-}
-
-export function updateConfigFiles(fyo: Fyo): ConfigFile {
-  const configFiles = fyo.config.get('files', []) as ConfigFile[];
-
-  const companyName = fyo.singles.AccountingSettings!.companyName as string;
-  const id = fyo.singles.SystemSettings!.instanceId as string;
-  const dbPath = fyo.db.dbPath!;
-  const openCount = fyo.singles.Misc!.openCount as number;
-
-  const fileIndex = configFiles.findIndex((f) => f.id === id);
-  let newFile = { id, companyName, dbPath, openCount } as ConfigFile;
-
-  if (fileIndex === -1) {
-    configFiles.push(newFile);
-  } else {
-    configFiles[fileIndex].companyName = companyName;
-    configFiles[fileIndex].dbPath = dbPath;
-    configFiles[fileIndex].openCount = openCount;
-    newFile = configFiles[fileIndex];
-  }
-
-  fyo.config.set('files', configFiles);
-  return newFile;
 }
 
 export const docsPathMap: Record<string, string | undefined> = {

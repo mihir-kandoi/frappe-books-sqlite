@@ -116,9 +116,9 @@
 </template>
 <script lang="ts">
 import { t } from 'fyo';
-import { Verb } from 'fyo/telemetry/types';
 import { Field, FieldTypeEnum } from 'schemas/types';
 import { fyo } from 'src/initFyo';
+import { saveExportData } from 'reports/commonExporter';
 import {
   getCsvExportData,
   getExportFields,
@@ -126,7 +126,6 @@ import {
   getJsonExportData,
 } from 'src/utils/export';
 import { ExportField, ExportFormat, ExportTableField } from 'src/utils/types';
-import { getSavePath, showExportInFolder } from 'src/utils/ui';
 import { QueryFilter } from 'utils/db/types';
 import { PropType, defineComponent } from 'vue';
 import Button from './Button.vue';
@@ -278,19 +277,11 @@ export default defineComponent({
     },
     async saveExportData(data: string) {
       const fileName = this.getFileName();
-      const { canceled, filePath } = await getSavePath(
-        fileName,
-        this.exportFormat
+      saveExportData(
+        data,
+        `${fileName}.${this.exportFormat}`,
+        fyo.t`Export Successful`
       );
-      if (canceled || !filePath) {
-        return;
-      }
-
-      await ipc.saveData(data, filePath);
-      this.fyo.telemetry.log(Verb.Exported, this.schemaName, {
-        extension: this.exportFormat,
-      });
-      showExportInFolder(fyo.t`Export Successful`, filePath);
     },
     getFileName() {
       const fileName = this.label.toLowerCase().replace(/\s/g, '-');

@@ -1,8 +1,8 @@
 # Frappe Books for Frappe Framework and SQLite
 
-This app runs the original Frappe Books Vue interface at `/books`. It uses Frappe authentication, permissions, APIs, and SQLite storage.
+This repository contains a pure Frappe Framework application for Books. It serves the Vue interface at `/books` and uses Frappe for authentication, permissions, document storage, and server workflows.
 
-The interface reuses the desktop components, routes, forms, lists, reports, and setup wizard. A compatibility layer replaces the Electron database and IPC calls. The app follows the standalone SPA structure used by ERPNext Banking. Vite writes assets to `public/books` and a Frappe website page serves them.
+The app follows the standalone SPA structure used by ERPNext Banking. Vite writes generated assets to `frappe_books/public/books`, and a Frappe website page serves the generated entry point. The source repository does not store generated assets.
 
 Frappe runs submit and cancel actions in one server transaction. This keeps ledger, stock, payment, pricing, and loyalty updates atomic. Draft updates also reject stale modification times.
 
@@ -10,9 +10,9 @@ The port targets Frappe Framework version 16. SQLite support in Frappe is still 
 
 ## Included
 
-- Original Frappe Books Vue interface on the standalone `/books` route
-- 74 standard Frappe DocTypes generated from the desktop Books schemas
-- Authenticated API bridge for the desktop database contract and dashboard queries
+- Books Vue interface on the standalone `/books` route
+- Standard Frappe DocTypes generated from the interface schemas
+- Authenticated Frappe APIs for document operations and aggregate queries
 - Setup wizard, standard chart of accounts, number series, roles, and defaults
 - Sales invoices, purchase invoices, quotes, payments, journal entries, returns, and cancellation reversals
 - Quote-to-invoice, invoice-to-payment, and invoice-to-return Desk actions
@@ -22,9 +22,9 @@ The port targets Frappe Framework version 16. SQLite support in Frappe is still 
 - India GST fields and GSTR-1/GSTR-2 reports, plus Swiss regional schema fields
 - General Ledger, Trial Balance, Profit and Loss, Balance Sheet, Stock Ledger, and Stock Balance reports
 - Native Frappe print formats for invoices, quotes, payments, shipments, and receipts
-- Dashboard, POS, Books workspace, Data Import/Data Export links, and a desktop SQLite database importer
+- Dashboard, POS, Books workspace, and Data Import/Data Export links
 
-The Electron runtime is not part of this app. The browser handles downloads, file selection, and printing. Window controls and automatic desktop updates do nothing. The old `books_integration` device-sync client is not active. Imported sync records remain available, but remote ERPNext sync needs a separate connector.
+The browser handles downloads, file selection, and printing. Company data belongs to the current Frappe site. The app does not contain a local company-database selector, device telemetry, an updater, or an ERPNext device-sync client.
 
 ## Requirements
 
@@ -95,29 +95,17 @@ Vite writes the asset graph to `frappe_books/public/books`. The build then copie
 
 Bench uses the root `build` script during `bench build --app frappe_books`. This follows the same source-to-generated-output pattern as ERPNext Banking.
 
-The app also keeps these Desk routes for administration and migration:
+The app also keeps these Desk routes for administration:
 
 - `/app/books` — Books workspace
 - `/app/books-dashboard` — dashboard
 - `/app/books-pos` — point of sale
-- `/app/books-desktop-import` — desktop database import
-
-## Import a desktop Books company
-
-Make a backup of the desktop `.books.db` file. Import into a fresh site when possible.
-
-1. Open **Books > Settings and Data > Import Desktop Database**.
-2. Upload the `.books.db`, `.db`, `.sqlite`, or `.sqlite3` file.
-3. Review the integrity check and mapped row counts.
-4. Confirm the import.
-
-The importer opens the source database read-only. It preserves document names, audit fields, children, settings, and submitted or cancelled status. It deliberately bypasses submit hooks because the desktop database already contains ledger rows. A repeated import skips records that already exist.
 
 Use standard Frappe **Data Import** and **Data Export** for CSV-based transfers.
 
 ## Schema synchronization
 
-The checked-in DocTypes and `frappe_books/schema_mapping.json` are generated from the desktop schema files. After changing a desktop schema, synchronize it from the bench:
+The checked-in DocTypes and `frappe_books/schema_mapping.json` are generated from the frontend schema files. After you change a frontend schema, synchronize it from the bench:
 
 ```bash
 bench --site books-sqlite.localhost execute frappe_books.dev.schema_sync.sync \
@@ -143,7 +131,7 @@ uvx ruff check apps/frappe_books/frappe_books
 uvx ruff format --check apps/frappe_books/frappe_books
 ```
 
-The integration suite covers the UI bridge, posting, reversals, payments, reports, stock, POS, setup, printing, and desktop database import.
+The integration suite covers the UI data layer, posting, reversals, payments, reports, stock, POS, setup, and printing.
 
 ## SQLite operations
 

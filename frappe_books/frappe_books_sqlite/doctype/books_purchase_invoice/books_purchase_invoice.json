@@ -38,7 +38,6 @@
   "attachment",
   "is_returned",
   "is_fully_returned",
-  "is_synced_with_erp",
   "back_reference",
   "return_against",
   "amended_from"
@@ -252,13 +251,6 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Fully Returned"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_synced_with_erp",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Synced With Erp"
   },
   {
    "fieldname": "back_reference",

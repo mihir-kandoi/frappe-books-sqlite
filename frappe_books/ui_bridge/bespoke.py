@@ -1,4 +1,4 @@
-"""Server equivalents of the Electron database's aggregate queries."""
+"""Aggregate queries used by the Books web interface."""
 
 from __future__ import annotations
 

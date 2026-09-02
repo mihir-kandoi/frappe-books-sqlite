@@ -23,7 +23,6 @@ import { PricingRule } from '../PricingRule/PricingRule';
 import {
   getItemRateFromPriceList,
   getPricingRule,
-  getItemVisibility,
 } from 'models/helpers';
 import { SalesInvoice } from '../SalesInvoice/SalesInvoice';
 import { getSuggestedBatchName } from 'models/inventory/helpers';
@@ -790,22 +789,6 @@ export abstract class InvoiceItem extends Doc {
       const filters: QueryFilter = {
         for: ['not in', [itemNotFor]],
       };
-
-      const enableERPNextSync =
-        doc.fyo.singles.AccountingSettings?.enableERPNextSync;
-
-      if (enableERPNextSync) {
-        const itemVisibility = await getItemVisibility(doc.fyo);
-
-        if (itemVisibility === 'Inventory Items') {
-          filters.trackItem = true;
-        } else if (itemVisibility === 'ERP Sync Items') {
-          filters.datafromErp = true;
-        } else if (itemVisibility === 'Non-Inventory Items') {
-          filters.trackItem = false;
-          filters.datafromErp = false;
-        }
-      }
 
       return filters;
     },

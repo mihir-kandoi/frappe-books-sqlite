@@ -4,8 +4,6 @@ import { DatabaseDemuxBase, DatabaseMethod } from 'utils/db/types';
 import { call } from './api';
 
 export class FrappeDatabaseDemux extends DatabaseDemuxBase {
-  override readonly supportsServerLifecycle = true;
-
   async getSchemaMap(): Promise<SchemaMap> {
     const rawCustomFields = (await this.call('getAll', 'CustomField', {
       fields: [
@@ -26,11 +24,7 @@ export class FrappeDatabaseDemux extends DatabaseDemuxBase {
     return getSchemas(window.books_boot?.country_code || '-', rawCustomFields);
   }
 
-  async createNewDatabase(_path: string, countryCode: string): Promise<string> {
-    return this.connectToDatabase('frappe-site', countryCode);
-  }
-
-  connectToDatabase(_path: string, countryCode?: string): Promise<string> {
+  connect(countryCode?: string): Promise<string> {
     return Promise.resolve(
       countryCode || window.books_boot?.country_code || '-'
     );

@@ -3,15 +3,9 @@ import { Doc } from 'fyo/model/doc';
 import { Invoice } from 'models/baseModels/Invoice/Invoice';
 import { ModelNameEnum } from 'models/types';
 import { FieldTypeEnum, Schema, TargetField } from 'schemas/types';
-import { getValueMapFromList } from 'utils/index';
-import { TemplateFile } from 'utils/types';
+import { printHtml } from './browser';
 import { showToast } from './interactive';
 import { PrintValues } from './types';
-import {
-  getDocFromNameIfExistsElseNew,
-  getSavePath,
-  showExportInFolder,
-} from './ui';
 import { Money } from 'pesa';
 import { SalesInvoice } from 'models/baseModels/SalesInvoice/SalesInvoice';
 import { Payment } from 'models/baseModels/Payment/Payment';
@@ -20,14 +14,6 @@ export type PrintTemplateHint = {
   [key: string]: string | PrintTemplateHint | PrintTemplateHint[];
 };
 type PrintTemplateData = Record<string, unknown>;
-type TemplateUpdateItem = {
-  name: string;
-  template: string;
-  type: string;
-  width: number;
-  height: number;
-};
-
 const printSettingsFields = [
   'logo',
   'displayLogo',
@@ -452,31 +438,20 @@ export async function getPathAndMakePDF(
   height: number,
   shouldPrint?: boolean
 ) {
-  if (!shouldPrint) {
-    const { filePath: savePath } = await getSavePath(name, 'pdf');
-    if (!savePath) {
-      return;
-    }
-
-    const html = constructPrintDocument(innerHTML, width, height);
-    const success = await ipc.makePDF(html, savePath, width, height);
-    if (success) {
-      showExportInFolder(t`Save as PDF Successful`, savePath);
-    } else {
-      showToast({ message: t`Export Failed`, type: 'error' });
-    }
+  const html = constructPrintDocument(name, innerHTML, width, height);
+  const success = await printHtml(html);
+  if (success) {
+    showToast({
+      message: shouldPrint ? t`Print dialog opened` : t`Save as PDF dialog opened`,
+      type: 'success',
+    });
   } else {
-    const html = constructPrintDocument(innerHTML, width, height);
-    const success = await ipc.printDocument(html, width, height);
-    if (success) {
-      showToast({ message: t`Print Successful`, type: 'success' });
-    } else {
-      showToast({ message: t`Print Failed`, type: 'error' });
-    }
+    showToast({ message: t`Pop-up blocked`, type: 'error' });
   }
 }
 
 function constructPrintDocument(
+  name: string,
   innerHTML: string,
   width: number,
   height: number
@@ -512,12 +487,11 @@ function constructPrintDocument(
     }
   `;
 
-  head.innerHTML = [
-    '<meta charset="UTF-8">',
-    '<title>Print Window</title>',
-  ].join('\n');
-
-  head.append(style, printCSS);
+  const meta = document.createElement('meta');
+  meta.setAttribute('charset', 'UTF-8');
+  const title = document.createElement('title');
+  title.textContent = name;
+  head.append(meta, title, style, printCSS);
 
   body.innerHTML = innerHTML;
   html.append(head, body);
@@ -544,114 +518,6 @@ function getAllCSSAsStyleElem() {
   const styleElem = document.createElement('style');
   styleElem.innerHTML = cssTexts.join('\n');
   return styleElem;
-}
-
-export async function updatePrintTemplates(fyo: Fyo) {
-  const templateFiles = await ipc.getTemplates(
-    fyo.singles.PrintSettings?.posPrintWidth as number
-  );
-  const existingTemplates = (await fyo.db.getAll(ModelNameEnum.PrintTemplate, {
-    fields: ['name', 'modified'],
-    filters: { isCustom: false },
-  })) as { name: string; modified: Date }[];
-
-  const nameModifiedMap = getValueMapFromList(
-    existingTemplates,
-    'name',
-    'modified'
-  );
-
-  const updateList: TemplateUpdateItem[] = [];
-  for (const templateFile of templateFiles) {
-    const updates = getPrintTemplateUpdateList(
-      templateFile,
-      nameModifiedMap,
-      fyo
-    );
-
-    updateList.push(...updates);
-  }
-
-  const isLogging = fyo.store.skipTelemetryLogging;
-  fyo.store.skipTelemetryLogging = true;
-  for (const { name, type, template, width, height } of updateList) {
-    const doc = await getDocFromNameIfExistsElseNew(
-      ModelNameEnum.PrintTemplate,
-      name
-    );
-
-    const updateData = {
-      name,
-      type,
-      template,
-      isCustom: false,
-      ...(width ? { width } : {}),
-      ...(height ? { height } : {}),
-    };
-
-    await doc.set(updateData);
-    await doc.sync();
-  }
-  fyo.store.skipTelemetryLogging = isLogging;
-}
-
-function getPrintTemplateUpdateList(
-  { file, template, modified: modifiedString, width, height }: TemplateFile,
-  nameModifiedMap: Record<string, Date>,
-  fyo: Fyo
-): TemplateUpdateItem[] {
-  const templateList: TemplateUpdateItem[] = [];
-  const dbModified = new Date(modifiedString);
-
-  for (const { name, type } of getNameAndTypeFromTemplateFile(file, fyo)) {
-    const fileModified = nameModifiedMap[name];
-    if (fileModified && dbModified.valueOf() <= fileModified.valueOf()) {
-      continue;
-    }
-
-    templateList.push({
-      height,
-      width,
-      name,
-      type,
-      template,
-    });
-  }
-  return templateList;
-}
-
-function getNameAndTypeFromTemplateFile(
-  file: string,
-  fyo: Fyo
-): { name: string; type: string }[] {
-  /**
-   * Template File Name Format:
-   * TemplateName[.SchemaName].template.html
-   *
-   * If the SchemaName is absent then it is assumed
-   * that the SchemaName is:
-   * - SalesInvoice
-   * - SalesQuote
-   * - PurchaseInvoice
-   */
-
-  const fileName = file.split('.template.html')[0];
-  const name = fileName.split('.')[0];
-  const schemaName = fileName.split('.')[1];
-
-  if (schemaName) {
-    const label = fyo.schemaMap[schemaName]?.label ?? schemaName;
-    return [{ name: `${name} - ${label}`, type: schemaName }];
-  }
-
-  return [
-    ModelNameEnum.SalesInvoice,
-    ModelNameEnum.SalesQuote,
-    ModelNameEnum.PurchaseInvoice,
-  ].map((schemaName) => {
-    const label = fyo.schemaMap[schemaName]?.label ?? schemaName;
-    return { name: `${name} - ${label}`, type: schemaName };
-  });
 }
 
 export const baseTemplate = `<main class="h-full w-full bg-white">

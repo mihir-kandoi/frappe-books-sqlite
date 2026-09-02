@@ -34,7 +34,6 @@
   "terms",
   "attachment",
   "is_fully_returned",
-  "is_synced_with_erp",
   "reference_type",
   "amended_from"
  ],
@@ -220,13 +219,6 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Fully Returned"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_synced_with_erp",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Synced With Erp"
   },
   {
    "default": "Books Party",

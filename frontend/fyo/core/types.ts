@@ -20,25 +20,9 @@ export type RawValueMap = Record<string, RawValue | RawValueMap[]>;
  * DatabaseDemuxConstructor: type for a constructor that returns a DatabaseDemuxBase
  * it's typed this way because `typeof AbstractClass` is invalid as abstract classes
  * can't be initialized using `new`.
- *
- * AuthDemuxConstructor: same as the above but for AuthDemuxBase
  */
 
 export type DatabaseDemuxConstructor = new () => DatabaseDemuxBase;
-
-export type ConfigMap = {
-  files: ConfigFile[];
-  lastSelectedFilePath: null | string;
-  language: string;
-  deviceId: string;
-};
-
-export interface ConfigFile {
-  id: string;
-  companyName: string;
-  dbPath: string;
-  openCount: number;
-}
 
 export interface FyoConfig {
   DatabaseDemux: DatabaseDemuxConstructor;

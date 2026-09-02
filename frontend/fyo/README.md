@@ -9,8 +9,8 @@ uses a Frappe database adapter for all document and query operations.
 ## Pre Req
 
 **Singleton**: The `Fyo` class is used as a singleton throughout Books, this
-allows for a single source of truth and a common interface to access different
-modules such as `db`, `doc` an `auth`.
+allows for a single source of truth and a common interface to access the `db`
+and `doc` modules.
 
 **Localization**: Since Books' functionality changes depending on region,
 regional information (`countryCode`) is required in the initialization process.
@@ -29,20 +29,15 @@ If you are confused, I understand.
 
 ## Initialization
 
-There are a set of core models which are maintained in the `fyo/models`
-subdirectory, from this the _SystemSettings_ field `countryCode` is used to
-config regional information.
+Core models are maintained in the `fyo/models` subdirectory. The Frappe site
+provides `countryCode` during boot so that Books can load regional models.
 
 A few things have to be done on initialization:
 
 #### 1. Connect To DB
 
-If creating a new instance then `fyo.db.createNewDatabase` or if loading an
-instance `fyo.db.connectToDatabase`.
-
-Both of them take `countryCode` as an argument, `fyo.db.createNewDatabase`
-should be passed the `countryCode` as the schemas are built on the basis of
-this.
+Call `fyo.db.connect(countryCode)` to connect the interface to the current
+Frappe site. Frappe owns database creation and migration.
 
 #### 2. Initialize and Register
 
@@ -54,18 +49,10 @@ other things.
 
 ### Sequence
 
-**First Load**: i.e. registering or creating a new instance.
-
-- Get `countryCode` from the setup wizard.
-- Create a new DB using `fyo.db.createNewDatabase` with the `countryCode`.
-- Get models and `regionalModels` using `countryCode` from `models/index.ts/getRegionalModels`.
-- Call `fyo.initializeAndRegister` with the all models.
-
-**Next Load**: i.e. logging in or opening an existing instance.
-
-- Connect to DB using `fyo.db.connectToDatabase` and get `countryCode` from the return.
-- Get models and `regionalModels` using `countryCode` from `models/index.ts/getRegionalModels`.
-- Call `fyo.initializeAndRegister` with the all models.
+- Read `countryCode` from the Frappe boot response.
+- Call `fyo.db.connect(countryCode)`.
+- Get `regionalModels` from `models/index.ts/getRegionalModels`.
+- Call `fyo.initializeAndRegister` with the models and regional models.
 
 _Note: since **SystemSettings** are initialized on `fyo.initializeAndRegister`
 db needs to be set first else an error will be thrown_

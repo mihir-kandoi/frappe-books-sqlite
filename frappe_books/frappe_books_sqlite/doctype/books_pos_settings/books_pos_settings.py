@@ -25,7 +25,6 @@ class BooksPosSettings(Document):
 		is_shift_open: DF.Check
 		item_code_digits: DF.Int
 		item_visibility: DF.Literal["Inventory Items", "Non-Inventory Items"]
-		item_visibility_erp: DF.Literal["ERP Sync Items", "Inventory Items", "Non-Inventory Items"]
 		pos_profile: DF.Link | None
 		pos_ui: DF.Literal["Classic", "Modern"]
 		weight_enabled_barcode: DF.Check

@@ -22,7 +22,6 @@
   "enable_price_list",
   "enable_invoice_returns",
   "enable_form_customization",
-  "enable_erp_next_sync",
   "enable_lead",
   "enable_pricing_rule",
   "enable_item_enquiry",
@@ -140,12 +139,6 @@
    "fieldname": "enable_form_customization",
    "fieldtype": "Check",
    "label": "Enable Form Customization"
-  },
-  {
-   "default": "0",
-   "fieldname": "enable_erp_next_sync",
-   "fieldtype": "Check",
-   "label": "Enable ERPNext Sync"
   },
   {
    "default": "0",

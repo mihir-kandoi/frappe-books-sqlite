@@ -23,7 +23,6 @@ class BooksAccountingSettings(Document):
 		email: DF.Data
 		enable_coupon_code: DF.Check
 		enable_discounting: DF.Check
-		enable_erp_next_sync: DF.Check
 		enable_form_customization: DF.Check
 		enable_inventory: DF.Check
 		enable_invoice_returns: DF.Check

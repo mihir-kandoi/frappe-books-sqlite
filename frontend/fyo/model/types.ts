@@ -13,7 +13,6 @@ import type { Misc } from 'models/baseModels/Misc';
 import type { POSSettings } from 'models/inventory/Point of Sale/POSSettings';
 import type { POSOpeningShift } from 'models/inventory/Point of Sale/POSOpeningShift';
 import type { POSClosingShift } from 'models/inventory/Point of Sale/POSClosingShift';
-import { ERPNextSyncSettings } from 'models/baseModels/ERPNextSyncSettings/ERPNextSyncSettings';
 import { POSProfile } from 'models/baseModels/POSProfile/PosProfile';
 
 /**
@@ -64,7 +63,6 @@ export interface SinglesMap {
   POSSettings?: POSSettings;
   POSProfile?: POSProfile;
   POSOpeningShift?: POSOpeningShift;
-  ERPNextSyncSettings?: ERPNextSyncSettings;
   POSClosingShift?: POSClosingShift;
   PrintSettings?: PrintSettings;
   Defaults?: Defaults;

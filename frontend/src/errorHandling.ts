@@ -6,43 +6,13 @@ import { truncate } from 'lodash';
 import { showDialog } from 'src/utils/interactive';
 import { fyo } from './initFyo';
 import router from './router';
-import { getErrorMessage, stringifyCircular } from './utils';
+import { getErrorMessage } from './utils';
 import type { DialogOptions, ToastOptions } from './utils/types';
 import { ModelNameEnum } from 'models/types';
 
 function shouldNotStore(error: Error) {
   const shouldLog = (error as BaseError).shouldStore ?? true;
   return !shouldLog;
-}
-
-export async function sendError(errorLogObj: ErrorLog) {
-  if (!errorLogObj.stack) {
-    return;
-  }
-
-  errorLogObj.more ??= {};
-  errorLogObj.more.path ??= router.currentRoute.value.fullPath;
-
-  const body = {
-    error_name: errorLogObj.name,
-    message: errorLogObj.message,
-    stack: errorLogObj.stack,
-    platform: fyo.store.platform,
-    version: fyo.store.appVersion,
-    language: fyo.store.language,
-    instance_id: fyo.store.instanceId,
-    device_id: fyo.store.deviceId,
-    open_count: fyo.store.openCount,
-    country_code: fyo.singles.SystemSettings?.countryCode,
-    more: stringifyCircular(errorLogObj.more),
-  };
-
-  if (fyo.store.isDevelopment) {
-    // eslint-disable-next-line no-console
-    console.log('sendError', body);
-  }
-
-  await ipc.sendError(JSON.stringify(body));
 }
 
 function getToastProps(errorLogObj: ErrorLog) {
@@ -88,7 +58,6 @@ export async function handleError(
   }
 
   const errorLogObj = getErrorLogObject(error, more);
-  await sendError(errorLogObj);
 
   if (notifyUser) {
     const toastProps = getToastProps(errorLogObj);
@@ -153,7 +122,7 @@ export async function showErrorDialog(title?: string, content?: string) {
   // To be used for  show stopper errors
   title ??= t`Error`;
   content ??= t`Something has gone terribly wrong. Please check the console and raise an issue.`;
-  await ipc.showError(title, content);
+  await showDialog({ title, detail: content, type: 'error' });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -268,10 +237,10 @@ function getIssueUrlQuery(errorLogObj?: ErrorLog): string {
   }
 
   body.push(`**Version**: \`${fyo.store.appVersion}\``);
-  body.push(`**Platform**: \`${fyo.store.platform}\``);
+  body.push('**Platform**: `Web`');
   body.push(`**Path**: \`${router.currentRoute.value.fullPath}\``);
 
-  body.push(`**Language**: \`${fyo.config.get('language') ?? '-'}\``);
+  body.push(`**Language**: \`${fyo.store.language || '-'}\``);
   if (fyo.singles.SystemSettings?.countryCode) {
     body.push(`**Country**: \`${fyo.singles.SystemSettings.countryCode}\``);
   }
@@ -283,7 +252,7 @@ function getIssueUrlQuery(errorLogObj?: ErrorLog): string {
 
 export function reportIssue(errorLogObj?: ErrorLog) {
   const urlQuery = getIssueUrlQuery(errorLogObj);
-  ipc.openExternalUrl(urlQuery);
+  window.open(urlQuery, '_blank', 'noopener,noreferrer');
 }
 
 function getErrorLabel(error: Error) {

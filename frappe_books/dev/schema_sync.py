@@ -1,4 +1,4 @@
-"""Synchronize all desktop Books schemas into standard Frappe DocTypes."""
+"""Synchronize Books interface schemas into Frappe DocTypes."""
 
 from __future__ import annotations
 

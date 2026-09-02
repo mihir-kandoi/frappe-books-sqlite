@@ -36,7 +36,6 @@ export enum ModelNameEnum {
   LoyaltyPointEntry = 'LoyaltyPointEntry',
   CollectionRulesItems = 'CollectionRulesItems',
   CouponCode = 'CouponCode',
-  IntegrationErrorLog = 'IntegrationErrorLog',
   AppliedCouponCodes = 'AppliedCouponCodes',
   Payment = 'Payment',
   PaymentMethod = 'PaymentMethod',
@@ -59,7 +58,6 @@ export enum ModelNameEnum {
   Tax = 'Tax',
   TaxDetail = 'TaxDetail',
   TaxSummary = 'TaxSummary',
-  PatchRun = 'PatchRun',
   SingleValue = 'SingleValue',
   InventorySettings = 'InventorySettings',
   SystemSettings = 'SystemSettings',
@@ -78,9 +76,6 @@ export enum ModelNameEnum {
   POSOpeningShift = 'POSOpeningShift',
   POSClosingShift = 'POSClosingShift',
 
-  ERPNextSyncSettings = 'ERPNextSyncSettings',
-  ERPNextSyncQueue = 'ERPNextSyncQueue',
-  FetchFromERPNextQueue = 'FetchFromERPNextQueue',
 }
 
 export type ModelName = keyof typeof ModelNameEnum;

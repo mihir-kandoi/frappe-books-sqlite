@@ -167,7 +167,6 @@
   </div>
 </template>
 <script lang="ts">
-import { Verb } from 'fyo/telemetry/types';
 import { Report } from 'reports/Report';
 import { reports } from 'reports/index';
 import { OptionField } from 'schemas/types';
@@ -325,7 +324,6 @@ export default defineComponent({
         shouldPrint
       );
 
-      this.fyo.telemetry.log(Verb.Printed, this.report!.reportName);
     },
     cellClasses(cIdx: number, rIdx: number): string[] {
       const classes: string[] = [];

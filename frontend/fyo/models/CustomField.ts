@@ -100,7 +100,6 @@ export class CustomField extends Doc {
           (s) =>
             !s?.isSingle &&
             ![
-              ModelNameEnum.PatchRun,
               ModelNameEnum.SingleValue,
               ModelNameEnum.CustomField,
               ModelNameEnum.CustomForm,

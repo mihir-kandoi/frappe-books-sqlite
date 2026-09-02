@@ -1,7 +1,7 @@
 import { t } from 'fyo';
 import { Action } from 'fyo/model/types';
-import { Verb } from 'fyo/telemetry/types';
-import { getSavePath, showExportInFolder } from 'src/utils/ui';
+import { downloadFile } from 'src/utils/browser';
+import { showToast } from 'src/utils/interactive';
 import { getIsNullOrUndef } from 'utils';
 import { generateCSV } from 'utils/csvParser';
 import { Report } from './Report';
@@ -31,15 +31,6 @@ export default function getCommonExportActions(report: Report): Action[] {
 }
 
 async function exportReport(extention: ExportExtention, report: Report) {
-  const { filePath, canceled } = await getSavePath(
-    report.reportName,
-    extention
-  );
-
-  if (canceled || !filePath) {
-    return;
-  }
-
   let data = '';
 
   if (extention === 'csv') {
@@ -52,8 +43,7 @@ async function exportReport(extention: ExportExtention, report: Report) {
     return;
   }
 
-  await saveExportData(data, filePath);
-  report.fyo.telemetry.log(Verb.Exported, report.reportName, { extention });
+  saveExportData(data, `${report.reportName}.${extention}`);
 }
 
 function getJsonData(report: Report): string {
@@ -178,12 +168,12 @@ function getValueFromCell(cell: ReportCell, displayPrecision: number) {
   return rawValue;
 }
 
-export async function saveExportData(
+export function saveExportData(
   data: string,
-  filePath: string,
+  fileName: string,
   message?: string
 ) {
-  await ipc.saveData(data, filePath);
+  downloadFile(data, fileName, 'text/plain;charset=utf-8');
   message ??= t`Export Successful`;
-  showExportInFolder(message, filePath);
+  showToast({ message, type: 'success' });
 }

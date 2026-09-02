@@ -1,4 +1,4 @@
-"""Translate desktop Books schema names and fields to hosted DocTypes."""
+"""Translate Books interface schema names and fields to Frappe DocTypes."""
 
 from __future__ import annotations
 

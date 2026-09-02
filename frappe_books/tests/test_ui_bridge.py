@@ -25,13 +25,13 @@ class IntegrationTestUiBridge(IntegrationTestCase):
 			{"name": "POSSettings"},
 		)
 
-	def test_missing_document_matches_desktop_empty_read(self):
+	def test_missing_document_matches_interface_empty_read(self):
 		self.assertEqual(
 			self.bridge.get("PurchaseInvoice", "New Purchase Invoice 01"),
 			{},
 		)
 
-	def test_return_outstanding_uses_desktop_positive_balance_contract(self):
+	def test_return_outstanding_uses_interface_positive_balance_contract(self):
 		values = self.bridge._row_to_source(
 			"SalesInvoice",
 			{
@@ -52,7 +52,7 @@ class IntegrationTestUiBridge(IntegrationTestCase):
 			42,
 		)
 
-	def test_pay_accounts_are_translated_between_desktop_and_frappe_semantics(self):
+	def test_pay_accounts_are_translated_between_interface_and_frappe_semantics(self):
 		target = self.bridge._target_values(
 			"Payment",
 			{
@@ -90,7 +90,7 @@ class IntegrationTestUiBridge(IntegrationTestCase):
 			max(int(first.name), int(second.name)),
 		)
 
-	def test_crud_uses_desktop_names_and_iso_datetimes(self):
+	def test_crud_uses_interface_names_and_iso_datetimes(self):
 		name = unique_name("Web UOM")
 		inserted = self.bridge.insert("UOM", {"name": name, "isWhole": True})
 
@@ -156,20 +156,6 @@ class IntegrationTestUiBridge(IntegrationTestCase):
 		self.assertEqual(
 			frappe.db.get_single_value("Books System Settings", "dark_mode"),
 			1,
-		)
-
-	def test_secret_single_values_are_not_returned(self):
-		settings = frappe.get_single("Books Erp Next Sync Settings")
-		settings.auth_token = "bridge-secret"
-		settings.save(ignore_permissions=True)
-
-		self.assertNotIn(
-			"authToken",
-			self.bridge.get("ERPNextSyncSettings", "ERPNextSyncSettings"),
-		)
-		self.assertEqual(
-			self.bridge.get_single_values({"parent": "ERPNextSyncSettings", "fieldname": "authToken"}),
-			[],
 		)
 
 	def test_doctype_references_are_translated_by_field_type(self):

@@ -91,7 +91,6 @@
 <script lang="ts">
 import { DocValue } from 'fyo/core/types';
 import { Doc } from 'fyo/model/doc';
-import { Verb } from 'fyo/telemetry/types';
 import { TranslationString } from 'fyo/utils/translation';
 import { ModelNameEnum } from 'models/types';
 import { Field } from 'schemas/types';
@@ -168,15 +167,10 @@ export default defineComponent({
   async mounted() {
     const languageMap = TranslationString.prototype.languageMap;
     this.docOrNull = getSetupWizardDoc(languageMap);
-    if (!this.fyo.db.isConnected) {
-      await this.fyo.db.init();
-    }
-
     if (this.fyo.store.isDevelopment) {
       // @ts-ignore
       window.sw = this;
     }
-    this.fyo.telemetry.log(Verb.Started, ModelNameEnum.SetupWizard);
   },
   methods: {
     async fill() {
@@ -222,11 +216,9 @@ export default defineComponent({
       }
 
       this.loading = true;
-      this.fyo.telemetry.log(Verb.Completed, ModelNameEnum.SetupWizard);
       this.$emit('setup-complete', this.doc.getValidDict());
     },
     cancel() {
-      this.fyo.telemetry.log(Verb.Cancelled, ModelNameEnum.SetupWizard);
       this.$emit('setup-canceled');
     },
   },

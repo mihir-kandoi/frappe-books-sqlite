@@ -64,7 +64,6 @@ import {
   generateCodeFrame,
   SourceLocation,
 } from '@vue/compiler-dom';
-import { Verb } from 'fyo/telemetry/types';
 import ErrorBoundary from 'src/components/ErrorBoundary.vue';
 import { getPathAndMakePDF } from 'src/utils/printTemplates';
 import { PrintValues } from 'src/utils/types';
@@ -198,7 +197,6 @@ export default defineComponent({
         shouldPrint
       );
 
-      this.fyo.telemetry.log(Verb.Printed, this.printSchemaName);
     },
   },
 });

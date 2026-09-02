@@ -22,7 +22,6 @@ class BooksItem(Document):
 
 		barcode: DF.Data | None
 		batch_series: DF.Data | None
-		datafrom_erp: DF.Check
 		description: DF.Text | None
 		expense_account: DF.Link
 		has_batch: DF.Check

@@ -10,8 +10,8 @@ import {
 import { validateEmail } from 'fyo/model/validationFunction';
 import { InventorySettings } from 'models/inventory/InventorySettings';
 import { ModelNameEnum } from 'models/types';
-import { createDiscountAccount } from 'src/setup/setupInstance';
 import { getCountryInfo } from 'utils/misc';
+import { AccountRootTypeEnum } from '../Account/types';
 
 export class AccountingSettings extends Doc {
   enableDiscounting?: boolean;
@@ -24,7 +24,6 @@ export class AccountingSettings extends Doc {
   enableLoyaltyProgram?: boolean;
   enablePricingRule?: boolean;
   enaenableItemEnquiry?: boolean;
-  enableERPNextSync?: boolean;
   enablePointOfSaleWithOutInventory?: boolean;
   enablePartialPayment?: boolean;
   enableitemGroup?: boolean;
@@ -62,9 +61,6 @@ export class AccountingSettings extends Doc {
     enableLead: () => {
       return !!this.enableLead;
     },
-    enableERPNextSync: () => {
-      return !!this.enableERPNextSync;
-    },
     enableInvoiceReturns: () => {
       return !!this.enableInvoiceReturns;
     },
@@ -94,7 +90,7 @@ export class AccountingSettings extends Doc {
     const discountAccountNotSet = !this.discountAccount;
 
     if (discountingEnabled && discountAccountNotSet) {
-      await createDiscountAccount(this.fyo);
+      await this.createDiscountAccount();
     }
 
     if (
@@ -113,5 +109,31 @@ export class AccountingSettings extends Doc {
 
       await inventorySettings.sync();
     }
+  }
+
+  async createDiscountAccount() {
+    const incomeAccountName = this.fyo.t`Indirect Income`;
+    if (!(await this.fyo.db.exists(ModelNameEnum.Account, incomeAccountName))) {
+      return;
+    }
+
+    const discountAccountName = this.fyo.t`Discounts`;
+    const discountAccountExists = await this.fyo.db.exists(
+      ModelNameEnum.Account,
+      discountAccountName
+    );
+    if (!discountAccountExists) {
+      await this.fyo.doc
+        .getNewDoc(ModelNameEnum.Account, {
+          name: discountAccountName,
+          rootType: AccountRootTypeEnum.Income,
+          parentAccount: incomeAccountName,
+          accountType: 'Income Account',
+          isGroup: false,
+        })
+        .sync();
+    }
+
+    await this.setAndSync('discountAccount', discountAccountName);
   }
 }

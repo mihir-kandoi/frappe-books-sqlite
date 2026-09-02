@@ -1,5 +1,4 @@
 import { Action } from 'fyo/model/types';
-import { Verb } from 'fyo/telemetry/types';
 import { DateTime } from 'luxon';
 import { ModelNameEnum } from 'models/types';
 import { codeStateMap } from 'regional/in';
@@ -9,7 +8,6 @@ import { invertMap } from 'utils';
 import { getCsvData, saveExportData } from '../commonExporter';
 import { BaseGSTR } from './BaseGSTR';
 import { TransferTypeEnum } from './types';
-import { getSavePath } from 'src/utils/ui';
 
 const GST = {
   'GST-0': 0,
@@ -141,15 +139,6 @@ async function exportReport(extention: ExportExtention, report: BaseGSTR) {
     return;
   }
 
-  const { filePath, canceled } = await getSavePath(
-    report.reportName,
-    extention
-  );
-
-  if (canceled || !filePath) {
-    return;
-  }
-
   let data = '';
 
   if (extention === 'csv') {
@@ -162,8 +151,7 @@ async function exportReport(extention: ExportExtention, report: BaseGSTR) {
     return;
   }
 
-  await saveExportData(data, filePath);
-  report.fyo.telemetry.log(Verb.Exported, report.reportName, { extention });
+  saveExportData(data, `${report.reportName}.${extention}`);
 }
 
 async function getCanExport(report: BaseGSTR) {

@@ -1,4 +1,4 @@
-"""Native Frappe replacement for the Electron Books setup workflow."""
+"""Set up a Books company on the current Frappe site."""
 
 import frappe
 
@@ -101,7 +101,6 @@ def _update_system_settings(wizard):
 			"currency": wizard.currency,
 			"country_code": _country_code(wizard.country),
 			"locale": "en-IN" if wizard.country == "India" else "en-US",
-			"version": frappe.get_attr("frappe_books.__version__"),
 		}
 	)
 	settings.save(ignore_permissions=True)

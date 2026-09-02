@@ -14,7 +14,6 @@ class BooksMisc(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		open_count: DF.Int
 		use_full_width: DF.Check
 	# end: auto-generated types
 

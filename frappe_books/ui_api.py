@@ -15,7 +15,7 @@ from frappe_books.ui_bridge.mapping import target_doctype
 
 @frappe.whitelist(methods=["POST"])
 def database_call(method: str, args: list[Any] | str | None = None) -> Any:
-	"""Run one operation from the desktop database compatibility contract."""
+	"""Run one Books interface data operation on the current Frappe site."""
 	_parsed_args = _as_list(args)
 	return BooksDatabaseBridge().call(method, _parsed_args)
 

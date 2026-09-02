@@ -18,19 +18,6 @@ export interface CountryInfo {
   locale: string;
 }
 
-export type Creds = {
-  errorLogUrl: string;
-  telemetryUrl: string;
-  tokenString: string;
-};
-
-export type UnexpectedLogObject = {
-  name: string;
-  message: string;
-  stack: string;
-  more: Record<string, unknown>;
-};
-
 export interface SelectFileOptions {
   title: string;
   filters?: { name: string; extensions: string[] }[];
@@ -39,14 +26,6 @@ export interface SelectFileOptions {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PropertyEnum<T extends Record<string, any>> = {
   [key in keyof Required<T>]: key;
-};
-
-export type TemplateFile = {
-  file: string;
-  template: string;
-  modified: string;
-  width: number;
-  height: number;
 };
 
 export interface Keys extends ModMap {

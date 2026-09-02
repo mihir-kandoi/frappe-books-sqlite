@@ -57,14 +57,6 @@
       "section": "Default"
     },
     {
-      "fieldname": "version",
-      "label": "Version",
-      "fieldtype": "Data",
-      "default": "0.0.0",
-      "readOnly": true,
-      "section": "Default"
-    },
-    {
       "fieldname": "allowFilterBypass",
       "label": "Allow to bypass filters",
       "fieldtype": "Check",
@@ -125,13 +117,6 @@
       "fieldtype": "Data",
       "default": "in",
       "description": "Country code used to initialize regional settings.",
-      "hidden": true
-    },
-    {
-      "fieldname": "instanceId",
-      "label": "Instance Id",
-      "fieldtype": "Data",
-      "readOnly": true,
       "hidden": true
     },
     {

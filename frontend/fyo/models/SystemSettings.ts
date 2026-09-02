@@ -14,8 +14,6 @@ export default class SystemSettings extends Doc {
   hideGetStarted?: boolean;
   countryCode?: string;
   currency?: string;
-  version?: string;
-  instanceId?: string;
   darkMode?: boolean;
   displayTermsAndConditions?: boolean;
 

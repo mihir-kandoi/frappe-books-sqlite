@@ -156,9 +156,6 @@ export default defineComponent({
   },
   computed: {
     ratio() {
-      if (this.itemVisibility === 'ERP Sync Items') {
-        return [1.6, 0.9, 0.7];
-      }
       return [1.6, 0.9, 0.8, 0.7];
     },
     tableFields() {
@@ -187,15 +184,13 @@ export default defineComponent({
         },
       ] as Field[];
 
-      if (this.itemVisibility !== 'ERP Sync Items') {
-        fields.splice(2, 0, {
-          fieldname: 'availableQty',
-          label: t`Qty`,
-          placeholder: 'Available Qty',
-          fieldtype: 'Float',
-          readOnly: true,
-        });
-      }
+      fields.splice(2, 0, {
+        fieldname: 'availableQty',
+        label: t`Qty`,
+        placeholder: 'Available Qty',
+        fieldtype: 'Float',
+        readOnly: true,
+      });
 
       return fields;
     },

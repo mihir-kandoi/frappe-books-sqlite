@@ -69,7 +69,6 @@
             </p>
           </div>
           <p
-            v-if="itemVisibility !== 'ERP Sync Items'"
             class="
               w-6
               h-6

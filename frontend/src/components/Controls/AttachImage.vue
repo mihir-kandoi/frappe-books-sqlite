@@ -73,6 +73,7 @@
 <script lang="ts">
 import { Field } from 'schemas/types';
 import { fyo } from 'src/initFyo';
+import { selectFile } from 'src/utils/browser';
 import { getDataURL } from 'src/utils/misc';
 import { defineComponent, PropType } from 'vue';
 import Button from '../Button.vue';
@@ -127,11 +128,11 @@ export default defineComponent({
         filters: [{ name: 'Image', extensions: Object.keys(mime_types) }],
       };
 
-      const { name, success, data } = await ipc.selectFile(options);
-
-      if (!success) {
+      const selectedFile = await selectFile(options);
+      if (!selectedFile) {
         return;
       }
+      const { name, data } = selectedFile;
       const extension = name.split('.').at(-1)?.toLowerCase();
       if (!extension) {
         return;

@@ -1,4 +1,4 @@
-"""Load and combine the JSON schemas used by the desktop Books application."""
+"""Load and combine the JSON schemas used by the Books web interface."""
 
 from __future__ import annotations
 
@@ -69,8 +69,8 @@ def load_schemas(source_root: str | Path) -> dict[str, Schema]:
 def _merge_regional_fields(source_root: Path, schemas: dict[str, Schema]) -> None:
 	"""Keep country-specific data portable by exposing all regional fields.
 
-	The desktop app changes its schema at runtime based on the selected country.
-	A hosted Frappe site needs a stable database schema, so regional fields remain
+	The interface changes its schema at runtime based on the selected country.
+	A Frappe site needs a stable database schema, so regional fields remain
 	available and controllers decide when they apply.
 	"""
 	for path in sorted((source_root / "schemas" / "regional").glob("*/*.json")):
@@ -86,7 +86,7 @@ def _merge_regional_fields(source_root: Path, schemas: dict[str, Schema]) -> Non
 
 
 def _merge_hosted_port_fields(schemas: dict[str, Schema]) -> None:
-	"""Add fields required when desktop interactions move to server workflows."""
+	"""Add fields required by server workflows."""
 	for schema_name, fields in HOSTED_PORT_FIELDS.items():
 		schema = schemas.get(schema_name)
 		if not schema:

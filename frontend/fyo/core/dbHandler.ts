@@ -35,7 +35,7 @@ export class DatabaseHandler extends DatabaseBase {
   #fyo: Fyo;
   converter: Converter;
   #demux: DatabaseDemuxBase;
-  dbPath?: string;
+  #connected = false;
   #schemaMap: SchemaMap = {};
   #fieldMap: FieldMap = {};
   observer: Observable<never> = new Observable();
@@ -57,24 +57,13 @@ export class DatabaseHandler extends DatabaseBase {
   }
 
   get isConnected() {
-    return !!this.dbPath;
+    return this.#connected;
   }
 
-  get supportsServerLifecycle() {
-    return this.#demux.supportsServerLifecycle;
-  }
-
-  async createNewDatabase(dbPath: string, countryCode: string) {
-    countryCode = await this.#demux.createNewDatabase(dbPath, countryCode);
+  async connect(countryCode?: string) {
+    countryCode = await this.#demux.connect(countryCode);
     await this.init();
-    this.dbPath = dbPath;
-    return countryCode;
-  }
-
-  async connectToDatabase(dbPath: string, countryCode?: string) {
-    countryCode = await this.#demux.connectToDatabase(dbPath, countryCode);
-    await this.init();
-    this.dbPath = dbPath;
+    this.#connected = true;
     return countryCode;
   }
 
@@ -98,7 +87,7 @@ export class DatabaseHandler extends DatabaseBase {
 
   async purgeCache() {
     await this.close();
-    this.dbPath = undefined;
+    this.#connected = false;
     this.#schemaMap = {};
     this.#fieldMap = {};
   }
@@ -214,7 +203,7 @@ export class DatabaseHandler extends DatabaseBase {
       schemaName,
       docValueMap
     ) as RawValueMap;
-    if (this.supportsServerLifecycle && expectedModified instanceof Date) {
+    if (expectedModified instanceof Date) {
       rawValueMap.__expectedModified = expectedModified.toISOString();
     }
     await this.#demux.call('update', schemaName, rawValueMap);

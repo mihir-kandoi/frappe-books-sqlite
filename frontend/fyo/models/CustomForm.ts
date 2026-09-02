@@ -37,7 +37,6 @@ export class CustomForm extends Doc {
           }
 
           return ![
-            ModelNameEnum.PatchRun,
             ModelNameEnum.SingleValue,
             ModelNameEnum.CustomField,
             ModelNameEnum.CustomForm,
@@ -69,7 +68,7 @@ export class CustomForm extends Doc {
   hidden: HiddenMap = { customFields: () => !this.name };
 
   override async afterSync(): Promise<void> {
-    if (!this.fyo.db.supportsServerLifecycle || !this.name) {
+    if (!this.name) {
       return;
     }
 

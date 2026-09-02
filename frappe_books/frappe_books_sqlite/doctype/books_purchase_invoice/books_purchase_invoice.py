@@ -35,7 +35,6 @@ class BooksPurchaseInvoice(InvoiceController):
 		grand_total: DF.Currency
 		is_fully_returned: DF.Check
 		is_returned: DF.Check
-		is_synced_with_erp: DF.Check
 		items: DF.Table[BooksPurchaseInvoiceItem]
 		make_auto_payment: DF.Check
 		make_auto_stock_transfer: DF.Check

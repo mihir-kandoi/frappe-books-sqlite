@@ -45,7 +45,6 @@ class BooksSalesInvoice(InvoiceController):
 		is_pos: DF.Check
 		is_pricing_rule_applied: DF.Check
 		is_returned: DF.Check
-		is_synced_with_erp: DF.Check
 		items: DF.Table[BooksSalesInvoiceItem]
 		loyalty_points: DF.Int
 		loyalty_program: DF.Link | None

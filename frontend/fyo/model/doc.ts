@@ -1,7 +1,6 @@
 import { Fyo } from 'fyo';
 import { Converter } from 'fyo/core/converter';
 import { DocValue, DocValueMap, RawValueMap } from 'fyo/core/types';
-import { Verb } from 'fyo/telemetry/types';
 import { DEFAULT_USER } from 'fyo/utils/consts';
 import { ConflictError, MandatoryError, NotFoundError } from 'fyo/utils/errors';
 import Observable from 'fyo/utils/observable';
@@ -44,9 +43,6 @@ import {
   ValidationMap,
 } from './types';
 import { validateOptions, validateRequired } from './validationFunction';
-import { getShouldDocSyncToERPNext } from 'src/utils/erpnextSync';
-import { ModelNameEnum } from 'models/types';
-import { DocItem } from 'models/inventory/types';
 
 export class Doc extends Observable<DocValue | Doc[]> {
   /* eslint-disable @typescript-eslint/no-floating-promises */
@@ -69,7 +65,6 @@ export class Doc extends Observable<DocValue | Doc[]> {
   _notInserted = true;
 
   _syncing = false;
-  _addDocToSyncQueue = true;
 
   constructor(
     schema: Schema,
@@ -250,23 +245,6 @@ export class Doc extends Observable<DocValue | Doc[]> {
     }
 
     return true;
-  }
-
-  get shouldDocSyncToERPNext(): boolean {
-    const syncEnabled = !!this.fyo.singles.ERPNextSyncSettings?.isEnabled;
-    if (!syncEnabled) {
-      return false;
-    }
-
-    if (!this.schemaName || !this.fyo.singles.ERPNextSyncSettings) {
-      return false;
-    }
-
-    if (!!this.schema.isSubmittable && !this.isSubmitted) {
-      return false;
-    }
-
-    return getShouldDocSyncToERPNext(this);
   }
 
   _setValuesWithoutChecks(data: DocValueMap, convertToDocValue: boolean) {
@@ -607,7 +585,7 @@ export class Doc extends Observable<DocValue | Doc[]> {
     }
 
     if (!this.createdBy) {
-      this.createdBy = this.fyo.auth.session.user || DEFAULT_USER;
+      this.createdBy = this.fyo.user || DEFAULT_USER;
     }
 
     if (!this.created) {
@@ -618,7 +596,7 @@ export class Doc extends Observable<DocValue | Doc[]> {
   }
 
   _updateModifiedMetaValues() {
-    this.modifiedBy = this.fyo.auth.session.user || DEFAULT_USER;
+    this.modifiedBy = this.fyo.user || DEFAULT_USER;
     this.modified = new Date();
   }
 
@@ -903,7 +881,6 @@ export class Doc extends Observable<DocValue | Doc[]> {
     }
     await this._syncValues(data);
 
-    this.fyo.telemetry.log(Verb.Created, this.schemaName);
     return this;
   }
 
@@ -927,26 +904,6 @@ export class Doc extends Observable<DocValue | Doc[]> {
 
     return this;
   }
-  async _hasERPSyncableItems(): Promise<boolean> {
-    const isSalesInvoice = this.schemaName === ModelNameEnum.SalesInvoice;
-    if (!isSalesInvoice) {
-      return true;
-    }
-    for (const item of this.items as DocItem[]) {
-      if (!item.item) {
-        continue;
-      }
-      const isFromERP = await this.fyo.getValue(
-        ModelNameEnum.Item,
-        item.item,
-        'datafromErp'
-      );
-      if (isFromERP) continue;
-      else return false;
-    }
-    return true;
-  }
-
   async sync(): Promise<Doc> {
     this._syncing = true;
     await this.trigger('beforeSync');
@@ -959,40 +916,6 @@ export class Doc extends Observable<DocValue | Doc[]> {
     this._notInserted = false;
     await this.trigger('afterSync');
     this.fyo.doc.observer.trigger(`sync:${this.schemaName}`, this.name);
-
-    if (this._addDocToSyncQueue && !!this.shouldDocSyncToERPNext) {
-      const isSalesInvoice = this.schemaName === ModelNameEnum.SalesInvoice;
-      const hasERPSyncableItems = await this._hasERPSyncableItems();
-
-      if (
-        hasERPSyncableItems &&
-        (!(isSalesInvoice && this.isSyncedWithErp) ||
-          (isSalesInvoice && !!this.isReturn))
-      ) {
-        if (isSalesInvoice && !this.isReturn) {
-          await this.setAndSync('isSyncedWithErp', true);
-        }
-
-        const isDocExistsInQueue = await this.fyo.db.getAll(
-          ModelNameEnum.ERPNextSyncQueue,
-          {
-            filters: {
-              referenceType: this.schemaName,
-              documentName: this.name as string,
-            },
-          }
-        );
-
-        if (!isDocExistsInQueue.length) {
-          await this.fyo.doc
-            .getNewDoc(ModelNameEnum.ERPNextSyncQueue, {
-              referenceType: this.schemaName,
-              documentName: this.name,
-            })
-            .sync();
-        }
-      }
-    }
 
     this._syncing = false;
     return doc;
@@ -1011,7 +934,6 @@ export class Doc extends Observable<DocValue | Doc[]> {
     await this.fyo.db.delete(this.schemaName, this.name!);
     await this.trigger('afterDelete');
 
-    this.fyo.telemetry.log(Verb.Deleted, this.schemaName);
     this.fyo.doc.observer.trigger(`delete:${this.schemaName}`, this.name);
   }
 
@@ -1020,24 +942,13 @@ export class Doc extends Observable<DocValue | Doc[]> {
       return;
     }
 
-    if (this.fyo.db.supportsServerLifecycle) {
-      const data = await this.fyo.db.runLifecycleAction(
-        'submit',
-        this.schemaName,
-        this.name!
-      );
-      await this._syncValues(data);
-      this._notInserted = false;
-      this.fyo.telemetry.log(Verb.Submitted, this.schemaName);
-      this.fyo.doc.observer.trigger(`submit:${this.schemaName}`, this.name);
-      return;
-    }
-
-    await this.trigger('beforeSubmit');
-    await this.setAndSync('submitted', true);
-    await this.trigger('afterSubmit');
-
-    this.fyo.telemetry.log(Verb.Submitted, this.schemaName);
+    const data = await this.fyo.db.runLifecycleAction(
+      'submit',
+      this.schemaName,
+      this.name!
+    );
+    await this._syncValues(data);
+    this._notInserted = false;
     this.fyo.doc.observer.trigger(`submit:${this.schemaName}`, this.name);
   }
 
@@ -1046,24 +957,13 @@ export class Doc extends Observable<DocValue | Doc[]> {
       return;
     }
 
-    if (this.fyo.db.supportsServerLifecycle) {
-      const data = await this.fyo.db.runLifecycleAction(
-        'cancel',
-        this.schemaName,
-        this.name!
-      );
-      await this._syncValues(data);
-      this._notInserted = false;
-      this.fyo.telemetry.log(Verb.Cancelled, this.schemaName);
-      this.fyo.doc.observer.trigger(`cancel:${this.schemaName}`, this.name);
-      return;
-    }
-
-    await this.trigger('beforeCancel');
-    await this.setAndSync('cancelled', true);
-    await this.trigger('afterCancel');
-
-    this.fyo.telemetry.log(Verb.Cancelled, this.schemaName);
+    const data = await this.fyo.db.runLifecycleAction(
+      'cancel',
+      this.schemaName,
+      this.name!
+    );
+    await this._syncValues(data);
+    this._notInserted = false;
     this.fyo.doc.observer.trigger(`cancel:${this.schemaName}`, this.name);
   }
 

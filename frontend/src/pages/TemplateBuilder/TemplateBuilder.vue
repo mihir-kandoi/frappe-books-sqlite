@@ -278,7 +278,6 @@ import {
   focusOrSelectFormControl,
   getActionsForDoc,
   getDocFromNameIfExistsElseNew,
-  getSavePath,
   openSettings,
   selectTextFile,
 } from 'src/utils/ui';
@@ -784,12 +783,11 @@ export default defineComponent({
         });
       }
 
-      const { canceled, filePath } = await getSavePath(name, 'template.html');
-      if (canceled || !filePath) {
-        return;
-      }
-
-      await saveExportData(template, filePath, this.t`Template file saved`);
+      saveExportData(
+        template,
+        `${name}.template.html`,
+        this.t`Template file saved`
+      );
     },
   },
 });

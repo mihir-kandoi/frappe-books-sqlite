@@ -2,14 +2,11 @@ import { getMoneyMaker, MoneyMaker } from 'pesa';
 import { Field, FieldType } from 'schemas/types';
 import { getIsNullOrUndef } from 'utils';
 import { markRaw } from 'vue';
-import { AuthHandler } from './core/authHandler';
 import { DatabaseHandler } from './core/dbHandler';
 import { DocHandler } from './core/docHandler';
 import { DocValue, FyoConfig } from './core/types';
-import { Config } from './demux/config';
 import { Doc } from './model/doc';
 import { ModelMap } from './model/types';
-import { TelemetryManager } from './telemetry/telemetry';
 import {
   DEFAULT_CURRENCY,
   DEFAULT_DISPLAY_PRECISION,
@@ -30,7 +27,7 @@ export class Fyo {
 
   pesa: MoneyMaker;
 
-  auth: AuthHandler;
+  user = '';
   doc: DocHandler;
   db: DatabaseHandler;
 
@@ -42,11 +39,7 @@ export class Fyo {
   currencyFormatter?: Intl.NumberFormat;
   currencySymbols: Record<string, string | undefined> = {};
 
-  telemetry: TelemetryManager;
-  config: Config;
-
   constructor(conf: FyoConfig) {
-    this.auth = new AuthHandler(this);
     this.db = new DatabaseHandler(this, conf.DatabaseDemux);
     this.doc = new DocHandler(this);
 
@@ -57,8 +50,6 @@ export class Fyo {
       wrapper: markRaw,
     });
 
-    this.telemetry = new TelemetryManager(this);
-    this.config = new Config();
   }
 
   get initialized() {
@@ -109,7 +100,6 @@ export class Fyo {
     this.temp = {};
 
     this.doc.init();
-    this.auth.init();
     await this.db.init();
   }
 
@@ -212,14 +202,8 @@ export class Fyo {
 
   store = {
     isDevelopment: false,
-    skipTelemetryLogging: false,
     appVersion: '',
-    platform: '',
     language: '',
-    instanceId: '',
-    deviceId: '',
-    openCount: -1,
-    appFlags: {} as Record<string, boolean>,
     reports: {} as Record<keyof typeof reports, Report | undefined>,
   };
 }

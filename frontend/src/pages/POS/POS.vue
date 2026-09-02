@@ -747,11 +747,8 @@ export default defineComponent({
 
       if (itemVisibility === 'Inventory Items') {
         filters.trackItem = true;
-      } else if (itemVisibility === 'ERP Sync Items') {
-        filters.datafromErp = true;
       } else if (itemVisibility === 'Non-Inventory Items') {
         filters.trackItem = false;
-        filters.datafromErp = false;
       }
 
       if (this.selectedItemGroup) {

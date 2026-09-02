@@ -7,7 +7,6 @@ import type { Doc } from 'fyo/model/doc';
 import { Action } from 'fyo/model/types';
 import { getActions } from 'fyo/utils';
 import {
-  BaseError,
   getDbError,
   LinkValidationError,
   ValueError,
@@ -27,6 +26,7 @@ import { assertIsType } from 'utils/index';
 import { SelectFileOptions } from 'utils/types';
 import { RouteLocationRaw } from 'vue-router';
 import { evaluateHidden } from './doc';
+import { selectFile } from './browser';
 import { showDialog, showToast } from './interactive';
 import { showSidebar } from './refs';
 import {
@@ -484,11 +484,9 @@ export async function selectTextFile(filters?: SelectFileOptions['filters']) {
     title: t`Select File`,
     filters,
   };
-  const { success, canceled, filePath, data, name } = await ipc.selectFile(
-    options
-  );
+  const selectedFile = await selectFile(options);
 
-  if (canceled || !success) {
+  if (!selectedFile) {
     showToast({
       type: 'error',
       message: t`File selection failed`,
@@ -496,7 +494,7 @@ export async function selectTextFile(filters?: SelectFileOptions['filters']) {
     return {};
   }
 
-  const text = new TextDecoder().decode(data);
+  const text = new TextDecoder().decode(selectedFile.data);
   if (!text) {
     showToast({
       type: 'error',
@@ -506,7 +504,11 @@ export async function selectTextFile(filters?: SelectFileOptions['filters']) {
     return {};
   }
 
-  return { text, filePath, name };
+  return {
+    text,
+    filePath: selectedFile.name,
+    name: selectedFile.name,
+  };
 }
 
 export enum ShortcutKey {
@@ -1015,67 +1017,3 @@ export const paperSizeMap: Record<
     height: -1,
   },
 };
-
-export function showExportInFolder(message: string, filePath: string) {
-  showToast({
-    message,
-    actionText: t`Open Folder`,
-    type: 'success',
-    action: () => {
-      ipc.showItemInFolder(filePath);
-    },
-  });
-}
-
-export async function deleteDb(filePath: string) {
-  const { error } = await ipc.deleteFile(filePath);
-
-  if (error?.code === 'EBUSY') {
-    await showDialog({
-      title: t`Delete Failed`,
-      detail: t`Please restart and try again.`,
-      type: 'error',
-    });
-  } else if (error?.code === 'ENOENT') {
-    await showDialog({
-      title: t`Delete Failed`,
-      detail: t`File ${filePath} does not exist.`,
-      type: 'error',
-    });
-  } else if (error?.code === 'EPERM') {
-    await showDialog({
-      title: t`Cannot Delete`,
-      detail: t`Close Frappe Books and try manually.`,
-      type: 'error',
-    });
-  } else if (error) {
-    const err = new BaseError(500, error.message);
-    err.name = error.name;
-    err.stack = error.stack;
-    throw err;
-  }
-}
-
-export async function getSelectedFilePath() {
-  return ipc.getOpenFilePath({
-    title: t`Select file`,
-    properties: ['openFile'],
-    filters: [{ name: 'SQLite DB File', extensions: ['db'] }],
-  });
-}
-
-export async function getSavePath(name: string, extention: string) {
-  const response = await ipc.getSaveFilePath({
-    title: t`Select folder`,
-    defaultPath: `${name}.${extention}`,
-  });
-
-  const canceled = response.canceled;
-  let filePath = response.filePath;
-
-  if (filePath && !filePath.endsWith(extention) && filePath !== ':memory:') {
-    filePath = `${filePath}.${extention}`;
-  }
-
-  return { canceled, filePath };
-}

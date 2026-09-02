@@ -6,9 +6,6 @@ import { outsideClickDirective } from 'src/utils/outsideClick';
 import { fyo } from 'src/initFyo';
 import router from 'src/router';
 import WebApp from './WebApp.vue';
-import { installWebIpc } from './ipc';
-
-installWebIpc();
 
 const app = createApp(WebApp);
 app.use(FrappeUI);

@@ -21,7 +21,6 @@
   "item_weight_digits",
   "default_section_break_13",
   "item_visibility",
-  "item_visibility_erp",
   "can_change_rate",
   "hide_unavailable_items",
   "can_edit_discount",
@@ -121,13 +120,6 @@
    "fieldtype": "Select",
    "label": "Item Visibility",
    "options": "Inventory Items\nNon-Inventory Items"
-  },
-  {
-   "default": "ERP Sync Items",
-   "fieldname": "item_visibility_erp",
-   "fieldtype": "Select",
-   "label": "Item Visibility",
-   "options": "ERP Sync Items\nInventory Items\nNon-Inventory Items"
   },
   {
    "default": "0",

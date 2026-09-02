@@ -32,7 +32,6 @@ class BooksSalesQuote(InvoiceController):
 		exchange_rate: DF.Float
 		grand_total: DF.Currency
 		is_fully_returned: DF.Check
-		is_synced_with_erp: DF.Check
 		items: DF.Table[BooksSalesQuoteItem]
 		make_auto_payment: DF.Check
 		net_total: DF.Currency

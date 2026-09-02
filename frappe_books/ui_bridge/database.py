@@ -30,7 +30,7 @@ FILTER_OPERATORS = {"=", "!=", ">", ">=", "<", "<=", "in", "not in", "like", "in
 
 
 class BooksDatabaseBridge:
-	"""Expose Frappe documents through the desktop database method contract."""
+	"""Expose Frappe documents through the Books interface data contract."""
 
 	def call(self, method: str, args: list[Any]) -> Any:
 		if not isinstance(method, str) or not isinstance(args, list):
@@ -321,7 +321,7 @@ class BooksDatabaseBridge:
 			and row.get("return_against")
 			and values.get("outstandingAmount") is not None
 		):
-			# The desktop Books model treats return outstanding amounts as a
+			# The Books interface treats return outstanding amounts as a
 			# positive refundable balance. Frappe stores credit-note outstanding
 			# values with a negative accounting sign.
 			values["outstandingAmount"] = abs(values["outstandingAmount"])
@@ -335,7 +335,7 @@ class BooksDatabaseBridge:
 			if source_name in {"name", "submitted", "cancelled", "__expectedModified"}:
 				continue
 			if source_schema == "PaymentFor" and source_name == "amount" and value is not None:
-				# Desktop Books signs a refund allocation like its credit note.
+				# The Books interface signs a refund allocation like its credit note.
 				# Frappe stores every payment allocation as a positive magnitude.
 				value = abs(flt(value))
 			target_name = target_field(source_schema, source_name)

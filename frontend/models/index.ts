@@ -53,10 +53,6 @@ import { POSSettings } from './inventory/Point of Sale/POSSettings';
 import { POSProfile } from './baseModels/POSProfile/PosProfile';
 import { POSOpeningShift } from './inventory/Point of Sale/POSOpeningShift';
 import { POSClosingShift } from './inventory/Point of Sale/POSClosingShift';
-import { ERPNextSyncSettings } from './baseModels/ERPNextSyncSettings/ERPNextSyncSettings';
-import { ERPNextSyncQueue } from './baseModels/ERPNextSyncQueue/ERPNextSyncQueue';
-import { FetchFromERPNextQueue } from './baseModels/FetchFromERPNextQueue/FetchFromERPNextQueue';
-import { IntegrationErrorLog } from './baseModels/IntegrationErrorLog/IntegrationErrorLog';
 import { ItemEnquiry } from './baseModels/ItemEnquiry/ItemEnquiry';
 
 export const models = {
@@ -117,12 +113,6 @@ export const models = {
   POSProfile,
   POSOpeningShift,
   POSClosingShift,
-  // ERPNext Sync
-  ERPNextSyncSettings,
-  ERPNextSyncQueue,
-  FetchFromERPNextQueue,
-  // Error Log
-  IntegrationErrorLog,
 } as ModelMap;
 
 export async function getRegionalModels(
