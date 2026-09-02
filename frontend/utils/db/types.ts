@@ -37,7 +37,7 @@ export abstract class DatabaseBase {
     schemaName: string,
     fieldValueMap: UnknownMap,
     expectedModified?: Date
-  ): Promise<void>;
+  ): Promise<UnknownMap>;
 
   // Delete
   abstract delete(schemaName: string, name: string): Promise<void>;

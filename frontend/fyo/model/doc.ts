@@ -890,9 +890,9 @@ export class Doc extends Observable<DocValue | Doc[]> {
     this._updateModifiedMetaValues();
     await this._preSync();
 
-    const data = this.getValidDict(false, true);
+    let data = this.getValidDict(false, true);
     try {
-      await this.fyo.db.update(
+      data = await this.fyo.db.update(
         this.schemaName,
         data,
         expectedModified instanceof Date ? expectedModified : undefined

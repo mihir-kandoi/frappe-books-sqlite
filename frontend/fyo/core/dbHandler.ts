@@ -198,7 +198,7 @@ export class DatabaseHandler extends DatabaseBase {
     schemaName: string,
     docValueMap: DocValueMap,
     expectedModified?: Date
-  ): Promise<void> {
+  ): Promise<DocValueMap> {
     const rawValueMap = this.converter.toRawValueMap(
       schemaName,
       docValueMap
@@ -206,9 +206,17 @@ export class DatabaseHandler extends DatabaseBase {
     if (expectedModified instanceof Date) {
       rawValueMap.__expectedModified = expectedModified.toISOString();
     }
-    await this.#demux.call('update', schemaName, rawValueMap);
+    const updatedRawValueMap = (await this.#demux.call(
+      'update',
+      schemaName,
+      rawValueMap
+    )) as RawValueMap;
 
     this.observer.trigger(`update:${schemaName}`, docValueMap);
+    return this.converter.toDocValueMap(
+      schemaName,
+      updatedRawValueMap
+    ) as DocValueMap;
   }
 
   async runLifecycleAction(

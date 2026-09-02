@@ -182,36 +182,26 @@ class BooksDatabaseBridge:
 		if values.get("name"):
 			doc.name = values["name"]
 		self._set_docstatus(doc, values)
-		doc.check_permission("create")
-		doc.db_insert()
-		doc.set_parent_in_children()
-		for child in doc.get_all_children():
-			child.db_insert()
-		self._sync_custom_form(source_schema, doc)
+		doc.insert(set_name=values.get("name"))
 		return self._to_source_document(source_schema, doc)
 
-	def update(self, source_schema: str, values: dict[str, Any]) -> None:
+	def update(self, source_schema: str, values: dict[str, Any]) -> dict:
 		if not isinstance(values, dict):
 			frappe.throw("Books update values must be an object")
 		target = target_doctype(source_schema)
 		if frappe.get_meta(target).issingle:
-			self._update_single(source_schema, values)
-			return
+			return self._update_single(source_schema, values)
 		if not isinstance(values.get("name"), str):
 			frappe.throw("Books update values require a document name")
 		doc = frappe.get_doc(target, values["name"])
 		doc.check_permission("write")
 		self._validate_expected_modified(doc, values.get("__expectedModified"))
 		self._validate_docstatus_update(doc, values)
-		target_values = self._target_values(source_schema, values)
-		table_fields = {field.fieldname for field in doc.meta.get_table_fields()}
-		for fieldname, value in target_values.items():
-			if fieldname not in table_fields:
-				doc.set(fieldname, value)
+		for fieldname, value in self._target_values(source_schema, values).items():
+			doc.set(fieldname, value)
 		self._set_docstatus(doc, values)
-		doc.db_update()
-		self._replace_children(doc, target_values, table_fields)
-		self._sync_custom_form(source_schema, doc)
+		doc.save()
+		return self._to_source_document(source_schema, doc)
 
 	def rename(self, source_schema: str, old_name: str, new_name: str) -> None:
 		doc = frappe.get_doc(target_doctype(source_schema), old_name)
@@ -332,19 +322,17 @@ class BooksDatabaseBridge:
 		meta = frappe.get_meta(target)
 		mapped = {}
 		for source_name, value in values.items():
-			if source_name in {"name", "submitted", "cancelled", "__expectedModified"}:
+			if source_name in SOURCE_META_TO_TARGET or source_name in {
+				"submitted",
+				"cancelled",
+				"__expectedModified",
+			}:
 				continue
 			if source_schema == "PaymentFor" and source_name == "amount" and value is not None:
 				# The Books interface signs a refund allocation like its credit note.
 				# Frappe stores every payment allocation as a positive magnitude.
 				value = abs(flt(value))
 			target_name = target_field(source_schema, source_name)
-			if source_name in SOURCE_META_TO_TARGET:
-				if target_name in {"creation", "modified"} and value:
-					mapped[target_name] = _frappe_datetime(value)
-				else:
-					mapped[target_name] = _target_value(meta, target_name, value)
-				continue
 			field = meta.get_field(target_name)
 			if not field:
 				continue
@@ -360,19 +348,6 @@ class BooksDatabaseBridge:
 				mapped.get("account"),
 			)
 		return mapped
-
-	def _replace_children(self, doc, values, table_fields):
-		for fieldname in table_fields & values.keys():
-			field = doc.meta.get_field(fieldname)
-			frappe.db.delete(
-				field.options,
-				{"parent": doc.name, "parenttype": doc.doctype, "parentfield": fieldname},
-			)
-			doc.set(fieldname, [])
-			for row in values[fieldname]:
-				doc.append(fieldname, row)
-			for child in doc.get(fieldname):
-				child.db_insert()
 
 	def _target_filters(self, source_schema: str, filters: dict) -> list[list[Any]]:
 		if not isinstance(filters, dict):
@@ -472,14 +447,6 @@ class BooksDatabaseBridge:
 
 	def _source_field_for_target(self, source_schema, target_name):
 		return source_field(source_schema, target_name)
-
-	def _sync_custom_form(self, source_schema, doc):
-		if source_schema != "CustomForm":
-			return
-
-		from frappe_books.customization import sync_custom_form
-
-		sync_custom_form(doc)
 
 	def _set_docstatus(self, doc, values):
 		if values.get("cancelled"):
@@ -613,10 +580,6 @@ def _stores_doctype_name(meta, fieldname: str) -> bool:
 
 def _iso_datetime(value) -> str:
 	return _aware_datetime(value).isoformat()
-
-
-def _frappe_datetime(value) -> datetime:
-	return _aware_datetime(value).astimezone(ZoneInfo(get_system_timezone())).replace(tzinfo=None)
 
 
 def _aware_datetime(value) -> datetime:

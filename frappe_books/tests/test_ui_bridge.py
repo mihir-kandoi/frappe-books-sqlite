@@ -116,7 +116,7 @@ class IntegrationTestUiBridge(IntegrationTestCase):
 		expected_modified = expected_modified.replace(
 			microsecond=expected_modified.microsecond // 1000 * 1000
 		)
-		self.bridge.update(
+		updated = self.bridge.update(
 			"UOM",
 			{
 				"name": name,
@@ -125,6 +125,7 @@ class IntegrationTestUiBridge(IntegrationTestCase):
 				"__expectedModified": expected_modified.isoformat(),
 			},
 		)
+		self.assertEqual(updated["modified"], self.bridge.get("UOM", name)["modified"])
 		self.assertEqual(self.bridge.get("UOM", name)["isWhole"], 0)
 		with self.assertRaises(frappe.TimestampMismatchError):
 			self.bridge.update(
@@ -159,6 +160,11 @@ class IntegrationTestUiBridge(IntegrationTestCase):
 		)
 
 	def test_doctype_references_are_translated_by_field_type(self):
+		receivable = make_account("Bridge Quote Receivable", account_type="Receivable")
+		income = make_account("Bridge Quote Income", root_type="Income", account_type="Income Account")
+		expense = make_account("Bridge Quote Expense", root_type="Expense", account_type="Expense Account")
+		party = make_party(receivable.name)
+		item = make_item(income.name, expense.name)
 		name = unique_name("Bridge Quote")
 
 		inserted = self.bridge.insert(
@@ -166,6 +172,16 @@ class IntegrationTestUiBridge(IntegrationTestCase):
 			{
 				"name": name,
 				"numberSeries": "SQUOT-",
+				"party": party.name,
+				"date": now_datetime().isoformat(),
+				"items": [
+					{
+						"item": item.name,
+						"account": income.name,
+						"rate": 100,
+						"quantity": 1,
+					}
+				],
 				"referenceType": "Party",
 				"entryCurrency": "Party",
 			},
@@ -181,6 +197,44 @@ class IntegrationTestUiBridge(IntegrationTestCase):
 			),
 			("Books Party", "Party"),
 		)
+
+	def test_draft_insert_runs_frappe_mandatory_validation(self):
+		name = unique_name("Invalid Bridge Color")
+
+		with self.assertRaises(frappe.MandatoryError):
+			self.bridge.insert("Color", {"name": name})
+
+		self.assertFalse(frappe.db.exists("Books Color", name))
+
+	def test_draft_writes_run_frappe_controller_validation(self):
+		income = make_account("Bridge Validation Income", root_type="Income", account_type="Income Account")
+		expense = make_account(
+			"Bridge Validation Expense", root_type="Expense", account_type="Expense Account"
+		)
+		invalid_name = unique_name("Invalid Bridge Item")
+		values = {
+			"itemCode": unique_name("INVALID-BRIDGE-ITEM"),
+			"incomeAccount": income.name,
+			"expenseAccount": expense.name,
+		}
+
+		with self.assertRaises(frappe.ValidationError):
+			self.bridge.insert("Item", {"name": invalid_name, "rate": -1, **values})
+		self.assertFalse(frappe.db.exists("Books Item", invalid_name))
+
+		name = unique_name("Bridge Validated Item")
+		inserted = self.bridge.insert("Item", {"name": name, "rate": 10, **values})
+		with self.assertRaises(frappe.ValidationError):
+			self.bridge.update(
+				"Item",
+				{
+					"name": name,
+					"rate": -1,
+					"__expectedModified": inserted["modified"],
+				},
+			)
+
+		self.assertEqual(frappe.db.get_value("Books Item", name, "rate"), 10)
 
 	def test_child_tables_round_trip_through_draft_writes(self):
 		account = make_account("Bridge Tax Account", root_type="Liability", account_type="Tax")
