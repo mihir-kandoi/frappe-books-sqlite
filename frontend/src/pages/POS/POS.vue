@@ -152,7 +152,7 @@ import { Shipment } from 'models/inventory/Shipment';
 import { routeTo, toggleSidebar } from 'src/utils/ui';
 import { shortcutsKey } from 'src/utils/injectionKeys';
 import PageHeader from 'src/components/PageHeader.vue';
-import { computed, defineComponent, inject } from 'vue';
+import { computed, defineComponent, inject, nextTick } from 'vue';
 import { Payment } from 'models/baseModels/Payment/Payment';
 import { PaymentMethod } from 'models/baseModels/PaymentMethod/PaymentMethod';
 import { getPaymentMethodRequirements } from 'models/baseModels/PaymentMethod/requirements';
@@ -335,6 +335,10 @@ export default defineComponent({
 
     await this.setItemQtyMap();
     await this.setItems();
+  },
+  async beforeRouteLeave() {
+    this.closeAllModals();
+    await nextTick();
   },
   deactivated() {
     this.shortcuts?.delete(COMPONENT_NAME);
@@ -1209,7 +1213,8 @@ export default defineComponent({
           await this.makePayment();
         }
 
-        this.toggleModal('Payment', false);
+        this.closeAllModals();
+        await nextTick();
 
         if (shouldPrint) {
           await routeTo(
