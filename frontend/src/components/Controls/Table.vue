@@ -25,11 +25,14 @@
           :key="df.fieldname"
           class="flex min-w-0 px-2 h-row-mid"
           :class="[
-            df.sub_label
-              ? 'flex-col items-center justify-center text-center'
-              : isNumeric(df)
-              ? 'items-center justify-end text-end'
-              : 'items-center',
+            df.sub_label ? 'flex-col justify-center' : 'items-center',
+            isNumeric(df)
+              ? df.sub_label
+                ? 'items-end text-end'
+                : 'justify-end text-end'
+              : df.sub_label
+              ? 'items-center text-center'
+              : '',
           ]"
         >
           <span>{{ df.label }}</span>
