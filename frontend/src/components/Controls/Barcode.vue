@@ -9,20 +9,25 @@
     @change="handleChange"
   >
     <template #suffix>
-      <span
-        class="lucide-scan-line size-3 cursor-text text-ink-gray-6"
+      <FrappeButton
+        size="xs"
+        variant="ghost"
+        class="!size-6 !p-0"
+        :aria-label="t`Focus barcode scanner`"
         @click="focusScanner"
-      />
+      >
+        <template #icon><span class="lucide-scan-line size-3" /></template>
+      </FrappeButton>
     </template>
   </FrappeTextInput>
 </template>
 
 <script lang="ts">
 import { showToast } from 'src/utils/interactive';
-import { TextInput as FrappeTextInput } from 'frappe-ui';
+import { Button as FrappeButton, TextInput as FrappeTextInput } from 'frappe-ui';
 import { defineComponent } from 'vue';
 export default defineComponent({
-  components: { FrappeTextInput },
+  components: { FrappeButton, FrappeTextInput },
   emits: ['item-selected'],
   data() {
     return {

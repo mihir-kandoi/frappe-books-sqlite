@@ -2,38 +2,31 @@
   <div class="flex">
     <SearchBar />
     <!-- Back Button -->
-    <a
+    <FrappeButton
       ref="backlink"
-      class="
-        nav-link
-        border-l border-r border-white
-        dark:border-gray-850 dark:bg-gray-900
-      "
-      :class="
-        historyState.back
-          ? 'text-gray-700 dark:text-gray-300 cursor-pointer'
-          : 'text-gray-400 dark:text-gray-700'
-      "
+      icon="lucide-chevron-left"
+      variant="subtle"
+      class="rounded-none border-x border-white dark:border-gray-850 dark:bg-gray-900"
+      :disabled="!historyState.back"
+      :tooltip="t`Back`"
+      :aria-label="t`Back`"
       @click="$router.back()"
-    >
-      <feather-icon name="chevron-left" class="w-4 h-4" />
-    </a>
+    />
     <!-- Forward Button -->
-    <a
-      class="nav-link rounded-md rounded-l-none dark:bg-gray-900"
-      :class="
-        historyState.forward
-          ? 'text-gray-700 dark:text-gray-400 cursor-pointer'
-          : 'text-gray-400 dark:text-gray-700'
-      "
+    <FrappeButton
+      icon="lucide-chevron-right"
+      variant="subtle"
+      class="rounded-s-none dark:bg-gray-900"
+      :disabled="!historyState.forward"
+      :tooltip="t`Forward`"
+      :aria-label="t`Forward`"
       @click="$router.forward()"
-    >
-      <feather-icon name="chevron-right" class="w-4 h-4" />
-    </a>
+    />
   </div>
 </template>
 <script lang="ts">
 import { shortcutsKey } from 'src/utils/injectionKeys';
+import { Button as FrappeButton } from 'frappe-ui';
 import { ref, inject } from 'vue';
 import { defineComponent } from 'vue';
 import SearchBar from './SearchBar.vue';
@@ -42,11 +35,11 @@ import { historyState } from 'src/utils/refs';
 const COMPONENT_NAME = 'PageHeaderNavGroup';
 
 export default defineComponent({
-  components: { SearchBar },
+  components: { SearchBar, FrappeButton },
   setup() {
     return {
       historyState,
-      backlink: ref<HTMLAnchorElement | null>(null),
+      backlink: ref<InstanceType<typeof FrappeButton> | null>(null),
       shortcuts: inject(shortcutsKey),
     };
   },
@@ -60,7 +53,7 @@ export default defineComponent({
   },
   activated() {
     this.shortcuts?.shift.set(COMPONENT_NAME, ['Backspace'], () => {
-      this.backlink?.click();
+      this.backlink?.$el.click();
     });
     // @ts-ignore
     window.ng = this;
@@ -70,9 +63,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-.nav-link {
-  @apply flex items-center bg-gray-200 px-3;
-}
-</style>

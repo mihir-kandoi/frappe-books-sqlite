@@ -3,25 +3,25 @@
     <FormHeader :form-title="t`Shortcuts`" />
     <hr class="dark:border-gray-800" />
     <div
-      class="
-        max-h-[min(34rem,calc(100vh-10rem))]
-        overflow-y-auto
-        custom-scroll custom-scroll-thumb2
-        text-gray-900
-        dark:text-gray-100
-      "
+      class="max-h-[min(34rem,calc(100vh-10rem))] overflow-y-auto custom-scroll custom-scroll-thumb2 text-gray-900 dark:text-gray-100"
     >
       <template v-for="g in groups" :key="g.label">
         <div class="p-4 w-full">
           <!-- Shortcut Group Header -->
-          <div class="cursor-pointer mb-4" @click="g.collapsed = !g.collapsed">
-            <div class="font-semibold">
-              {{ g.label }}
-            </div>
-            <div class="text-base">
-              {{ g.description }}
-            </div>
-          </div>
+          <FrappeButton
+            class="mb-4 !h-auto w-full !justify-between !px-0 text-start"
+            variant="ghost"
+            :icon-right="g.collapsed ? 'lucide-chevron-down' : 'lucide-chevron-up'"
+            :aria-expanded="!g.collapsed"
+            @click="g.collapsed = !g.collapsed"
+          >
+            <span class="flex flex-col items-start">
+              <strong>{{ g.label }}</strong>
+              <span class="text-base font-normal text-ink-gray-6">
+                {{ g.description }}
+              </span>
+            </span>
+          </FrappeButton>
           <!-- Shortcuts -->
           <div v-if="!g.collapsed" class="flex flex-col gap-4">
             <div
@@ -50,6 +50,7 @@
 </template>
 <script lang="ts">
 import { t } from 'fyo';
+import { Button as FrappeButton } from 'frappe-ui';
 import { ShortcutKey } from 'src/utils/ui';
 import { defineComponent } from 'vue';
 import FormHeader from './FormHeader.vue';
@@ -63,7 +64,7 @@ type Group = {
 };
 
 export default defineComponent({
-  components: { FormHeader, ShortcutKeys },
+  components: { FormHeader, ShortcutKeys, FrappeButton },
   data() {
     return { groups: [] } as { groups: Group[] };
   },

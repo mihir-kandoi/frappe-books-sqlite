@@ -41,15 +41,9 @@
       :style="templateBuilderBodyStyles"
     >
       <!-- Template Display Area -->
-      <div
-        class="overflow-auto no-scrollbar flex flex-col"
-        :style="templateDisplayStyles"
-      >
+      <div class="overflow-auto no-scrollbar flex flex-col" :style="templateDisplayStyles">
         <!-- Template Container -->
-        <div
-          v-if="canDisplayPreview"
-          class="p-4 overflow-auto custom-scroll custom-scroll-thumb1"
-        >
+        <div v-if="canDisplayPreview" class="p-4 overflow-auto custom-scroll custom-scroll-thumb1">
           <PrintContainer
             ref="printContainer"
             :print-schema-name="displayDoc!.schemaName"
@@ -62,27 +56,13 @@
         </div>
 
         <!-- Display Hints -->
-        <p
-          v-else-if="helperMessage"
-          class="text-sm text-gray-700 dark:text-gray-300 p-4"
-        >
+        <p v-else-if="helperMessage" class="text-sm text-gray-700 dark:text-gray-300 p-4">
           {{ helperMessage }}
         </p>
 
         <!-- Bottom Bar -->
         <div
-          class="
-            w-full
-            sticky
-            bottom-0
-            flex
-            bg-white
-            dark:bg-gray-890
-            border-t
-            dark:border-gray-800
-            mt-auto
-            flex-shrink-0
-          "
+          class="w-full sticky bottom-0 flex bg-white dark:bg-gray-890 border-t dark:border-gray-800 mt-auto flex-shrink-0"
         >
           <!-- Entry Type -->
           <FormControl
@@ -135,18 +115,12 @@
         :min-x="22 * 16"
         :max-x="maxWidth"
         style="z-index: 5"
-        @resize="(x: number) => panelWidth = x"
+        @resize="(x: number) => (panelWidth = x)"
       />
 
       <!-- Template Panel -->
       <div
-        class="
-          border-l
-          dark:border-gray-800
-          bg-white
-          dark:bg-gray-890
-          flex flex-col
-        "
+        class="border-l dark:border-gray-800 bg-white dark:bg-gray-890 flex flex-col"
         :style="templateDisplayStyles"
       >
         <!-- Template Editor -->
@@ -164,17 +138,7 @@
         </div>
         <div
           v-if="templateChanged"
-          class="
-            flex
-            gap-2
-            p-2
-            text-sm text-gray-600
-            dark:text-gray-400
-            items-center
-            mt-auto
-            border-t
-            dark:border-gray-800
-          "
+          class="flex gap-2 p-2 text-sm text-gray-600 dark:text-gray-400 items-center mt-auto border-t dark:border-gray-800"
         >
           <ShortcutKeys :keys="applyChangesShortcut" :simple="true" />
           {{ t` to apply changes` }}
@@ -187,39 +151,23 @@
           :class="templateChanged ? '' : 'mt-auto'"
         >
           <!-- Value Key Toggle -->
-          <div
-            class="
-              flex
-              justify-between
-              items-center
-              cursor-pointer
-              select-none
-              p-2
-            "
+          <FrappeButton
+            class="!h-auto w-full !justify-between !rounded-none !p-2"
+            variant="ghost"
+            :icon-right="showHints ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+            :aria-expanded="showHints"
             @click="toggleShowHints"
           >
-            <h2
-              class="text-base text-gray-900 dark:text-gray-200 font-semibold"
-            >
+            <h2 class="text-base text-gray-900 dark:text-gray-200 font-semibold">
               {{ t`Key Hints` }}
             </h2>
-            <feather-icon
-              :name="showHints ? 'chevron-up' : 'chevron-down'"
-              class="w-4 h-4 text-gray-600 dark:text-gray-400 resize-none"
-            />
-          </div>
+          </FrappeButton>
 
           <!-- Value Key Hints -->
           <Transition name="hints">
             <div
               v-if="showHints"
-              class="
-                overflow-auto
-                custom-scroll custom-scroll-thumb1
-                p-2
-                border-t
-                dark:border-gray-800
-              "
+              class="overflow-auto custom-scroll custom-scroll-thumb1 p-2 border-t dark:border-gray-800"
               style="max-height: 30vh"
             >
               <TemplateBuilderHint :hints="hints" />
@@ -228,18 +176,10 @@
         </div>
       </div>
     </div>
-    <Modal
-      v-if="doc"
-      :open-modal="showSizeModal"
-      @closemodal="showSizeModal = !showSizeModal"
-    >
+    <Modal v-if="doc" :open-modal="showSizeModal" @closemodal="showSizeModal = !showSizeModal">
       <SetPrintSize :doc="doc" @done="showSizeModal = !showSizeModal" />
     </Modal>
-    <Modal
-      v-if="doc"
-      :open-modal="showTypeModal"
-      @closemodal="showTypeModal = !showTypeModal"
-    >
+    <Modal v-if="doc" :open-modal="showTypeModal" @closemodal="showTypeModal = !showTypeModal">
       <SetType :doc="doc" @done="showTypeModal = !showTypeModal" />
     </Modal>
   </div>
@@ -252,7 +192,7 @@ import { PrintTemplate } from 'models/baseModels/PrintTemplate';
 import { ModelNameEnum } from 'models/types';
 import { saveExportData } from 'reports/commonExporter';
 import { Field, TargetField } from 'schemas/types';
-import { TextInput as FrappeTextInput } from 'frappe-ui';
+import { Button as FrappeButton, TextInput as FrappeTextInput } from 'frappe-ui';
 import Button from 'src/components/Button.vue';
 import FormControl from 'src/components/Controls/FormControl.vue';
 import Link from 'src/components/Controls/Link.vue';
@@ -305,6 +245,7 @@ export default defineComponent({
     Modal,
     SetPrintSize,
     SetType,
+    FrappeButton,
     FrappeTextInput,
   },
   provide() {
@@ -435,10 +376,7 @@ export default defineComponent({
       return actions;
     },
     fields(): Record<string, Field> {
-      return getMapFromList(
-        this.fyo.schemaMap.PrintTemplate?.fields ?? [],
-        'fieldname'
-      );
+      return getMapFromList(this.fyo.schemaMap.PrintTemplate?.fields ?? [], 'fieldname');
     },
     displayDocField(): TargetField {
       const target = this.doc?.type ?? ModelNameEnum.SalesInvoice;
@@ -520,30 +458,14 @@ export default defineComponent({
         return;
       }
 
-      this.shortcuts.ctrl.set(
-        this.context,
-        ['Enter'],
-        this.setTemplate.bind(this)
-      );
-      this.shortcuts.ctrl.set(
-        this.context,
-        ['KeyE'],
-        this.toggleEditMode.bind(this)
-      );
-      this.shortcuts.ctrl.set(
-        this.context,
-        ['KeyH'],
-        this.toggleShowHints.bind(this)
-      );
-      this.shortcuts.ctrl.set(this.context, ['Equal'], () =>
-        this.setScale(this.scale + 0.1)
-      );
+      this.shortcuts.ctrl.set(this.context, ['Enter'], this.setTemplate.bind(this));
+      this.shortcuts.ctrl.set(this.context, ['KeyE'], this.toggleEditMode.bind(this));
+      this.shortcuts.ctrl.set(this.context, ['KeyH'], this.toggleShowHints.bind(this));
+      this.shortcuts.ctrl.set(this.context, ['Equal'], () => this.setScale(this.scale + 0.1));
       this.shortcuts.ctrl.shift.set(this.context, ['Equal'], () =>
-        this.setScale(this.scale + 0.1)
+        this.setScale(this.scale + 0.1),
       );
-      this.shortcuts.ctrl.set(this.context, ['Minus'], () =>
-        this.setScale(this.scale - 0.1)
-      );
+      this.shortcuts.ctrl.set(this.context, ['Minus'], () => this.setScale(this.scale - 0.1));
     },
     async initialize() {
       await this.setDoc();
@@ -674,8 +596,7 @@ export default defineComponent({
         const label = this.fyo.schemaMap[schemaName]?.label ?? schemaName;
         await showDialog({
           title: this.t`No Display Entries Found`,
-          detail: this
-            .t`Please create a ${label} entry to view Template Preview.`,
+          detail: this.t`Please create a ${label} entry to view Template Preview.`,
           type: 'warning',
         });
 
@@ -703,7 +624,7 @@ export default defineComponent({
 
       this.doc = (await getDocFromNameIfExistsElseNew(
         ModelNameEnum.PrintTemplate,
-        this.name
+        this.name,
       )) as PrintTemplate;
     },
     async setType(value: unknown) {
@@ -783,11 +704,7 @@ export default defineComponent({
         });
       }
 
-      saveExportData(
-        template,
-        `${name}.template.html`,
-        this.t`Template file saved`
-      );
+      saveExportData(template, `${name}.template.html`, this.t`Template file saved`);
     },
   },
 });

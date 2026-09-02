@@ -5,16 +5,7 @@
       <!--Title Row -->
       <div
         ref="titlerow"
-        class="
-          w-full
-          overflow-x-hidden
-          flex
-          items-center
-          dark:text-gray-25
-          border-b
-          dark:border-gray-800
-          px-4
-        "
+        class="w-full overflow-x-hidden flex items-center dark:text-gray-25 border-b dark:border-gray-800 px-4"
         :style="{
           height: `${hconst}px`,
           paddingRight: 'calc(var(--w-scrollbar) + 1rem)',
@@ -24,24 +15,13 @@
           v-for="(col, c) in report.columns"
           :key="c + '-col'"
           :style="getCellStyle(col, c)"
-          class="
-            text-base
-            px-3
-            flex-shrink-0
-            overflow-x-auto
-            whitespace-nowrap
-            no-scrollbar
-          "
+          class="text-base px-3 flex-shrink-0 overflow-x-auto whitespace-nowrap no-scrollbar"
         >
           {{ col.label }}
         </div>
       </div>
 
-      <WithScroll
-        class="overflow-auto w-full"
-        style="height: calc(100% - 49px)"
-        @scroll="scroll"
-      >
+      <WithScroll class="w-full" style="height: calc(100% - 49px)" @scroll="scroll">
         <!-- Report Rows -->
         <template v-for="(row, r) in dataSlice" :key="r + '-row'">
           <div
@@ -53,9 +33,7 @@
             }"
             :class="[
               r !== pageEnd - 1 ? 'border-b dark:border-gray-800' : '',
-              row.isGroup
-                ? 'hover:bg-gray-50 dark:hover:bg-gray-890 cursor-pointer'
-                : '',
+              row.isGroup ? 'hover:bg-gray-50 dark:hover:bg-gray-890 cursor-pointer' : '',
             ]"
             @click="() => onRowClick(row, r)"
           >
@@ -64,14 +42,7 @@
               v-for="(cell, c) in row.cells"
               :key="`${c}-${r}-cell`"
               :style="getCellStyle(cell, c)"
-              class="
-                text-base
-                px-3
-                flex-shrink-0
-                overflow-x-auto
-                whitespace-nowrap
-                no-scrollbar
-              "
+              class="text-base px-3 flex-shrink-0 overflow-x-auto whitespace-nowrap no-scrollbar"
               :class="[getCellColorClass(cell)]"
             >
               {{ cell.value }}
@@ -81,17 +52,7 @@
       </WithScroll>
       <!-- Report Rows Container -->
     </div>
-    <p
-      v-else
-      class="
-        w-full
-        text-center
-        mt-20
-        text-gray-800
-        dark:text-gray-100
-        text-base
-      "
-    >
+    <p v-else class="w-full text-center mt-20 text-gray-800 dark:text-gray-100 text-base">
       {{ report.loading ? t`Loading Report...` : t`No Values to be Displayed` }}
     </p>
 

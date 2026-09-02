@@ -25,7 +25,11 @@
     </div>
     <Popover placement="bottom-end">
       <template #target>
-        <div tabindex="0" :class="[inputClasses, containerClasses]">
+        <FrappeButton
+          variant="outline"
+          class="!h-auto w-full !justify-start !p-0"
+          :class="[inputClasses, containerClasses]"
+        >
           <div class="flex items-center">
             <div
               v-if="value"
@@ -39,24 +43,17 @@
               {{ inputPlaceholder }}
             </span>
           </div>
-        </div>
+        </FrappeButton>
       </template>
       <template #content>
         <div class="w-48 p-3">
           <div class="grid grid-cols-5 gap-2">
-            <button
+            <FrappeButton
               v-for="color in colors"
               :key="color.value"
-              type="button"
-              class="
-                h-7
-                w-7
-                rounded-md
-                border border-gray-200
-                dark:border-gray-700
-                focus:outline-none
-                focus-visible:ring-2 focus-visible:ring-blue-400
-              "
+              variant="outline"
+              size="sm"
+              class="!size-7 !min-w-0 !p-0"
               :class="
                 normalizedColor.toLowerCase() === color.value.toLowerCase()
                   ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-850'
@@ -70,17 +67,7 @@
           </div>
 
           <div
-            class="
-              mt-3
-              flex
-              items-center
-              gap-2
-              rounded-md
-              border border-gray-200
-              bg-gray-25
-              p-1.5
-              dark:border-gray-700 dark:bg-gray-875
-            "
+            class="mt-3 flex items-center gap-2 rounded-md border border-gray-200 bg-gray-25 p-1.5 dark:border-gray-700 dark:bg-gray-875"
           >
             <input
               type="color"
@@ -90,27 +77,12 @@
               :aria-label="t`Choose color`"
               @input="setColorFromEvent"
             />
-            <input
-              type="text"
-              class="
-                min-w-0
-                flex-1
-                bg-transparent
-                px-1
-                py-1
-                font-mono
-                text-sm text-gray-900
-                uppercase
-                focus:outline-none
-                dark:text-gray-100
-              "
-              :value="normalizedColor"
+            <FrappeTextInput
+              class="min-w-0 flex-1 font-mono uppercase"
+              :model-value="normalizedColor"
               :placeholder="t`Custom Hex`"
               :aria-label="t`Custom Hex`"
-              maxlength="7"
-              spellcheck="false"
-              @change="setColorFromEvent"
-              @keydown.enter.prevent="setColorFromEvent"
+              @update:model-value="setColorValue"
             />
           </div>
         </div>
@@ -120,6 +92,7 @@
 </template>
 
 <script>
+import { Button as FrappeButton, TextInput as FrappeTextInput } from 'frappe-ui';
 import Popover from 'src/components/Popover.vue';
 import Base from './Base.vue';
 import ReadOnlyValue from './ReadOnlyValue.vue';
@@ -129,14 +102,14 @@ export default {
   components: {
     Popover,
     ReadOnlyValue,
+    FrappeButton,
+    FrappeTextInput,
   },
   extends: Base,
   computed: {
     colors() {
       if (Array.isArray(this.df.options) && this.df.options.length) {
-        return this.df.options.filter(
-          (color) => color && typeof color.value === 'string'
-        );
+        return this.df.options.filter((color) => color && typeof color.value === 'string');
       }
 
       return defaultColors;
@@ -151,8 +124,7 @@ export default {
     },
     selectedColorLabel() {
       const color = this.colors.find(
-        (candidate) =>
-          candidate.value.toLowerCase() === this.normalizedColor.toLowerCase()
+        (candidate) => candidate.value.toLowerCase() === this.normalizedColor.toLowerCase(),
       );
       return color ? color.label : this.value;
     },

@@ -13,24 +13,21 @@
       <span v-if="readOnly">
         {{ row.idx + 1 }}
       </span>
-      <button
+      <FrappeButton
         v-else
-        type="button"
-        class="relative w-4 h-4 flex items-center justify-center rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        :icon="showDeleteButton ? 'lucide-x' : undefined"
+        variant="ghost"
+        size="xs"
+        class="!size-5 !p-0"
         aria-label="Delete row"
         @focus="isDeleteFocused = true"
         @blur="isDeleteFocused = false"
         @click="$emit('remove')"
       >
-        <feather-icon
-          v-if="showDeleteButton"
-          name="x"
-          class="w-4 h-4 -ms-1 cursor-pointer transition"
-        />
-        <span v-else>
+        <span v-if="!showDeleteButton">
           {{ row.idx + 1 }}
         </span>
-      </button>
+      </FrappeButton>
     </div>
 
     <!-- Data Input Form Control -->
@@ -51,10 +48,7 @@
       size="sm"
       @click="openRowQuickEdit"
     >
-      <feather-icon
-        name="edit"
-        class="w-4 h-4 text-gray-600 dark:text-gray-400"
-      />
+      <feather-icon name="edit" class="w-4 h-4 text-gray-600 dark:text-gray-400" />
     </Button>
 
     <!-- Error Display -->
@@ -69,6 +63,7 @@
 </template>
 <script>
 import { Doc } from 'fyo/model/doc';
+import { Button as FrappeButton } from 'frappe-ui';
 import Row from 'src/components/Row.vue';
 import { getErrorMessage } from 'src/utils';
 import { computed, nextTick } from 'vue';
@@ -81,6 +76,7 @@ export default {
     Row,
     FormControl,
     Button,
+    FrappeButton,
   },
   provide() {
     return {
@@ -138,9 +134,7 @@ export default {
       this.$parent.$emit('editrow', this.row);
     },
     focusFirstInput() {
-      const firstControl = this.$el.querySelector(
-        '.form-control, input, textarea, select'
-      );
+      const firstControl = this.$el.querySelector('.form-control, input, textarea, select');
       if (firstControl) {
         firstControl.focus();
       }

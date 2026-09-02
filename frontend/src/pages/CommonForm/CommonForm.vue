@@ -4,10 +4,12 @@
       <Barcode
         v-if="canShowBarcode"
         class="h-8"
-        @item-selected="(name:string) => {
-          // @ts-ignore
-          doc?.addItem(name);
-        }"
+        @item-selected="
+          (name: string) => {
+            // @ts-ignore
+            doc?.addItem(name);
+          }
+        "
       />
       <ExchangeRate
         v-if="canShowExchangeRate"
@@ -15,10 +17,7 @@
         :from-currency="fromCurrency"
         :to-currency="toCurrency"
         :exchange-rate="exchangeRate"
-        @change="
-          async (exchangeRate: number) =>
-            await doc.set('exchangeRate', exchangeRate)
-        "
+        @change="async (exchangeRate: number) => await doc.set('exchangeRate', exchangeRate)"
       />
       <p
         v-if="schema.label && !(canShowBarcode || canShowExchangeRate)"
@@ -45,11 +44,7 @@
       >
         <feather-icon name="printer" class="w-4 h-4"></feather-icon>
       </Button>
-      <Button
-        :icon="true"
-        :title="t`Toggle between form and full width`"
-        @click="toggleWidth"
-      >
+      <Button :icon="true" :title="t`Toggle between form and full width`" @click="toggleWidth">
         <feather-icon
           :name="useFullWidth ? 'minimize' : 'maximize'"
           class="w-4 h-4"
@@ -69,40 +64,24 @@
       <Button v-if="doc?.canSave" type="primary" @click="sync">
         {{ t`Save` }}
       </Button>
-      <Button v-else-if="doc?.canSubmit" type="primary" @click="submit">{{
-        t`Submit`
-      }}</Button>
+      <Button v-else-if="doc?.canSubmit" type="primary" @click="submit">{{ t`Submit` }}</Button>
     </template>
     <template #body>
       <FormHeader
         :form-title="title"
-        class="
-          sticky
-          top-0
-          bg-white
-          dark:bg-gray-890
-          border-b
-          dark:border-gray-800
-        "
+        class="sticky top-0 bg-white dark:bg-gray-890 border-b dark:border-gray-800"
       >
         <StatusPill v-if="hasDoc" :doc="doc" />
       </FormHeader>
 
       <!-- Section Container -->
-      <div
-        v-if="hasDoc"
-        class="overflow-auto custom-scroll custom-scroll-thumb1"
-      >
+      <div v-if="hasDoc" class="overflow-auto custom-scroll custom-scroll-thumb1">
         <CommonFormSection
           v-for="([n, fields], idx) in activeGroup.entries()"
           :key="n + idx"
           ref="section"
           class="p-4"
-          :class="
-            idx !== 0 && activeGroup.size > 1
-              ? 'border-t dark:border-gray-800'
-              : ''
-          "
+          :class="idx !== 0 && activeGroup.size > 1 ? 'border-t dark:border-gray-800' : ''"
           :show-title="activeGroup.size > 1 && n !== t`Default`"
           :title="n"
           :fields="fields"
@@ -117,46 +96,14 @@
       <!-- Tab Bar -->
       <div
         v-if="groupedFields && groupedFields.size > 1"
-        class="
-          mt-auto
-          px-4
-          pb-4
-          flex
-          gap-8
-          border-t
-          dark:border-gray-800
-          flex-shrink-0
-          sticky
-          bottom-0
-          bg-white
-          dark:bg-gray-875
-        "
+        class="sticky bottom-0 mt-auto flex-shrink-0 border-t bg-white p-4 dark:border-gray-800 dark:bg-gray-875"
       >
-        <div
-          v-for="key of groupedFields.keys()"
-          :key="key"
-          class="text-sm cursor-pointer"
-          :class="
-            key === activeTab
-              ? 'text-gray-900 dark:text-gray-25 font-semibold border-t-2 border-gray-800 dark:border-gray-100'
-              : 'text-gray-700 dark:text-gray-200 '
-          "
-          :style="{
-            paddingTop: key === activeTab ? 'calc(1rem - 2px)' : '1rem',
-          }"
-          @click="activeTab = key"
-        >
-          {{ key }}
-        </div>
+        <FrappeTabButtons v-model="activeTab" :options="tabOptions" variant="underline" />
       </div>
     </template>
     <template #quickedit>
       <Transition name="quickedit">
-        <LinkedEntries
-          v-if="showLinks && canShowLinks"
-          :doc="doc"
-          @close="showLinks = false"
-        />
+        <LinkedEntries v-if="showLinks && canShowLinks" :doc="doc" @close="showLinks = false" />
       </Transition>
       <Transition name="quickedit">
         <RowEditForm
@@ -164,8 +111,8 @@
           :doc="doc"
           :fieldname="row.fieldname"
           :index="row.index"
-          @previous="(i:number) => row!.index = i"
-          @next="(i:number) => row!.index = i"
+          @previous="(i: number) => (row!.index = i)"
+          @next="(i: number) => (row!.index = i)"
           @close="() => (row = null)"
         />
       </Transition>
@@ -177,6 +124,7 @@ import { DocValue } from 'fyo/core/types';
 import { Doc } from 'fyo/model/doc';
 import { DEFAULT_CURRENCY } from 'fyo/utils/consts';
 import { ValidationError } from 'fyo/utils/errors';
+import { TabButtons as FrappeTabButtons } from 'frappe-ui';
 import { getDocStatus } from 'models/helpers';
 import { ModelNameEnum } from 'models/types';
 import { Field, Schema } from 'schemas/types';
@@ -220,6 +168,7 @@ export default defineComponent({
     LinkedEntries,
     RowEditForm,
     StatusPill,
+    FrappeTabButtons,
   },
   provide() {
     return {
@@ -338,9 +287,7 @@ export default defineComponent({
     doc(): Doc {
       const doc = this.docOrNull;
       if (!doc) {
-        throw new ValidationError(
-          this.t`Doc ${this.schema.label} ${this.name} not set`
-        );
+        throw new ValidationError(this.t`Doc ${this.schema.label} ${this.name} not set`);
       }
       return doc;
     },
@@ -371,6 +318,12 @@ export default defineComponent({
       }
 
       return group;
+    },
+    tabOptions(): { value: string; label: string }[] {
+      return [...(this.groupedFields?.keys() ?? [])].map((value) => ({
+        value,
+        label: value,
+      }));
     },
     groupedActions(): ActionGroup[] {
       if (!this.hasDoc) {
@@ -432,10 +385,7 @@ export default defineComponent({
         return;
       }
 
-      this.groupedFields = getFieldsGroupedByTabAndSection(
-        this.schema,
-        this.doc
-      );
+      this.groupedFields = getFieldsGroupedByTabAndSection(this.schema, this.doc);
     },
     async sync(useDialog?: boolean) {
       if (await commonDocSync(this.doc, useDialog)) {
@@ -452,10 +402,7 @@ export default defineComponent({
         return;
       }
 
-      this.docOrNull = await getDocFromNameIfExistsElseNew(
-        this.schemaName,
-        this.name
-      );
+      this.docOrNull = await getDocFromNameIfExistsElseNew(this.schemaName, this.name);
     },
     replacePathAfterSync() {
       if (!this.hasDoc || this.doc.inserted) {

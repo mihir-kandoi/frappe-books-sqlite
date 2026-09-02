@@ -22,7 +22,11 @@
       "fixtures/*": ["fixtures/*"],
       "reports/*": ["reports/*"],
       "models/*": ["models/*"],
-      "utils/*": ["utils/*"]
+      "utils/*": ["utils/*"],
+      "#utils/*": ["node_modules/frappe-ui/src/utils/*"],
+      "frappe-ui-command-palette": [
+        "node_modules/frappe-ui/experimental/CommandPalette/index.ts"
+      ]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },

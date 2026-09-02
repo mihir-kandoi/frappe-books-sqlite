@@ -9,14 +9,7 @@
       <FormHeader
         :form-title="tabLabels[activeTab] ?? ''"
         :form-sub-title="t`Settings`"
-        class="
-          sticky
-          top-0
-          bg-white
-          dark:bg-gray-890
-          border-b
-          dark:border-gray-800
-        "
+        class="sticky top-0 bg-white dark:bg-gray-890 border-b dark:border-gray-800"
       >
       </FormHeader>
 
@@ -27,11 +20,7 @@
           :key="name + idx"
           ref="section"
           class="p-4"
-          :class="
-            idx !== 0 && activeGroup.size > 1
-              ? 'border-t dark:border-gray-800'
-              : ''
-          "
+          :class="idx !== 0 && activeGroup.size > 1 ? 'border-t dark:border-gray-800' : ''"
           :show-title="activeGroup.size > 1 && name !== t`Default`"
           :title="name"
           :fields="fields"
@@ -44,37 +33,9 @@
       <!-- Tab Bar -->
       <div
         v-if="groupedFields && groupedFields.size > 1"
-        class="
-          mt-auto
-          px-4
-          pb-4
-          flex
-          gap-8
-          border-t
-          dark:border-gray-800
-          flex-shrink-0
-          sticky
-          bottom-0
-          bg-white
-          dark:bg-gray-890
-        "
+        class="sticky bottom-0 mt-auto flex-shrink-0 border-t bg-white p-4 dark:border-gray-800 dark:bg-gray-890"
       >
-        <div
-          v-for="key of groupedFields.keys()"
-          :key="key"
-          class="text-sm cursor-pointer"
-          :class="
-            key === activeTab
-              ? 'text-gray-900 dark:text-gray-25 font-semibold border-t-2 border-gray-800 dark:border-gray-100'
-              : 'text-gray-700 dark:text-gray-200 '
-          "
-          :style="{
-            paddingTop: key === activeTab ? 'calc(1rem - 2px)' : '1rem',
-          }"
-          @click="activeTab = key"
-        >
-          {{ tabLabels[key] }}
-        </div>
+        <FrappeTabButtons v-model="activeTab" :options="tabOptions" variant="underline" />
       </div>
     </template>
   </FormContainer>
@@ -83,6 +44,7 @@
 import { DocValue } from 'fyo/core/types';
 import { Doc } from 'fyo/model/doc';
 import { ValidationError } from 'fyo/utils/errors';
+import { TabButtons as FrappeTabButtons } from 'frappe-ui';
 import { ModelNameEnum } from 'models/types';
 import { Field, Schema } from 'schemas/types';
 import Button from 'src/components/Button.vue';
@@ -102,7 +64,13 @@ import CommonFormSection from '../CommonForm/CommonFormSection.vue';
 const COMPONENT_NAME = 'Settings';
 
 export default defineComponent({
-  components: { FormContainer, Button, FormHeader, CommonFormSection },
+  components: {
+    FormContainer,
+    Button,
+    FormHeader,
+    CommonFormSection,
+    FrappeTabButtons,
+  },
   provide() {
     return { doc: computed(() => this.doc) };
   },
@@ -151,9 +119,14 @@ export default defineComponent({
         [ModelNameEnum.SystemSettings]: this.t`System`,
       };
     },
+    tabOptions(): { value: string; label: string }[] {
+      return [...(this.groupedFields?.keys() ?? [])].map((value) => ({
+        value,
+        label: this.tabLabels[value] ?? value,
+      }));
+    },
     schemas(): Schema[] {
-      const enableInventory =
-        !!this.fyo.singles.AccountingSettings?.enableInventory;
+      const enableInventory = !!this.fyo.singles.AccountingSettings?.enableInventory;
       const enablePOS = !!this.fyo.singles.InventorySettings?.enablePointOfSale;
       return [
         ModelNameEnum.AccountingSettings,
@@ -183,9 +156,7 @@ export default defineComponent({
 
       const group = this.groupedFields.get(this.activeTab);
       if (!group) {
-        throw new ValidationError(
-          `Tab group ${this.activeTab} has no value set`
-        );
+        throw new ValidationError(`Tab group ${this.activeTab} has no value set`);
       }
 
       return group;

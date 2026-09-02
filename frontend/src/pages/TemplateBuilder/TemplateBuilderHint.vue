@@ -1,68 +1,30 @@
 <template>
   <div :class="level > 0 ? 'ms-2 ps-2 border-l dark:border-gray-800' : ''">
     <template v-for="r of rows" :key="r.key">
-      <div
-        class="
-          flex
-          gap-2
-          text-sm text-gray-600
-          dark:text-gray-400
-          whitespace-nowrap
-          overflow-auto
-          no-scrollbar
-        "
-        :class="[typeof r.value === 'object' ? 'cursor-pointer' : '']"
+      <FrappeButton
+        v-if="r.isCollapsible"
+        class="!h-auto w-full !justify-start !px-0 text-start text-ink-gray-6"
+        variant="ghost"
+        size="sm"
+        :icon-right="r.collapsed ? 'lucide-chevron-down' : 'lucide-chevron-up'"
+        :aria-expanded="!r.collapsed"
         @click="r.collapsed = !r.collapsed"
       >
-        <div class="">{{ getKey(r) }}</div>
-        <div
-          v-if="!r.isCollapsible"
-          class="font-semibold text-gray-800 dark:text-gray-200"
-        >
+        <span class="min-w-0 overflow-auto whitespace-nowrap no-scrollbar">
+          {{ getKey(r) }}
+        </span>
+        <FrappeBadge :theme="Array.isArray(r.value) ? 'blue' : 'red'" variant="subtle" size="sm">
+          {{ Array.isArray(r.value) ? t`Array` : t`Object` }}
+        </FrappeBadge>
+      </FrappeButton>
+      <div
+        v-else
+        class="flex gap-2 px-0 py-1.5 text-sm text-ink-gray-6 whitespace-nowrap overflow-auto no-scrollbar"
+      >
+        <div>{{ getKey(r) }}</div>
+        <div class="font-semibold text-ink-gray-8">
           {{ r.value }}
         </div>
-        <div
-          v-else-if="Array.isArray(r.value)"
-          class="
-            text-blue-600
-            dark:text-blue-100
-            bg-blue-100
-            dark:bg-blue-600
-            border-white
-            dark:border-blue-600
-            border
-            tracking-tighter
-            rounded
-            text-xs
-            px-1
-          "
-        >
-          Array
-        </div>
-        <div
-          v-else
-          class="
-            text-pink-600
-            dark:text-pink-100
-            bg-pink-100
-            dark:bg-pink-600
-            border-white
-            dark:border-pink-600
-            border
-            tracking-tighter
-            rounded
-            text-xs
-            px-1
-          "
-        >
-          Object
-        </div>
-
-        <feather-icon
-          v-if="r.isCollapsible"
-          :name="r.collapsed ? 'chevron-up' : 'chevron-down'"
-          class="w-4 h-4 ms-auto"
-        />
       </div>
       <div v-if="!r.collapsed && typeof r.value === 'object'">
         <TemplateBuilderHint
@@ -76,6 +38,7 @@
 </template>
 <script lang="ts">
 import { PrintTemplateHint } from 'src/utils/printTemplates';
+import { Badge as FrappeBadge, Button as FrappeButton } from 'frappe-ui';
 import { PropType } from 'vue';
 import { defineComponent } from 'vue';
 type HintRow = {
@@ -86,6 +49,7 @@ type HintRow = {
 };
 export default defineComponent({
   name: 'TemplateBuilderHint',
+  components: { FrappeBadge, FrappeButton },
   props: {
     prefix: { type: String, default: '' },
     hints: {

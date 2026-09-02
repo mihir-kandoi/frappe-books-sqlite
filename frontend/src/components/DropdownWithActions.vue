@@ -54,11 +54,11 @@ export default defineComponent({
       return undefined;
     },
     items(): DropdownItem[] {
-      return this.actions.map(({ label, group, component, action }) => ({
+      return this.actions.map(({ label, group, theme, action }) => ({
         label,
         group,
         action,
-        component,
+        theme,
       }));
     },
   },

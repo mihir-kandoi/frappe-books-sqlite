@@ -23,23 +23,13 @@
       />
     </div>
 
-    <div class="flex items-center gap-2">
-      <Button
-        :background="false"
-        class="min-w-0 flex-1 h-full p-2 mt-2"
-        :class="{ 'dark:bg-gray-890 underline': savedInvoiceList }"
-        @click="showSavedInvoices(true)"
-        >Saved</Button
-      >
-
-      <Button
-        :background="false"
-        class="min-w-0 flex-1 h-full p-2 mt-2"
-        :class="{ 'dark:bg-gray-890 underline': !savedInvoiceList }"
-        @click="showSavedInvoices(false)"
-        >Submitted</Button
-      >
-    </div>
+    <FrappeTabButtons
+      :model-value="savedInvoiceList ? 'saved' : 'submitted'"
+      :options="invoiceTabs"
+      class="mt-2 w-full"
+      fluid
+      @update:model-value="showSavedInvoices($event === 'saved')"
+    />
 
     <InvoiceSelectionTable
       v-model="selectedInvoiceName"
@@ -74,7 +64,7 @@ import { defineComponent } from 'vue';
 import { ModelNameEnum } from 'models/types';
 import { Field } from 'schemas/types';
 import { Money } from 'pesa';
-import { TextInput as FrappeTextInput } from 'frappe-ui';
+import { TabButtons as FrappeTabButtons, TextInput as FrappeTextInput } from 'frappe-ui';
 
 export default defineComponent({
   name: 'SavedInvoiceModal',
@@ -83,6 +73,7 @@ export default defineComponent({
     Button,
     InvoiceSelectionTable,
     FrappeTextInput,
+    FrappeTabButtons,
   },
   props: {
     openModal: Boolean,
@@ -100,6 +91,12 @@ export default defineComponent({
   computed: {
     ratio() {
       return [1, 1, 1, 0.8];
+    },
+    invoiceTabs() {
+      return [
+        { value: 'saved', label: this.t`Saved` },
+        { value: 'submitted', label: this.t`Submitted` },
+      ];
     },
     tableFields() {
       return [
@@ -131,13 +128,9 @@ export default defineComponent({
       ] as Field[];
     },
     filteredInvoices() {
-      const invoices = this.savedInvoiceList
-        ? this.savedInvoices
-        : this.submittedInvoices;
+      const invoices = this.savedInvoiceList ? this.savedInvoices : this.submittedInvoices;
       return invoices.filter((invoice) =>
-        (invoice.name as string)
-          .toLowerCase()
-          .includes(this.invoiceSearchTerm.toLowerCase())
+        (invoice.name as string).toLowerCase().includes(this.invoiceSearchTerm.toLowerCase()),
       );
     },
   },
@@ -164,13 +157,10 @@ export default defineComponent({
 
   methods: {
     async setSavedInvoices() {
-      this.savedInvoices = (await this.fyo.db.getAll(
-        ModelNameEnum.SalesInvoice,
-        {
-          fields: [],
-          filters: { isPOS: true, submitted: false },
-        }
-      )) as SalesInvoice[];
+      this.savedInvoices = (await this.fyo.db.getAll(ModelNameEnum.SalesInvoice, {
+        fields: [],
+        filters: { isPOS: true, submitted: false },
+      })) as SalesInvoice[];
     },
     async setSubmittedInvoices() {
       const invoices = (await this.fyo.db.getAll(ModelNameEnum.SalesInvoice, {
@@ -179,7 +169,7 @@ export default defineComponent({
       })) as SalesInvoice[];
 
       this.submittedInvoices = invoices.filter(
-        (invoice) => !(invoice.outstandingAmount as Money).isZero()
+        (invoice) => !(invoice.outstandingAmount as Money).isZero(),
       );
     },
     closeModal() {
@@ -188,7 +178,7 @@ export default defineComponent({
     },
     openSelectedInvoice() {
       const selectedInvoice = this.filteredInvoices.find(
-        (invoice) => invoice.name === this.selectedInvoiceName
+        (invoice) => invoice.name === this.selectedInvoiceName,
       );
       if (!selectedInvoice) {
         return;

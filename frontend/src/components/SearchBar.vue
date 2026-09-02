@@ -1,107 +1,52 @@
 <template>
-  <div>
-    <!-- Search Bar Button -->
-    <Button
-      class="px-3 py-2 rounded-r-none dark:bg-gray-900"
-      :padding="false"
-      :title="t`Search`"
-      :aria-label="t`Search`"
-      @click="open"
-    >
-      <feather-icon
-        name="search"
-        class="w-4 h-4 text-gray-700 dark:text-gray-300"
-      />
-    </Button>
-  </div>
+  <FrappeButton
+    icon="lucide-search"
+    class="rounded-e-none dark:bg-gray-900"
+    :tooltip="t`Search`"
+    :aria-label="t`Search`"
+    @click="open"
+  />
 
   <!-- Search Modal -->
-  <Modal
-    :open-modal="openModal"
-    size="3xl"
-    @closemodal="close"
+  <CommandPalette
+    v-model:open="openModal"
+    v-model:query="inputValue"
+    :filterable="false"
+    :title="t`Search Frappe Books`"
+    @select="selectSearchItem"
   >
-    <div class="w-full">
-      <!-- Search Input -->
-      <div class="p-1">
-        <FrappeTextInput
-          ref="input"
-          v-model="inputValue"
-          type="search"
-          autocomplete="off"
-          spellcheck="false"
-          :placeholder="t`Type to search...`"
-          class="w-full"
-          variant="subtle"
-          size="xl"
-          @keydown.up="up"
-          @keydown.down="down"
-          @keydown.enter="() => select()"
-          @keydown.esc="close"
-        />
-      </div>
-      <hr v-if="suggestions.length" class="dark:border-gray-800" />
+    <CommandPaletteInput :placeholder="t`Type to search...`" />
 
-      <!-- Search List -->
-      <div
-        :style="`max-height: ${49 * 6 - 1}px`"
-        class="overflow-auto custom-scroll custom-scroll-thumb2"
+    <!-- Search List -->
+    <CommandPaletteList>
+      <CommandPaletteItem
+        v-for="(si, i) in suggestions"
+        :key="`${i}-${si.label}`"
+        :value="si"
+        :label="si.label"
       >
-        <div
-          v-for="(si, i) in suggestions"
-          :key="`${i}-${si.label}`"
-          :data-index="`search-suggestion-${i}`"
-          class="hover:bg-gray-50 dark:hover:bg-gray-875 cursor-pointer"
-          :class="
-            idx === i
-              ? 'border-gray-700 dark:border-gray-200 bg-gray-50 dark:bg-gray-875 border-s-4'
-              : ''
-          "
-          @click="select(i)"
-        >
-          <!-- Search List Item -->
-          <div
-            class="flex w-full justify-between px-3 items-center"
-            style="height: var(--h-row-mid)"
-          >
-            <div class="flex items-center">
-              <p
-                :class="
-                  idx === i
-                    ? 'text-gray-900 dark:text-gray-100'
-                    : 'text-gray-700 dark:text-gray-400'
-                "
-                :style="idx === i ? 'margin-left: -4px' : ''"
-              >
-                {{ si.label }}
-              </p>
-              <p
-                v-if="si.group === 'Docs'"
-                class="text-gray-600 dark:text-gray-400 text-sm ms-3"
-              >
-                {{ si.more.filter(Boolean).join(', ') }}
-              </p>
-            </div>
-            <p
-              class="text-sm text-end justify-self-end"
-              :class="`text-${groupColorMap[si.group]}-500`"
-            >
-              {{
-                si.group === 'Docs' ? si.schemaLabel : groupLabelMap[si.group]
-              }}
+        <!-- Search List Item -->
+        <div class="flex min-w-0 flex-1 items-center justify-between">
+          <div class="flex items-center">
+            <p class="truncate text-ink-gray-8">
+              {{ si.label }}
+            </p>
+            <p v-if="si.group === 'Docs'" class="ms-3 truncate text-sm text-ink-gray-5">
+              {{ si.more.filter(Boolean).join(', ') }}
             </p>
           </div>
-
-          <hr
-            v-if="i !== suggestions.length - 1"
-            class="dark:border-gray-800"
-          />
+          <FrappeBadge :theme="groupThemeMap[si.group]" variant="subtle">
+            {{ si.group === 'Docs' ? si.schemaLabel : groupLabelMap[si.group] }}
+          </FrappeBadge>
         </div>
-      </div>
+      </CommandPaletteItem>
+    </CommandPaletteList>
 
-      <!-- Footer -->
-      <hr class="dark:border-gray-800" />
-      <div class="m-1 flex justify-between flex-col gap-2 text-sm select-none">
+    <CommandPaletteEmpty>{{ t`No results` }}</CommandPaletteEmpty>
+
+    <!-- Footer -->
+    <CommandPaletteFooter>
+      <div class="flex w-full flex-col gap-2 text-sm select-none">
         <!-- Group Filters -->
         <div class="flex justify-between">
           <div class="flex gap-1">
@@ -111,9 +56,7 @@
               size="xs"
               variant="outline"
               :class="getGroupFilterButtonClass(g)"
-              @click="
-                setSearchFilter(g, !searcher!.filters.groupFilters[g])
-              "
+              @click="setSearchFilter(g, !searcher!.filters.groupFilters[g])"
             >
               {{ groupLabelMap[g] }}
             </FrappeButton>
@@ -134,31 +77,20 @@
               :variant="searcher?.filters[s] ? 'subtle' : 'outline'"
               @click="setSearchFilter(s, !searcher?.filters[s])"
             >
-              {{
-                s === 'skipTables' ? t`Skip Child Tables` : t`Skip Transactions`
-              }}
+              {{ s === 'skipTables' ? t`Skip Child Tables` : t`Skip Transactions` }}
             </FrappeButton>
           </div>
 
           <!-- Schema Name Filters -->
-          <div
-            class="flex mt-1 gap-1 text-blue-500 dark:text-blue-100 flex-wrap"
-          >
+          <div class="flex mt-1 gap-1 text-blue-500 dark:text-blue-100 flex-wrap">
             <FrappeButton
               v-for="sf in schemaFilters"
               :key="sf.value"
               class="whitespace-nowrap"
               size="xs"
               theme="blue"
-              :variant="
-                searcher?.filters.schemaFilters[sf.value] ? 'subtle' : 'outline'
-              "
-              @click="
-                setSearchFilter(
-                  sf.value,
-                  !searcher?.filters.schemaFilters[sf.value]
-                )
-              "
+              :variant="searcher?.filters.schemaFilters[sf.value] ? 'subtle' : 'outline'"
+              @click="setSearchFilter(sf.value, !searcher?.filters.schemaFilters[sf.value])"
             >
               {{ sf.label }}
             </FrappeButton>
@@ -168,10 +100,16 @@
         <!-- Keybindings Help -->
         <div class="flex text-sm text-gray-500 justify-between items-center">
           <div class="flex items-center gap-4">
-            <p class="flex h-7 items-center">↑↓ {{ t`Navigate` }}</p>
-            <p class="flex h-7 items-center">↩ {{ t`Select` }}</p>
-            <p class="flex h-7 items-center">
-              <span class="tracking-tighter">esc</span>&nbsp;{{ t`Close` }}
+            <p class="flex h-7 items-center gap-1">
+              <FrappeKeyboardShortcut combo="ArrowUp" />
+              <FrappeKeyboardShortcut combo="ArrowDown" />
+              {{ t`Navigate` }}
+            </p>
+            <p class="flex h-7 items-center gap-1">
+              <FrappeKeyboardShortcut combo="Enter" /> {{ t`Select` }}
+            </p>
+            <p class="flex h-7 items-center gap-1">
+              <FrappeKeyboardShortcut combo="Escape" /> {{ t`Close` }}
             </p>
             <FrappeButton
               class="h-7"
@@ -190,18 +128,11 @@
 
           <div
             v-if="(searcher?.numSearches ?? 0) > 50"
-            class="
-              border border-gray-100
-              dark:border-gray-875
-              rounded
-              flex
-              justify-self-end
-              ms-2
-            "
+            class="border border-gray-100 dark:border-gray-875 rounded flex justify-self-end ms-2"
           >
             <template
               v-for="c in allowedLimits.filter(
-                (c) => c < (searcher?.numSearches ?? 0) || c === -1
+                (c) => c < (searcher?.numSearches ?? 0) || c === -1,
               )"
               :key="c + '-count'"
             >
@@ -217,8 +148,8 @@
           </div>
         </div>
       </div>
-    </div>
-  </Modal>
+    </CommandPaletteFooter>
+  </CommandPalette>
 </template>
 
 <script lang="ts">
@@ -226,27 +157,39 @@ import { fyo } from 'src/initFyo';
 import { getBgTextColorClass } from 'src/utils/colors';
 import { searcherKey, shortcutsKey } from 'src/utils/injectionKeys';
 import { docsPathMap } from 'src/utils/misc';
+import { SearchGroup, SearchItems, getGroupLabelMap, searchGroups } from 'src/utils/search';
+import { defineComponent, inject } from 'vue';
 import {
-  SearchGroup,
-  SearchItems,
-  SearchItem,
-  getGroupLabelMap,
-  searchGroups,
-} from 'src/utils/search';
-import { defineComponent, inject, nextTick } from 'vue';
-import {
+  Badge as FrappeBadge,
   Button as FrappeButton,
-  TextInput as FrappeTextInput,
+  KeyboardShortcut as FrappeKeyboardShortcut,
 } from 'frappe-ui';
-import Button from './Button.vue';
-import Modal from './Modal.vue';
+import {
+  CommandPalette,
+  CommandPaletteEmpty,
+  CommandPaletteFooter,
+  CommandPaletteInput,
+  CommandPaletteItem,
+  CommandPaletteList,
+  type CommandPaletteValue,
+} from 'frappe-ui-command-palette';
 
 const COMPONENT_NAME = 'SearchBar';
 
 type SchemaFilters = { value: string; label: string; index: number }[];
 
 export default defineComponent({
-  components: { FrappeButton, FrappeTextInput, Modal, Button },
+  components: {
+    CommandPalette,
+    CommandPaletteEmpty,
+    CommandPaletteFooter,
+    CommandPaletteInput,
+    CommandPaletteItem,
+    CommandPaletteList,
+    FrappeBadge,
+    FrappeButton,
+    FrappeKeyboardShortcut,
+  },
   setup() {
     return {
       searcher: inject(searcherKey),
@@ -255,7 +198,6 @@ export default defineComponent({
   },
   data() {
     return {
-      idx: 0,
       searchGroups,
       openModal: false,
       inputValue: '',
@@ -303,11 +245,15 @@ export default defineComponent({
         Recent: 'purple',
       };
     },
-    groupColorClassMap(): Record<SearchGroup, string> {
-      return searchGroups.reduce((map, g) => {
-        map[g] = getBgTextColorClass(this.groupColorMap[g]);
-        return map;
-      }, {} as Record<SearchGroup, string>);
+    groupThemeMap(): Record<SearchGroup, 'gray' | 'blue' | 'green' | 'amber' | 'red' | 'violet'> {
+      return {
+        Docs: 'blue',
+        Create: 'green',
+        List: 'violet',
+        Report: 'amber',
+        Page: 'red',
+        Recent: 'gray',
+      };
     },
     suggestions(): SearchItems {
       // The web app keeps Search in a shallow ref; track filter mutations here.
@@ -343,13 +289,20 @@ export default defineComponent({
   unmounted() {
     this.shortcuts?.delete(COMPONENT_NAME);
   },
+  watch: {
+    openModal(open: boolean) {
+      if (open) {
+        this.setShortcuts();
+        return;
+      }
+
+      this.clearFilterShortcuts();
+      this.reset();
+    },
+  },
   methods: {
     openDocs() {
-      window.open(
-        'https://docs.frappe.io/' + docsPathMap.Search,
-        '_blank',
-        'noopener,noreferrer'
-      );
+      window.open('https://docs.frappe.io/' + docsPathMap.Search, '_blank', 'noopener,noreferrer');
     },
     getShortcuts() {
       const shortcuts: { shortcut: string; callback: () => void }[] = [];
@@ -403,14 +356,6 @@ export default defineComponent({
       this.openModal = true;
       this.setShortcuts();
       this.searcher?.updateKeywords();
-
-      nextTick(() => {
-        (
-          this.$refs.input as {
-            focus?: () => void;
-          }
-        )?.focus?.();
-      });
     },
     close(): void {
       this.clearFilterShortcuts();
@@ -427,34 +372,13 @@ export default defineComponent({
 
       this.searcher.set(filterName, value);
       this.filterRevision += 1;
-      this.idx = 0;
     },
-    up(): void {
-      this.idx = Math.max(this.idx - 1, 0);
-      this.scrollToHighlighted();
-    },
-    down(): void {
-      this.idx = Math.max(
-        Math.min(this.idx + 1, this.suggestions.length - 1),
-        0
-      );
-      this.scrollToHighlighted();
-    },
-    select(idx?: number): void {
-      this.idx = idx ?? this.idx;
-      const selectedItem = this.suggestions[this.idx];
-
+    selectSearchItem(value: CommandPaletteValue): void {
+      const selectedItem = value as SearchItems[number];
       if (selectedItem?.action) {
         this.searcher?.addToRecent(selectedItem);
         selectedItem.action();
       }
-
-      this.close();
-    },
-    scrollToHighlighted(): void {
-      const query = `[data-index="search-suggestion-${this.idx}"]`;
-      const element = document.querySelectorAll(query)?.[0];
-      element?.scrollIntoView({ block: 'nearest' });
     },
     getGroupFilterButtonClass(g: SearchGroup): string {
       if (!this.searcher) {
@@ -464,9 +388,7 @@ export default defineComponent({
       const isOn = this.searcher.filters.groupFilters[g];
       const color = this.groupColorMap[g];
       if (isOn) {
-        return `${getBgTextColorClass(
-          color
-        )} border-${color}-100 dark:border-${color}-800`;
+        return `${getBgTextColorClass(color)} border-${color}-100 dark:border-${color}-800`;
       }
 
       return `text-${color}-600 dark:text-${color}-400 border-${color}-100 dark:border-${color}-800`;

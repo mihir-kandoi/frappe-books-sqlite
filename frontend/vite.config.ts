@@ -6,9 +6,8 @@ const frontendRoot = __dirname;
 const appRoot = path.resolve(frontendRoot, '..');
 
 export default defineConfig(async () => {
-  const { lucideIconsPlugin } = await import(
-    'frappe-ui/vite/lucideIconsPlugin'
-  );
+  const { lucideIconsPlugin } =
+    await import('frappe-ui/vite/lucideIconsPlugin');
 
   return {
     base: '/assets/frappe_books/books/',
@@ -25,6 +24,10 @@ export default defineConfig(async () => {
         regional: path.resolve(frontendRoot, 'regional'),
         reports: path.resolve(frontendRoot, 'reports'),
         fixtures: path.resolve(frontendRoot, 'fixtures'),
+        'frappe-ui-command-palette': path.resolve(
+          frontendRoot,
+          'node_modules/frappe-ui/experimental/CommandPalette/index.ts',
+        ),
       },
     },
     define: {

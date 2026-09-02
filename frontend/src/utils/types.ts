@@ -93,7 +93,7 @@ export type DropdownItem = {
   value?: string;
   action?: (() => unknown) | ((doc: Doc, router: Router) => unknown);
   group?: string;
-  component?: { template: string };
+  theme?: 'gray' | 'red';
   isGroup?: boolean;
 };
 

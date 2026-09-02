@@ -6,11 +6,7 @@ import { t } from 'fyo';
 import type { Doc } from 'fyo/model/doc';
 import { Action } from 'fyo/model/types';
 import { getActions } from 'fyo/utils';
-import {
-  getDbError,
-  LinkValidationError,
-  ValueError,
-} from 'fyo/utils/errors';
+import { getDbError, LinkValidationError, ValueError } from 'fyo/utils/errors';
 import { Invoice } from 'models/baseModels/Invoice/Invoice';
 import { PurchaseInvoice } from 'models/baseModels/PurchaseInvoice/PurchaseInvoice';
 import { SalesInvoice } from 'models/baseModels/SalesInvoice/SalesInvoice';
@@ -155,7 +151,7 @@ export async function cancelDocWithPrompt(doc: Doc) {
       }`;
     } else if (paymentList.length > 1) {
       detail = t`This action is permanent and will cancel the following payments: ${paymentList.join(
-        ', '
+        ', ',
       )}`;
     }
   }
@@ -212,7 +208,7 @@ export function getActionsForDoc(doc?: Doc): Action[] {
       return {
         group: d.group,
         label: d.label,
-        component: d.component,
+        theme: d.theme,
         action: d.action,
       };
     });
@@ -220,21 +216,24 @@ export function getActionsForDoc(doc?: Doc): Action[] {
 
 export function getGroupedActionsForDoc(doc?: Doc): ActionGroup[] {
   const actions = getActionsForDoc(doc);
-  const actionsMap = actions.reduce((acc, ac) => {
-    if (!ac.group) {
-      ac.group = '';
-    }
+  const actionsMap = actions.reduce(
+    (acc, ac) => {
+      if (!ac.group) {
+        ac.group = '';
+      }
 
-    acc[ac.group] ??= {
-      group: ac.group,
-      label: ac.label ?? '',
-      type: ac.type ?? 'secondary',
-      actions: [],
-    };
+      acc[ac.group] ??= {
+        group: ac.group,
+        label: ac.label ?? '',
+        type: ac.type ?? 'secondary',
+        actions: [],
+      };
 
-    acc[ac.group].actions.push(ac);
-    return acc;
-  }, {} as Record<string, ActionGroup>);
+      acc[ac.group].actions.push(ac);
+      return acc;
+    },
+    {} as Record<string, ActionGroup>,
+  );
 
   const grouped = Object.keys(actionsMap)
     .filter(Boolean)
@@ -268,9 +267,7 @@ function getViewActions(doc: Doc): Action[] {
 function getCancelAction(doc: Doc): Action {
   return {
     label: t`Cancel`,
-    component: {
-      template: '<span class="text-red-700">{{ t`Cancel` }}</span>',
-    },
+    theme: 'red',
     condition: (doc: Doc) => doc.canCancel,
     async action() {
       await commonDocCancel(doc);
@@ -281,9 +278,7 @@ function getCancelAction(doc: Doc): Action {
 function getDeleteAction(doc: Doc): Action {
   return {
     label: t`Delete`,
-    component: {
-      template: '<span class="text-red-700">{{ t`Delete` }}</span>',
-    },
+    theme: 'red',
     condition: (doc: Doc) => doc.canDelete,
     async action() {
       await commongDocDelete(doc);
@@ -338,7 +333,7 @@ function getNewAction(doc: Doc): Action {
 
 export function getFieldsGroupedByTabAndSection(
   schema: Schema,
-  doc: Doc
+  doc: Doc,
 ): UIGroupedFields {
   const grouped: UIGroupedFields = new Map();
   for (const field of schema?.fields ?? []) {
@@ -389,7 +384,7 @@ export function getFieldsGroupedByTabAndSection(
 
 export function getFormRoute(
   schemaName: string,
-  name: string
+  name: string,
 ): RouteLocationRaw {
   const route = fyo.models[schemaName]
     ?.getListViewSettings(fyo)
@@ -405,7 +400,7 @@ export function getFormRoute(
 
 export async function getDocFromNameIfExistsElseNew(
   schemaName: string,
-  name?: string
+  name?: string,
 ) {
   if (!name) {
     return fyo.doc.getNewDoc(schemaName);
@@ -436,7 +431,7 @@ export function toggleSidebar(value?: boolean) {
 export function focusOrSelectFormControl(
   doc: Doc,
   ref: unknown,
-  shouldClear = true
+  shouldClear = true,
 ) {
   if (!doc?.fyo) {
     return;
@@ -522,7 +517,7 @@ export enum ShortcutKey {
 }
 
 export function getShortcutKeyMap(
-  platform: string
+  platform: string,
 ): Record<ShortcutKey, string> {
   if (platform === 'Mac') {
     return {
@@ -548,7 +543,7 @@ export function getShortcutKeyMap(
 
 export async function commongDocDelete(
   doc: Doc,
-  routeBack = true
+  routeBack = true,
 ): Promise<boolean> {
   const res = await deleteDocWithPrompt(doc);
   if (!res) {
@@ -574,7 +569,7 @@ export async function commonDocCancel(doc: Doc): Promise<boolean> {
 
 export async function commonDocSync(
   doc: Doc,
-  useDialog = false
+  useDialog = false,
 ): Promise<boolean> {
   let success: boolean;
   if (useDialog) {
@@ -642,7 +637,7 @@ async function showInsufficientInventoryDialog(doc: SalesInvoice) {
         undefined,
         undefined,
         doc.date!.toISOString(),
-        batch
+        batch,
       )) ?? 0;
 
     if (stockQuantity > quantity) {
@@ -759,7 +754,7 @@ function getDocSubmitMessage(doc: Doc): string {
     const amount = fyo.format(doc.outstandingAmount, 'Currency');
 
     details.push(
-      t`Payment of ${amount} will be made from account "${fromAccount}" to account "${toAccount}" on Submit.`
+      t`Payment of ${amount} will be made from account "${fromAccount}" to account "${toAccount}" on Submit.`,
     );
   } else if (doc instanceof PurchaseInvoice && doc.makeAutoPayment) {
     const fromAccount = doc.autoPaymentAccount!;
@@ -767,7 +762,7 @@ function getDocSubmitMessage(doc: Doc): string {
     const amount = fyo.format(doc.outstandingAmount, 'Currency');
 
     details.push(
-      t`Payment of ${amount} will be made from account "${fromAccount}" to account "${toAccount}" on Submit.`
+      t`Payment of ${amount} will be made from account "${fromAccount}" to account "${toAccount}" on Submit.`,
     );
   }
 
@@ -889,7 +884,7 @@ export const printSizes = [
 ] as const;
 
 export const paperSizeMap: Record<
-  typeof printSizes[number],
+  (typeof printSizes)[number],
   { width: number; height: number }
 > = {
   A0: {

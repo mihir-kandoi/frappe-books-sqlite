@@ -1,43 +1,25 @@
 <template>
-  <div
-    ref="hr"
-    class="
-      h-full
-      bg-gray-300
-      dark:bg-gray-700
-      transition-opacity
-      hover:opacity-100
-    "
-    :class="resizing ? 'opacity-100' : 'opacity-0'"
-    style="width: 3px; cursor: col-resize; margin-left: -3px"
-    @mousedown="onMouseDown"
-  >
-    <MouseFollower
-      :show="resizing"
-      placement="left"
-      class="
-        px-1
-        py-0.5
-        border
-        dark:border-gray-800
-        rounded-md
-        shadow
-        text-sm text-center
-        bg-gray-900
-        text-gray-100
-      "
-      style="min-width: 2rem"
-    >
+  <FrappePopover :open="resizing" side="left" :offset="8">
+    <template #trigger>
+      <div
+        ref="hr"
+        class="h-full bg-gray-300 transition-opacity hover:opacity-100 dark:bg-gray-700"
+        :class="resizing ? 'opacity-100' : 'opacity-0'"
+        style="width: 3px; cursor: col-resize; margin-left: -3px"
+        @mousedown="onMouseDown"
+      />
+    </template>
+    <div class="min-w-8 text-center text-sm tabular-nums">
       {{ value }}
-    </MouseFollower>
-  </div>
+    </div>
+  </FrappePopover>
 </template>
 <script lang="ts">
+import { Popover as FrappePopover } from 'frappe-ui';
 import { defineComponent } from 'vue';
-import MouseFollower from './MouseFollower.vue';
 
 export default defineComponent({
-  components: { MouseFollower },
+  components: { FrappePopover },
   props: {
     initialX: { type: Number, required: true },
     minX: Number,

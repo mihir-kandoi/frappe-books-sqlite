@@ -10,11 +10,7 @@
     <template #target>
       <Button>
         <span class="flex items-center">
-          <Icon
-            name="filter"
-            size="12"
-            class="stroke-current text-gray-700 dark:text-gray-400"
-          />
+          <Icon name="filter" size="12" class="stroke-current text-gray-700 dark:text-gray-400" />
           <span class="ms-1">
             <template v-if="activeFilterCount > 0">
               {{ filterAppliedMessage }}
@@ -36,34 +32,14 @@
                 :key="filter.id"
                 class="flex items-center justify-between text-base gap-2"
               >
-                <div
-                  class="
-                    cursor-pointer
-                    w-4
-                    h-4
-                    flex
-                    items-center
-                    justify-center
-                    text-gray-600
-                    dark:text-gray-400
-                    hover:text-gray-800
-                    dark:hover:text-gray-300
-                    rounded-md
-                    group
-                  "
-                >
-                  <span class="hidden group-hover:inline-block">
-                    <feather-icon
-                      name="x"
-                      class="w-4 h-4 cursor-pointer"
-                      :button="true"
-                      @click="removeFilter(i)"
-                    />
-                  </span>
-                  <span class="group-hover:hidden">
-                    {{ i + 1 }}
-                  </span>
-                </div>
+                <FrappeButton
+                  icon="lucide-x"
+                  size="xs"
+                  variant="ghost"
+                  :tooltip="t`Remove filter`"
+                  :aria-label="t`Remove filter ${i + 1}`"
+                  @click.stop="removeFilter(i)"
+                />
                 <Select
                   :border="true"
                   size="small"
@@ -129,66 +105,28 @@
           </template>
         </div>
         <div class="flex justify-between border-t dark:border-gray-800">
-          <div
-            class="
-              text-base
-              border-t
-              dark:border-gray-800
-              p-2
-              flex
-              items-center
-              text-gray-600
-              dark:text-gray-500
-              cursor-pointer
-              hover:bg-gray-100
-              dark:hover:bg-gray-875
-            "
-            @click.stop="addNewFilter"
-          >
-            <feather-icon name="plus" class="w-4 h-4" />
-            <span class="ms-2">{{ t`Add a filter` }}</span>
-          </div>
+          <FrappeButton icon-left="lucide-plus" variant="ghost" @click.stop="addNewFilter">
+            {{ t`Add a filter` }}
+          </FrappeButton>
 
           <div class="flex">
-            <div
+            <FrappeButton
               v-if="filters.length"
-              class="
-                text-base
-                p-2
-                flex
-                items-center
-                text-gray-600
-                dark:text-gray-500
-                cursor-pointer
-                hover:bg-gray-100
-                dark:hover:bg-gray-875
-              "
+              icon-left="lucide-trash-2"
+              variant="ghost"
               @click="clearAllFilters"
             >
-              <feather-icon name="trash-2" class="w-4 h-4" />
-              <span class="ms-2">{{ t`Clear` }}</span>
-            </div>
+              {{ t`Clear` }}
+            </FrappeButton>
 
-            <div
+            <FrappeButton
               v-if="filters.length"
+              icon-left="lucide-search"
+              variant="subtle"
               @click="applyFilters"
-              class="
-                text-base
-                border-t
-                dark:border-gray-800
-                p-2
-                flex
-                items-center
-                text-gray-600
-                dark:text-gray-500
-                cursor-pointer
-                hover:bg-gray-100
-                dark:hover:bg-gray-875
-              "
             >
-              <feather-icon name="search" class="w-4 h-4" />
-              <span class="ml-2 text-sm">{{ t`Apply` }}</span>
-            </div>
+              {{ t`Apply` }}
+            </FrappeButton>
           </div>
         </div>
       </div>
@@ -197,6 +135,7 @@
 </template>
 <script lang="ts">
 import { Field, FieldTypeEnum } from 'schemas/types';
+import { Button as FrappeButton } from 'frappe-ui';
 import { fyo } from 'src/initFyo';
 import { getRandomString } from 'utils';
 import { defineComponent } from 'vue';
@@ -219,7 +158,7 @@ const conditions = [
   { label: t`Is Not Empty`, value: 'is not null' },
 ] as const;
 
-type Condition = typeof conditions[number]['label'];
+type Condition = (typeof conditions)[number]['label'];
 
 type Filter = {
   id: string;
@@ -229,16 +168,7 @@ type Filter = {
   implicit: boolean;
 };
 
-const fieldLabelAcronyms = new Set([
-  'ERP',
-  'GST',
-  'GSTIN',
-  'HSN',
-  'ID',
-  'POS',
-  'SAC',
-  'UOM',
-]);
+const fieldLabelAcronyms = new Set(['ERP', 'GST', 'GSTIN', 'HSN', 'ID', 'POS', 'SAC', 'UOM']);
 
 function getFieldLabel(field: Field): string {
   const label = field.label?.trim();
@@ -258,10 +188,7 @@ function getFieldLabel(field: Field): string {
       }
 
       const lowerWord = word.toLowerCase();
-      if (
-        index > 0 &&
-        ['and', 'an', 'a', 'from', 'by', 'on'].includes(lowerWord)
-      ) {
+      if (index > 0 && ['and', 'an', 'a', 'from', 'by', 'on'].includes(lowerWord)) {
         return lowerWord;
       }
 
@@ -278,6 +205,7 @@ export default defineComponent({
     Icon,
     Select,
     Data,
+    FrappeButton,
   },
   props: { schemaName: { type: String, required: true } },
   emits: ['change'],
@@ -295,8 +223,7 @@ export default defineComponent({
         FieldTypeEnum.AttachImage,
       ];
 
-      const listViewSettings =
-        fyo.models[this.schemaName]?.getListViewSettings?.(fyo);
+      const listViewSettings = fyo.models[this.schemaName]?.getListViewSettings?.(fyo);
       const statusField = listViewSettings?.columns?.[1] as any;
 
       const fields = fyo.schemaMap[this.schemaName]?.fields ?? [];
@@ -318,12 +245,12 @@ export default defineComponent({
 
       if (statusField && statusField.fieldname) {
         const statusFieldExists = filteredFields.some(
-          (field) => field.fieldname === statusField.fieldname
+          (field) => field.fieldname === statusField.fieldname,
         );
 
         if (!statusFieldExists) {
           const originalStatusField = fields.find(
-            (field) => field.fieldname === statusField.fieldname
+            (field) => field.fieldname === statusField.fieldname,
           );
           if (originalStatusField) {
             filteredFields.unshift(originalStatusField);
@@ -388,7 +315,7 @@ export default defineComponent({
       fieldname: string,
       condition: string,
       value: Filter['value'],
-      implicit?: boolean
+      implicit?: boolean,
     ): void {
       const displayCondition = this.getConditionLabel(condition);
       const newFilter = {
@@ -418,11 +345,7 @@ export default defineComponent({
       this.$emit('change', {});
     },
 
-    updateNewFilters<K extends keyof Filter>(
-      index: number,
-      key: K,
-      value: Filter[K]
-    ) {
+    updateNewFilters<K extends keyof Filter>(index: number, key: K, value: Filter[K]) {
       if (key === 'condition') {
         const displayCondition = this.getConditionLabel(value as string);
         this.newFilters![index][key] = displayCondition as Filter[K];
@@ -443,9 +366,7 @@ export default defineComponent({
     },
 
     closeFilterPopover(): void {
-      const popover = this.$refs.filterPopover as
-        | InstanceType<typeof Popover>
-        | undefined;
+      const popover = this.$refs.filterPopover as InstanceType<typeof Popover> | undefined;
       popover?.close();
     },
 
@@ -494,7 +415,7 @@ export default defineComponent({
 
       if (this.newFilters.length) {
         this.filters = this.filters.filter(
-          (filter) => filter.condition && filter.value && filter.fieldname
+          (filter) => filter.condition && filter.value && filter.fieldname,
         );
         this.filters.push(this.newFilters[this.newFilters.length - 1]);
       }
@@ -504,8 +425,8 @@ export default defineComponent({
           this.filters.map((filter) => [
             `${filter.condition}-${filter.value}-${filter.fieldname}`,
             filter,
-          ])
-        ).values()
+          ]),
+        ).values(),
       );
     },
   },

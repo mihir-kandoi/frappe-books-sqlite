@@ -17,12 +17,7 @@
       >
         <feather-icon name="plus" class="w-4 h-4" />
       </Button>
-      <Button
-        v-if="hasImporter"
-        :title="t`Save Template`"
-        :icon="true"
-        @click="saveTemplate"
-      >
+      <Button v-if="hasImporter" :title="t`Save Template`" :icon="true" @click="saveTemplate">
         <feather-icon name="download" class="w-4 h-4" />
       </Button>
       <Button
@@ -48,17 +43,7 @@
     <div class="flex text-base w-full flex-col">
       <!-- Select Import Type -->
       <div
-        class="
-          h-row-largest
-          flex flex-row
-          justify-start
-          items-center
-          w-full
-          gap-2
-          border-b
-          dark:border-gray-800
-          p-4
-        "
+        class="h-row-largest flex flex-row justify-start items-center w-full gap-2 border-b dark:border-gray-800 p-4"
       >
         <AutoComplete
           :df="{
@@ -91,19 +76,14 @@
         >
           <span v-if="fileName" class="font-normal">{{ t`Selected` }} </span>
           {{ helperMessage }}{{ fileName ? ',' : '' }}
-          <span v-if="fileName" class="font-normal">
-            {{ t`check values and click on` }} </span
+          <span v-if="fileName" class="font-normal"> {{ t`check values and click on` }} </span
           >{{ ' ' }}<span v-if="fileName">{{ t`Import Data.` }}</span>
-          <span
-            v-if="hasImporter && importer.valueMatrix.length > 0"
-            class="font-normal"
-            >{{
-              ' ' +
-              (importer.valueMatrix.length === 2
-                ? t`${importer.valueMatrix.length} row added.`
-                : t`${importer.valueMatrix.length} rows added.`)
-            }}</span
-          >
+          <span v-if="hasImporter && importer.valueMatrix.length > 0" class="font-normal">{{
+            ' ' +
+            (importer.valueMatrix.length === 2
+              ? t`${importer.valueMatrix.length} row added.`
+              : t`${importer.valueMatrix.length} rows added.`)
+          }}</span>
         </p>
       </div>
 
@@ -115,18 +95,7 @@
       >
         <!-- Column Assignment Row -->
         <div
-          class="
-            grid
-            sticky
-            top-0
-            py-4
-            pe-4
-            bg-white
-            dark:bg-gray-875
-            border-b border-e
-            dark:border-gray-800
-            gap-4
-          "
+          class="grid sticky top-0 py-4 pe-4 bg-white dark:bg-gray-875 border-b border-e dark:border-gray-800 gap-4"
           style="z-index: 1; width: fit-content"
           :style="gridTemplateColumn"
         >
@@ -146,34 +115,21 @@
         <!-- Values Grid -->
         <div
           v-if="importer.valueMatrix.length"
-          class="
-            grid
-            py-4
-            pe-4
-            bg-white
-            dark:bg-gray-875
-            gap-4
-            border-e
-            last:border-b
-            dark:border-gray-800
-          "
+          class="grid py-4 pe-4 bg-white dark:bg-gray-875 gap-4 border-e last:border-b dark:border-gray-800"
           style="width: fit-content"
           :style="gridTemplateColumn"
         >
           <!-- Grid Value Row Cells, Allow Editing Values -->
           <template v-for="(row, ridx) of importer.valueMatrix" :key="ridx">
-            <div
-              class="index-cell group cursor-pointer"
-              @click="importer.removeRow(ridx)"
-            >
-              <feather-icon
-                name="x"
-                class="w-4 h-4 hidden group-hover:inline-block -me-1"
-                :button="true"
+            <div class="index-cell">
+              <FrappeButton
+                icon="lucide-x"
+                size="xs"
+                variant="ghost"
+                :tooltip="t`Remove row ${ridx + 1}`"
+                :aria-label="t`Remove row ${ridx + 1}`"
+                @click="importer.removeRow(ridx)"
               />
-              <span class="group-hover:hidden">
-                {{ ridx + 1 }}
-              </span>
             </div>
 
             <template
@@ -196,8 +152,8 @@
                   val.value != null
                     ? String(val.value)
                     : val.rawValue != null
-                    ? String(val.rawValue)
-                    : ''
+                      ? String(val.rawValue)
+                      : ''
                 "
                 :read-only="true"
               />
@@ -205,26 +161,20 @@
               <!-- FormControl Field if Column is Assigned -->
               <FormControl
                 v-else
-                :class="
-                  val.error
-                    ? 'border border-red-300 dark:border-red-600 rounded-md'
-                    : ''
-                "
+                :class="val.error ? 'border border-red-300 dark:border-red-600 rounded-md' : ''"
                 :title="getFieldTitle(val)"
-                :df="
-                    importer.templateFieldsMap.get(
-                      importer.assignedTemplateFields[cidx]!
-                    )
-                  "
+                :df="importer.templateFieldsMap.get(importer.assignedTemplateFields[cidx]!)"
                 size="small"
                 :rows="1"
                 :border="true"
                 :value="val.error ? null : val.value"
                 :read-only="false"
-                @change="(value: DocValue)=> {
-                    importer.valueMatrix[ridx][cidx]!.error = false
-                    importer.valueMatrix[ridx][cidx]!.value = value
-                  }"
+                @change="
+                  (value: DocValue) => {
+                    importer.valueMatrix[ridx][cidx]!.error = false;
+                    importer.valueMatrix[ridx][cidx]!.value = value;
+                  }
+                "
               />
             </template>
           </template>
@@ -232,15 +182,7 @@
 
         <div
           v-else
-          class="
-            ps-4
-            text-gray-700
-            dark:text-gray-300
-            sticky
-            left-0
-            flex
-            items-center
-          "
+          class="ps-4 text-gray-700 dark:text-gray-300 sticky left-0 flex items-center"
           style="height: 62.5px"
         >
           {{ t`No rows added. Select a file or add rows.` }}
@@ -257,11 +199,7 @@
     />
 
     <!-- Pick Column Modal -->
-    <Modal
-      :open-modal="showColumnPicker"
-      size="3xl"
-      @closemodal="showColumnPicker = false"
-    >
+    <Modal :open-modal="showColumnPicker" size="3xl" @closemodal="showColumnPicker = false">
       <div class="w-full">
         <!-- Pick Column Header -->
         <FormHeader :form-title="t`Pick Import Columns`" />
@@ -277,17 +215,7 @@
             {{ key }}
           </h2>
           <div
-            class="
-              grid grid-cols-1
-              sm:grid-cols-2
-              md:grid-cols-3
-              gap-x-6 gap-y-2
-              border
-              dark:border-gray-800
-              rounded
-              mt-1
-              p-3
-            "
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 border dark:border-gray-800 rounded mt-1 p-3"
           >
             <div v-for="tf of value" :key="tf.fieldKey" class="min-w-0">
               <Check
@@ -300,7 +228,7 @@
                 :show-label="true"
                 :read-only="tf.required"
                 :value="importer.templateFieldsPicked.get(tf.fieldKey)"
-                @change="(value:boolean) => pickColumn(tf.fieldKey, value)"
+                @change="(value: boolean) => pickColumn(tf.fieldKey, value)"
               />
             </div>
           </div>
@@ -312,9 +240,7 @@
           <p class="text-sm text-gray-600 dark:text-gray-400">
             {{ t`${numColumnsPicked} fields selected` }}
           </p>
-          <Button type="primary" @click="showColumnPicker = false">{{
-            t`Done`
-          }}</Button>
+          <Button type="primary" @click="showColumnPicker = false">{{ t`Done` }}</Button>
         </div>
       </div>
     </Modal>
@@ -374,14 +300,7 @@
             <div
               v-for="(f, i) of failed"
               :key="f.name"
-              class="
-                grid
-                grid-cols-[1.5rem_minmax(6rem,auto)_minmax(0,1fr)]
-                gap-3
-                px-4
-                py-1.5
-                text-base
-              "
+              class="grid grid-cols-[1.5rem_minmax(6rem,auto)_minmax(0,1fr)] gap-3 px-4 py-1.5 text-base"
             >
               <div class="text-end">{{ i + 1 }}.</div>
               <p class="min-w-0 break-words">
@@ -405,16 +324,12 @@
 
         <!-- Footer Button -->
         <div class="flex items-center justify-end gap-2 p-4">
-          <Button
-            v-if="failed.length > 0"
-            @click="clearSuccessfullyImportedEntries"
-            >{{ t`Fix Failed` }}</Button
-          >
-          <Button
-            v-if="failed.length === 0 && success.length > 0"
-            @click="showMe"
-            >{{ t`Show Me` }}</Button
-          >
+          <Button v-if="failed.length > 0" @click="clearSuccessfullyImportedEntries">{{
+            t`Fix Failed`
+          }}</Button>
+          <Button v-if="failed.length === 0 && success.length > 0" @click="showMe">{{
+            t`Show Me`
+          }}</Button>
           <Button type="primary" @click="clear">{{ t`Done` }}</Button>
         </div>
       </div>
@@ -425,6 +340,7 @@
 import { DocValue } from 'fyo/core/types';
 import { Action } from 'fyo/model/types';
 import { ValidationError } from 'fyo/utils/errors';
+import { Button as FrappeButton } from 'frappe-ui';
 import { ModelNameEnum } from 'models/types';
 import { OptionField, RawValue, SelectOption } from 'schemas/types';
 import Button from 'src/components/Button.vue';
@@ -474,6 +390,7 @@ export default defineComponent({
     FormHeader,
     Check,
     Select,
+    FrappeButton,
   },
   data() {
     return {
@@ -543,10 +460,7 @@ export default defineComponent({
       }
 
       if (this.requiredNotSelected.length) {
-        return this
-          .t`Required fields not selected: ${this.requiredNotSelected.join(
-          ', '
-        )}`;
+        return this.t`Required fields not selected: ${this.requiredNotSelected.join(', ')}`;
       }
 
       return '';
@@ -576,7 +490,7 @@ export default defineComponent({
 
       return Math.min(
         this.importer.assignedTemplateFields.length,
-        this.importer.valueMatrix[0].length
+        this.importer.valueMatrix[0].length,
       );
     },
     columnIterator(): number[] {
@@ -588,8 +502,7 @@ export default defineComponent({
       return !!this.nullOrImporter;
     },
     numColumnsPicked(): number {
-      return [...this.importer.templateFieldsPicked.values()].filter(Boolean)
-        .length;
+      return [...this.importer.templateFieldsPicked.values()].filter(Boolean).length;
     },
     columnPickerFieldsMap(): Map<string, TemplateField[]> {
       const map: Map<string, TemplateField[]> = new Map();
@@ -636,7 +549,7 @@ export default defineComponent({
           ModelNameEnum.StockMovement,
           ModelNameEnum.Shipment,
           ModelNameEnum.PurchaseReceipt,
-          ModelNameEnum.Location
+          ModelNameEnum.Location,
         );
       }
 
@@ -653,26 +566,18 @@ export default defineComponent({
       if (this.canImportData) {
         actions.push({
           label: selectFileLabel,
-          component: {
-            template: `<span>{{ "${selectFileLabel}" }}</span>`,
-          },
           action: this.selectFile.bind(this),
         });
       }
 
       const pickColumnsAction = {
         label: this.t`Pick Import Columns`,
-        component: {
-          template: '<span>{{ t`Pick Import Columns` }}</span>',
-        },
         action: () => (this.showColumnPicker = true),
       };
 
       const cancelAction = {
         label: this.t`Cancel`,
-        component: {
-          template: '<span class="text-red-700" >{{ t`Cancel` }}</span>',
-        },
+        theme: 'red' as const,
         action: this.clear.bind(this),
       };
       actions.push(pickColumnsAction, cancelAction);
@@ -759,11 +664,7 @@ export default defineComponent({
     this.clear();
   },
   methods: {
-    getFieldTitle(vmi: {
-      value?: DocValue;
-      rawValue?: RawValue;
-      error?: boolean;
-    }): string {
+    getFieldTitle(vmi: { value?: DocValue; rawValue?: RawValue; error?: boolean }): string {
       const title: string[] = [];
       if (vmi.value != null) {
         title.push(this.t`Value: ${String(vmi.value)}`);
@@ -789,9 +690,7 @@ export default defineComponent({
         return;
       }
 
-      const idx = this.importer.assignedTemplateFields.findIndex(
-        (f) => f === fieldKey
-      );
+      const idx = this.importer.assignedTemplateFields.findIndex((f) => f === fieldKey);
 
       if (idx >= 0) {
         this.importer.assignedTemplateFields[idx] = null;
@@ -803,11 +702,7 @@ export default defineComponent({
         return;
       }
 
-      for (
-        let idx = 0;
-        idx < this.importer.assignedTemplateFields.length;
-        idx++
-      ) {
+      for (let idx = 0; idx < this.importer.assignedTemplateFields.length; idx++) {
         this.importer.assignedTemplateFields[idx] = null;
       }
 
@@ -859,9 +754,7 @@ export default defineComponent({
         await showDialog({
           title,
           type: 'error',
-          detail: this.t`Following cells have errors: ${cellErrors.join(
-            ', '
-          )}.`,
+          detail: this.t`Following cells have errors: ${cellErrors.join(', ')}.`,
         });
         return false;
       }
@@ -947,20 +840,16 @@ export default defineComponent({
     clearSuccessfullyImportedEntries() {
       const schemaName = this.importer.schemaName;
       const nameFieldKey = `${schemaName}.name`;
-      const nameIndex = this.importer.assignedTemplateFields.findIndex(
-        (n) => n === nameFieldKey
-      );
+      const nameIndex = this.importer.assignedTemplateFields.findIndex((n) => n === nameFieldKey);
 
-      const failedEntriesValueMatrix = this.importer.valueMatrix.filter(
-        (row) => {
-          const value = row[nameIndex].value;
-          if (typeof value !== 'string') {
-            return false;
-          }
-
-          return !this.successOldName.includes(value);
+      const failedEntriesValueMatrix = this.importer.valueMatrix.filter((row) => {
+        const value = row[nameIndex].value;
+        if (typeof value !== 'string') {
+          return false;
         }
-      );
+
+        return !this.successOldName.includes(value);
+      });
 
       this.setImportType(this.importType);
       this.importer.valueMatrix = failedEntriesValueMatrix;

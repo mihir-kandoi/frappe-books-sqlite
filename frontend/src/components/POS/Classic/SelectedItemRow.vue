@@ -1,7 +1,10 @@
 <template>
-  <feather-icon
-    :name="isExapanded ? 'chevron-up' : 'chevron-down'"
-    class="w-4 h-4 inline-flex cursor-pointer text-gray-700 dark:text-gray-200"
+  <FrappeButton
+    :icon="isExapanded ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+    variant="ghost"
+    size="xs"
+    :tooltip="isExapanded ? t`Collapse item` : t`Expand item`"
+    :aria-label="isExapanded ? t`Collapse item` : t`Expand item`"
     @click="toggleExpand"
   />
 
@@ -40,28 +43,22 @@
       :read-only="true"
     />
     <div class="flex flex-col ml-1">
-      <feather-icon
-        name="chevron-up"
-        class="
-          w-3
-          h-3
-          cursor-pointer
-          hover:text-blue-500
-          text-gray-700
-          dark:text-gray-200
-        "
+      <FrappeButton
+        icon="lucide-chevron-up"
+        variant="ghost"
+        size="xs"
+        class="!size-4"
+        :tooltip="t`Increase quantity`"
+        :aria-label="t`Increase quantity`"
         @click="adjustQuantity(1)"
       />
-      <feather-icon
-        name="chevron-down"
-        class="
-          w-3
-          h-3
-          cursor-pointer
-          hover:text-blue-500
-          text-gray-700
-          dark:text-gray-200
-        "
+      <FrappeButton
+        icon="lucide-chevron-down"
+        variant="ghost"
+        size="xs"
+        class="!size-4"
+        :tooltip="t`Decrease quantity`"
+        :aria-label="t`Decrease quantity`"
         @click="adjustQuantity(-1)"
       />
     </div>
@@ -105,10 +102,14 @@
   />
 
   <div class="px-4">
-    <feather-icon
-      name="trash"
-      class="w-4 text-xl text-red-500"
-      @click="removeAddedItem(row)"
+    <FrappeButton
+      icon="lucide-trash-2"
+      theme="red"
+      variant="ghost"
+      size="xs"
+      :tooltip="t`Remove item`"
+      :aria-label="t`Remove item`"
+      @click.stop="removeAddedItem(row)"
     />
   </div>
 
@@ -127,7 +128,7 @@
         :border="true"
         :show-label="true"
         :value="getDisplayTransferQuantity()"
-        @change="(value:number) => setTransferQuantity(value)"
+        @change="(value: number) => setTransferQuantity(value)"
         :read-only="isReadOnly"
       />
     </div>
@@ -146,7 +147,7 @@
         :show-label="true"
         :border="true"
         :value="row.transferUnit ?? ''"
-        @change="(value:string) => row.set('transferUnit', value)"
+        @change="(value: string) => row.set('transferUnit', value)"
         :read-only="isReadOnly"
       />
     </div>
@@ -163,7 +164,7 @@
         :border="true"
         :show-label="true"
         :value="row.quantity"
-        @change="(value:number) => setQuantity(value)"
+        @change="(value: number) => setQuantity(value)"
         :read-only="isUOMConversionEnabled"
       />
     </div>
@@ -183,7 +184,7 @@
         :border="true"
         :value="row.rate"
         :read-only="isRateReadOnly()"
-        @change="(value:Money) => setRate((row.rate = value))"
+        @change="(value: Money) => setRate((row.rate = value))"
       />
     </div>
     <div class="px-6 pt-6 col-span-2">
@@ -199,8 +200,8 @@
         :show-label="true"
         :border="true"
         :value="row.itemDiscountAmount"
-        :read-only="isDiscountsReadOnly(row.itemDiscountPercent as number > 0)"
-        @change="(value:number) => setItemDiscount('amount', value)"
+        :read-only="isDiscountsReadOnly((row.itemDiscountPercent as number) > 0)"
+        @change="(value: number) => setItemDiscount('amount', value)"
       />
     </div>
 
@@ -217,29 +218,26 @@
         :border="true"
         :value="row.itemDiscountPercent"
         :read-only="isDiscountsReadOnly(!row.itemDiscountAmount?.isZero())"
-        @change="(value:number) => setItemDiscount('percent', value)"
+        @change="(value: number) => setItemDiscount('percent', value)"
       />
     </div>
 
     <div class=""></div>
 
-    <div
-      v-if="row.links?.item && row.links?.item.hasBatch"
-      class="pl-6 px-4 pt-6 col-span-2"
-    >
+    <div v-if="row.links?.item && row.links?.item.hasBatch" class="pl-6 px-4 pt-6 col-span-2">
       <Link
         :df="{
           fieldname: 'batch',
           fieldtype: 'Link',
           target: 'Batch',
           label: t`Batch`,
-          filters: { item: row.item as string},
+          filters: { item: row.item as string },
         }"
         :value="row.batch"
         :border="true"
         :show-label="true"
         :read-only="false"
-        @change="(value:string) => setBatch(value)"
+        @change="(value: string) => setBatch(value)"
       />
     </div>
 
@@ -267,19 +265,18 @@
           fieldtype: 'Text',
           fieldname: 'serialNumber',
         }"
-        :value="String(
-          itemSerialNumbers[row.item as string] || row.serialNumber || ''
-        )"
+        :value="String(itemSerialNumbers[row.item as string] || row.serialNumber || '')"
         :show-label="true"
         :border="true"
         :required="hasSerialNumber"
-        @change="(value:string)=> setSerialNumber(value)"
+        @change="(value: string) => setSerialNumber(value)"
       />
     </div>
   </template>
 </template>
 
 <script lang="ts">
+import { Button as FrappeButton } from 'frappe-ui';
 import Currency from 'src/components/Controls/Currency.vue';
 import Data from 'src/components/Controls/Data.vue';
 import Float from 'src/components/Controls/Float.vue';
@@ -302,7 +299,15 @@ import { getPOSPermissionSetting } from 'src/utils/pos';
 
 export default defineComponent({
   name: 'SelectedItemRow',
-  components: { Currency, Data, Float, Link, Text, AutoComplete },
+  components: {
+    Currency,
+    Data,
+    Float,
+    Link,
+    Text,
+    AutoComplete,
+    FrappeButton,
+  },
   props: {
     row: { type: SalesInvoiceItem, required: true },
     batchAdded: { type: Boolean, default: false },
@@ -311,12 +316,7 @@ export default defineComponent({
       default: undefined,
     },
   },
-  emits: [
-    'runSinvFormulas',
-    'applyPricingRule',
-    'selectedRow',
-    'setExpandedBatchId',
-  ],
+  emits: ['runSinvFormulas', 'applyPricingRule', 'selectedRow', 'setExpandedBatchId'],
   setup() {
     return {
       isDiscountingEnabled: inject('isDiscountingEnabled') as boolean,
@@ -390,11 +390,7 @@ export default defineComponent({
       return this.row.isFreeItem;
     },
     showAvlQuantityInBatch() {
-      return (
-        this.row.links?.item &&
-        this.row.links?.item.hasBatch &&
-        this.itemVisibility
-      );
+      return this.row.links?.item && this.row.links?.item.hasBatch && this.itemVisibility;
     },
   },
 
@@ -433,8 +429,8 @@ export default defineComponent({
     },
     async adjustQuantity(change: number) {
       const currentQuantity = this.isUOMConversionEnabled
-        ? this.row.transferQuantity ?? this.row.quantity ?? 1
-        : this.row.quantity ?? 1;
+        ? (this.row.transferQuantity ?? this.row.quantity ?? 1)
+        : (this.row.quantity ?? 1);
       const newQuantity = currentQuantity + change;
 
       if (newQuantity === 0) {
@@ -490,7 +486,7 @@ export default defineComponent({
           undefined,
           undefined,
           undefined,
-          this.row.batch
+          this.row.batch,
         )) ?? 0
       );
     },
@@ -528,11 +524,7 @@ export default defineComponent({
       this.row.set('serialNumber', serialNumber);
       this.itemSerialNumbers[this.row.item as string] = serialNumber;
 
-      validateSerialNumberCount(
-        serialNumber,
-        Math.abs(this.row.quantity ?? 0),
-        this.row.item!
-      );
+      validateSerialNumberCount(serialNumber, Math.abs(this.row.quantity ?? 0), this.row.item!);
     },
     async fetchSerialNumbers() {
       if (!this.hasSerialNumber) {
@@ -544,13 +536,10 @@ export default defineComponent({
         return;
       }
 
-      const existingSerialNumbers =
-        this.itemSerialNumbers[this.row.item as string];
+      const existingSerialNumbers = this.itemSerialNumbers[this.row.item as string];
 
       if (existingSerialNumbers) {
-        const existingCount = existingSerialNumbers
-          .split('\n')
-          .filter((s) => s.trim()).length;
+        const existingCount = existingSerialNumbers.split('\n').filter((s) => s.trim()).length;
 
         if (existingCount === quantity) {
           return;
@@ -561,7 +550,7 @@ export default defineComponent({
         const serialNumbers = await getExistingActiveSerialNumbersForItem(
           this.fyo,
           this.row.item as string,
-          quantity
+          quantity,
         );
 
         if (serialNumbers) {
@@ -591,8 +580,7 @@ export default defineComponent({
     async setQuantity(quantity: number) {
       const previousQuantity = this.row.quantity ?? 1;
       const hasManualDiscount = this.row.setItemDiscountAmount;
-      const isPercentageDiscount =
-        !hasManualDiscount && this.row.itemDiscountPercent !== 0;
+      const isPercentageDiscount = !hasManualDiscount && this.row.itemDiscountPercent !== 0;
       const manualDiscountAmount = this.row.itemDiscountAmount;
       const manualDiscountPercent = this.row.itemDiscountPercent;
 
@@ -611,15 +599,11 @@ export default defineComponent({
       const existingItems =
         (this.row.parentdoc as SalesInvoice).items?.filter(
           (invoiceItem: InvoiceItem) =>
-            invoiceItem.item === this.row.item && !invoiceItem.isFreeItem
+            invoiceItem.item === this.row.item && !invoiceItem.isFreeItem,
         ) ?? [];
 
       try {
-        await validateQty(
-          this.row.parentdoc as SalesInvoice,
-          this.row,
-          existingItems
-        );
+        await validateQty(this.row.parentdoc as SalesInvoice, this.row, existingItems);
       } catch (error) {
         await this.row.set('quantity', previousQuantity);
 
@@ -649,12 +633,10 @@ export default defineComponent({
       }
     },
     async setTransferQuantity(transferQuantity: number) {
-      const previousTransferQuantity =
-        this.row.transferQuantity ?? this.row.quantity ?? 1;
+      const previousTransferQuantity = this.row.transferQuantity ?? this.row.quantity ?? 1;
       const previousQuantity = this.row.quantity ?? 1;
       const hasManualDiscount = this.row.setItemDiscountAmount;
-      const isPercentageDiscount =
-        !hasManualDiscount && this.row.itemDiscountPercent !== 0;
+      const isPercentageDiscount = !hasManualDiscount && this.row.itemDiscountPercent !== 0;
       const manualDiscountAmount = this.row.itemDiscountAmount;
       const manualDiscountPercent = this.row.itemDiscountPercent;
 
@@ -672,15 +654,11 @@ export default defineComponent({
       const existingItems =
         (this.row.parentdoc as SalesInvoice).items?.filter(
           (invoiceItem: InvoiceItem) =>
-            invoiceItem.item === this.row.item && !invoiceItem.isFreeItem
+            invoiceItem.item === this.row.item && !invoiceItem.isFreeItem,
         ) ?? [];
 
       try {
-        await validateQty(
-          this.row.parentdoc as SalesInvoice,
-          this.row,
-          existingItems
-        );
+        await validateQty(this.row.parentdoc as SalesInvoice, this.row, existingItems);
       } catch (error) {
         await this.row.set('transferQuantity', previousTransferQuantity);
         await this.row.set('quantity', previousQuantity);

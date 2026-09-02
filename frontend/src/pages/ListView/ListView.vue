@@ -10,45 +10,19 @@
       >
         {{ t`Select` }}
       </Button>
-      <div
-        v-if="
-          isSelectionMode && schemaName === 'Item' && selectedItems.length > 0
-        "
-        class="relative"
+      <FrappeDropdown
+        v-if="isSelectionMode && schemaName === 'Item' && selectedItems.length > 0"
+        :options="actionOptions"
+        align="end"
       >
-        <Button class="w-40" @click="toggleDropdown"> Create </Button>
-        <div
-          v-if="showDropdown"
-          class="
-            absolute
-            top-full
-            mt-1
-            bg-white
-            border border-gray-300
-            rounded
-            shadow-lg
-            z-10
-            w-40
-          "
-        >
-          <div
-            v-for="option in actionOptions"
-            :key="option.value"
-            class="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-            @click="createInvoice(option.value)"
-          >
-            {{ option.label }}
-          </div>
-        </div>
-      </div>
+        <template #trigger>
+          <Button class="w-40">{{ t`Create` }}</Button>
+        </template>
+      </FrappeDropdown>
       <Button ref="exportButton" :icon="false" @click="openExportModal = true">
         {{ t`Export` }}
       </Button>
-      <FilterDropdown
-        ref="filterDropdown"
-        :schema-name="schemaName"
-        @change="applyFilter"
-      />
+      <FilterDropdown ref="filterDropdown" :schema-name="schemaName" @change="applyFilter" />
       <Button
         v-if="canCreate"
         ref="makeNewDocButton"
@@ -74,11 +48,7 @@
       @make-new-doc="makeNewDoc"
       @selected-items-changed="updateSelectedItems"
     />
-    <Modal
-      :open-modal="openExportModal"
-      size="4xl"
-      @closemodal="openExportModal = false"
-    >
+    <Modal :open-modal="openExportModal" size="4xl" @closemodal="openExportModal = false">
       <ExportWizard
         class="w-full"
         :schema-name="schemaName"
@@ -90,6 +60,7 @@
 </template>
 <script lang="ts">
 import { Field } from 'schemas/types';
+import { Dropdown as FrappeDropdown, type DropdownOptions } from 'frappe-ui';
 import Button from 'src/components/Button.vue';
 import ExportWizard from 'src/components/ExportWizard.vue';
 import FilterDropdown from 'src/components/FilterDropdown.vue';
@@ -98,10 +69,7 @@ import PageHeader from 'src/components/PageHeader.vue';
 
 import { fyo } from 'src/initFyo';
 import { shortcutsKey } from 'src/utils/injectionKeys';
-import {
-  docsPathMap,
-  getCreateFiltersFromListViewFilters,
-} from 'src/utils/misc';
+import { docsPathMap, getCreateFiltersFromListViewFilters } from 'src/utils/misc';
 import { docsPathRef } from 'src/utils/refs';
 import { getFormRoute, routeTo } from 'src/utils/ui';
 import { QueryFilter } from 'utils/db/types';
@@ -119,6 +87,7 @@ export default defineComponent({
     FilterDropdown,
     Modal,
     ExportWizard,
+    FrappeDropdown,
   },
   props: {
     schemaName: { type: String, required: true },
@@ -140,14 +109,12 @@ export default defineComponent({
       openExportModal: false,
       listFilters: {},
       isSelectionMode: false,
-      showDropdown: false,
       selectedItems: [] as string[],
     } as {
       listConfig: undefined | ReturnType<typeof getListConfig>;
       openExportModal: boolean;
       listFilters: QueryFilter;
       isSelectionMode: boolean;
-      showDropdown: boolean;
       selectedItems: string[];
     };
   },
@@ -168,18 +135,20 @@ export default defineComponent({
     canCreate(): boolean {
       return fyo.schemaMap[this.schemaName]?.create !== false;
     },
-    actionOptions(): { value: string; label: string }[] {
+    actionOptions(): DropdownOptions {
       return [
         { value: 'SalesQuote', label: 'Sales Quote' },
         { value: 'SalesInvoice', label: 'Sales Invoice' },
         { value: 'PurchaseInvoice', label: 'Purchase Invoice' },
-      ];
+      ].map((option) => ({
+        ...option,
+        onClick: () => this.createInvoice(option.value),
+      }));
     },
   },
   activated() {
     this.listConfig = getListConfig(this.schemaName);
-    docsPathRef.value =
-      docsPathMap[this.schemaName] ?? docsPathMap.Entries ?? '';
+    docsPathRef.value = docsPathMap[this.schemaName] ?? docsPathMap.Entries ?? '';
 
     if (this.fyo.store.isDevelopment) {
       // @ts-ignore
@@ -198,12 +167,8 @@ export default defineComponent({
         return;
       }
 
-      this.shortcuts.pmod.set(this.context, ['KeyN'], () =>
-        this.makeNewDocButton?.$el.click()
-      );
-      this.shortcuts.pmod.set(this.context, ['KeyE'], () =>
-        this.exportButton?.$el.click()
-      );
+      this.shortcuts.pmod.set(this.context, ['KeyN'], () => this.makeNewDocButton?.$el.click());
+      this.shortcuts.pmod.set(this.context, ['KeyE'], () => this.exportButton?.$el.click());
     },
     updatedData(listFilters: QueryFilter) {
       this.listFilters = listFilters;
@@ -231,12 +196,8 @@ export default defineComponent({
     toggleSelectionMode() {
       this.isSelectionMode = !this.isSelectionMode;
       if (!this.isSelectionMode) {
-        this.showDropdown = false;
         this.selectedItems = [];
       }
-    },
-    toggleDropdown() {
-      this.showDropdown = !this.showDropdown;
     },
     async createInvoice(value: string) {
       if (
@@ -262,7 +223,6 @@ export default defineComponent({
         await routeTo(route);
         this.selectedItems = [];
         this.isSelectionMode = false;
-        this.showDropdown = false;
       }
     },
 

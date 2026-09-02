@@ -10,90 +10,63 @@
       <!-- Paid & Unpaid Amounts -->
       <div class="flex justify-between">
         <!-- Paid -->
-        <div
+        <FrappeButton
           class="text-sm font-medium dark:text-gray-25"
-          :class="{
-            'bg-gray-200 dark:bg-gray-700 text-gray-200 dark:text-gray-700 rounded':
-              !count,
-            'cursor-pointer': paidCount > 0,
-          }"
-          :title="paidCount > 0 ? t`View Paid Invoices` : ''"
-          @click="() => routeToInvoices('paid')"
+          variant="ghost"
+          :disabled="paidCount === 0"
+          :tooltip="paidCount > 0 ? t`View Paid Invoices` : undefined"
+          @click="routeToInvoices('paid')"
         >
           {{ fyo.format(paid, 'Currency') }}
-          <span
-            :class="{ 'text-gray-900 dark:text-gray-200 font-normal': count }"
-            >{{ t`Paid` }}</span
-          >
-        </div>
+          <span :class="{ 'text-gray-900 dark:text-gray-200 font-normal': count }">{{
+            t`Paid`
+          }}</span>
+        </FrappeButton>
 
         <!-- Unpaid -->
-        <div
+        <FrappeButton
           class="text-sm font-medium dark:text-gray-25"
-          :class="{
-            'bg-gray-200 dark:bg-gray-700 text-gray-200 dark:text-gray-700 rounded':
-              !count,
-            'cursor-pointer': unpaidCount > 0,
-          }"
-          :title="unpaidCount > 0 ? t`View Unpaid Invoices` : ''"
-          @click="() => routeToInvoices('unpaid')"
+          variant="ghost"
+          :disabled="unpaidCount === 0"
+          :tooltip="unpaidCount > 0 ? t`View Unpaid Invoices` : undefined"
+          @click="routeToInvoices('unpaid')"
         >
           {{ fyo.format(unpaid, 'Currency') }}
-          <span
-            :class="{ 'text-gray-900 dark:text-gray-200 font-normal': count }"
-            >{{ t`Unpaid` }}</span
-          >
-        </div>
+          <span :class="{ 'text-gray-900 dark:text-gray-200 font-normal': count }">{{
+            t`Unpaid`
+          }}</span>
+        </FrappeButton>
       </div>
 
       <!-- Widget Bar -->
-      <div
-        class="mt-2 relative rounded overflow-hidden"
-        @mouseenter="show = true"
-        @mouseleave="show = false"
-      >
-        <div class="w-full h-4" :class="unpaidColor"></div>
-        <div
-          class="absolute inset-0 h-4"
-          :class="paidColor"
-          :style="`width: ${barWidth}%`"
-        ></div>
-      </div>
+      <FrappeTooltip :disabled="!hasData" :hover-delay="0" side="top">
+        <div class="relative mt-2 overflow-hidden rounded">
+          <div class="h-4 w-full" :class="unpaidColor"></div>
+          <div
+            class="absolute inset-0 h-4"
+            :class="paidColor"
+            :style="`width: ${barWidth}%`"
+          ></div>
+        </div>
+        <template #content>
+          <div class="grid grid-cols-[auto_auto] gap-x-4 gap-y-1">
+            <span>{{ t`Paid` }}</span>
+            <strong class="text-end tabular-nums">{{ paidCount }}</strong>
+            <span v-if="unpaidCount">{{ t`Unpaid` }}</span>
+            <strong v-if="unpaidCount" class="text-end tabular-nums">
+              {{ unpaidCount }}
+            </strong>
+          </div>
+        </template>
+      </FrappeTooltip>
     </div>
-    <MouseFollower
-      v-if="hasData"
-      :offset="15"
-      :show="show"
-      placement="top"
-      class="
-        text-sm
-        shadow-md
-        px-2
-        py-1
-        bg-white
-        dark:bg-gray-900
-        text-gray-900
-        dark:text-white
-        border-s-4
-      "
-      :style="{ borderColor: colors }"
-    >
-      <div class="flex justify-between gap-4">
-        <p>{{ t`Paid` }}</p>
-        <p class="font-semibold">{{ paidCount ?? 0 }}</p>
-      </div>
-      <div v-if="unpaidCount > 0" class="flex justify-between gap-4">
-        <p>{{ t`Unpaid` }}</p>
-        <p class="font-semibold">{{ unpaidCount ?? 0 }}</p>
-      </div>
-    </MouseFollower>
   </div>
 </template>
 <script lang="ts">
 import { t } from 'fyo';
+import { Button as FrappeButton, Tooltip as FrappeTooltip } from 'frappe-ui';
 import { DateTime } from 'luxon';
 import { ModelNameEnum } from 'models/types';
-import MouseFollower from 'src/components/MouseFollower.vue';
 import { fyo } from 'src/initFyo';
 import { uicolors } from 'src/utils/colors';
 import { getDatesAndPeriodList } from 'src/utils/misc';
@@ -114,7 +87,8 @@ export default defineComponent({
   name: 'UnpaidInvoices',
   components: {
     SectionHeader,
-    MouseFollower,
+    FrappeButton,
+    FrappeTooltip,
   },
   extends: BaseDashboardChart,
   props: {
@@ -123,7 +97,6 @@ export default defineComponent({
   },
   data() {
     return {
-      show: false,
       total: 0,
       unpaid: 0,
       hasData: false,
@@ -134,7 +107,6 @@ export default defineComponent({
       barWidth: 40,
       period: 'This Year',
     } as {
-      show: boolean;
       period: PeriodKey;
       total: number;
       unpaid: number;
@@ -155,9 +127,6 @@ export default defineComponent({
         return 'blue';
       }
       return 'pink';
-    },
-    colors(): string {
-      return uicolors[this.color][this.darkMode ? '600' : '500'];
     },
     paidColor(): string {
       if (!this.hasData) {
@@ -206,13 +175,13 @@ export default defineComponent({
       const { total, outstanding } = await fyo.db.getTotalOutstanding(
         this.schemaName,
         fromDate.toISO(),
-        toDate.toISO()
+        toDate.toISO(),
       );
 
       const { countTotal, countOutstanding } = await this.getCounts(
         this.schemaName,
         fromDate,
-        toDate
+        toDate,
       );
 
       this.total = total ?? 0;
@@ -239,9 +208,7 @@ export default defineComponent({
         },
       });
 
-      const isOutstanding = outstandingAmounts.map((o) =>
-        safeParseFloat(o.outstandingAmount)
-      );
+      const isOutstanding = outstandingAmounts.map((o) => safeParseFloat(o.outstandingAmount));
 
       return {
         countTotal: isOutstanding.length,

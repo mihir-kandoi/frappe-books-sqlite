@@ -1,20 +1,21 @@
 <template>
   <div v-if="(fields ?? []).length > 0">
-    <div
-      v-if="showTitle && title"
-      class="flex justify-between items-center select-none"
-      :class="[collapsed ? '' : 'mb-4', collapsible ? 'cursor-pointer' : '']"
+    <FrappeButton
+      v-if="showTitle && title && collapsible"
+      class="!h-auto w-full !justify-between !px-0 text-start"
+      :class="collapsed ? '' : 'mb-4'"
+      variant="ghost"
+      :icon-right="collapsed ? 'lucide-chevron-down' : 'lucide-chevron-up'"
+      :aria-expanded="!collapsed"
       @click="toggleCollapsed"
     >
-      <h2 class="text-base text-gray-900 dark:text-gray-25 font-semibold">
+      <h2 class="text-base font-semibold text-ink-gray-9">
         {{ title }}
       </h2>
-      <feather-icon
-        v-if="collapsible"
-        :name="collapsed ? 'chevron-up' : 'chevron-down'"
-        class="w-4 h-4 text-gray-600 dark:text-gray-400"
-      />
-    </div>
+    </FrappeButton>
+    <h2 v-else-if="showTitle && title" class="mb-4 text-base font-semibold text-ink-gray-9">
+      {{ title }}
+    </h2>
     <div v-if="!collapsed" class="grid gap-4 gap-x-8 grid-cols-2">
       <div
         v-for="field of fields"
@@ -40,7 +41,10 @@
           :value="tableValue(doc[field.fieldname])"
           @editrow="(doc: Doc) => $emit('editrow', doc)"
           @change="(value: DocValue) => $emit('value-change', field, value)"
-          @row-change="(field:Field, value:DocValue, parentfield:Field) => $emit('row-change',field, value, parentfield)"
+          @row-change="
+            (field: Field, value: DocValue, parentfield: Field) =>
+              $emit('row-change', field, value, parentfield)
+          "
         />
         <FormControl
           v-else
@@ -53,7 +57,10 @@
           :value="doc[field.fieldname]"
           @editrow="(doc: Doc) => $emit('editrow', doc)"
           @change="(value: DocValue) => $emit('value-change', field, value)"
-          @row-change="(field:Field, value:DocValue, parentfield:Field) => $emit('row-change',field, value, parentfield)"
+          @row-change="
+            (field: Field, value: DocValue, parentfield: Field) =>
+              $emit('row-change', field, value, parentfield)
+          "
         />
         <div v-if="errors?.[field.fieldname]" class="text-sm text-red-600 mt-1">
           {{ errors[field.fieldname] }}
@@ -67,13 +74,14 @@
 import { DocValue } from 'fyo/core/types';
 import { Doc } from 'fyo/model/doc';
 import { Field } from 'schemas/types';
+import { Button as FrappeButton } from 'frappe-ui';
 import FormControl from 'src/components/Controls/FormControl.vue';
 import Table from 'src/components/Controls/Table.vue';
 import { focusOrSelectFormControl } from 'src/utils/ui';
 import { defineComponent, PropType } from 'vue';
 
 export default defineComponent({
-  components: { FormControl, Table },
+  components: { FormControl, Table, FrappeButton },
   props: {
     title: { type: String, default: '' },
     errors: {

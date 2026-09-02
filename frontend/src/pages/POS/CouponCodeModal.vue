@@ -20,17 +20,7 @@
           :key="coupon.coupons"
           :ratio="ratio"
           :border="true"
-          class="
-            border-b border-l border-r
-            dark:border-gray-800
-            relative
-            group
-            h-coupon-mid
-            hover:bg-gray-25
-            dark:bg-gray-890
-            items-center
-            justify-center
-          "
+          class="border-b border-l border-r dark:border-gray-800 relative group h-coupon-mid hover:bg-gray-25 dark:bg-gray-890 items-center justify-center"
         >
           <div class="flex flex-row w-full items-center">
             <div class="flex flex-row">
@@ -46,9 +36,13 @@
             </div>
           </div>
           <div class="absolute right-3">
-            <feather-icon
-              name="trash"
-              class="w-4 text-xl text-red-500 cursor-pointer"
+            <FrappeButton
+              icon="lucide-trash-2"
+              theme="red"
+              variant="ghost"
+              size="xs"
+              :tooltip="t`Remove coupon`"
+              :aria-label="t`Remove coupon`"
               @click="removeAppliedCoupon(coupon)"
             />
           </div>
@@ -125,6 +119,7 @@ import { Field } from 'schemas/types';
 import FormControl from 'src/components/Controls/FormControl.vue';
 import Row from 'src/components/Row.vue';
 import { InvoiceItem } from 'models/baseModels/InvoiceItem/InvoiceItem';
+import { Button as FrappeButton } from 'frappe-ui';
 
 export default defineComponent({
   name: 'CouponCodeModal',
@@ -134,6 +129,7 @@ export default defineComponent({
     Link,
     FormControl,
     Row,
+    FrappeButton,
   },
   props: {
     openModal: Boolean,
@@ -177,8 +173,7 @@ export default defineComponent({
 
       this.couponCode = '';
       this.validationError = false;
-      this.initialCouponCodes =
-        this.sinvDoc.coupons?.map((coupon) => coupon.coupons ?? '') ?? [];
+      this.initialCouponCodes = this.sinvDoc.coupons?.map((coupon) => coupon.coupons ?? '') ?? [];
     },
   },
   methods: {
@@ -194,14 +189,12 @@ export default defineComponent({
         }
 
         this.couponCode = value as string;
-        const appliedCouponCodes = this.fyo.doc.getNewDoc(
-          ModelNameEnum.AppliedCouponCodes
-        );
+        const appliedCouponCodes = this.fyo.doc.getNewDoc(ModelNameEnum.AppliedCouponCodes);
 
         await validateCouponCode(
           appliedCouponCodes as AppliedCouponCodes,
           this.couponCode,
-          this.sinvDoc
+          this.sinvDoc,
         );
 
         await this.sinvDoc.append('coupons', { coupons: this.couponCode });

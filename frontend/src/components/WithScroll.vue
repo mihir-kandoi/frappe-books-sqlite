@@ -1,31 +1,41 @@
 <template>
-  <div class="custom-scroll custom-scroll-thumb1">
+  <FrappeScrollArea ref="scrollArea" orientation="both">
     <slot></slot>
-  </div>
+  </FrappeScrollArea>
 </template>
 <script lang="ts">
+import { ScrollArea as FrappeScrollArea, type ScrollAreaExposed } from 'frappe-ui';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'WithScroll',
+  components: { FrappeScrollArea },
   emits: ['scroll'],
   data() {
     return { listener: undefined } as { listener?: () => void };
   },
   mounted() {
     this.listener = () => {
-      let { scrollLeft, scrollTop } = this.$el;
+      const { scrollLeft, scrollTop } = this.scrollElement ?? {
+        scrollLeft: 0,
+        scrollTop: 0,
+      };
       this.$emit('scroll', { scrollLeft, scrollTop });
     };
-    this.$el.addEventListener('scroll', this.listener);
+    this.scrollElement?.addEventListener('scroll', this.listener);
   },
   beforeUnmount() {
     if (!this.listener) {
       return;
     }
 
-    this.$el.removeEventListener('scroll', this.listener);
+    this.scrollElement?.removeEventListener('scroll', this.listener);
     delete this.listener;
+  },
+  computed: {
+    scrollElement(): HTMLElement | null {
+      return (this.$refs.scrollArea as ScrollAreaExposed | undefined)?.viewportElement ?? null;
+    },
   },
 });
 </script>

@@ -1,8 +1,11 @@
 <template>
   <div>
-    <feather-icon
-      :name="isExapanded ? 'chevron-up' : 'chevron-down'"
-      class="w-4 h-4 inline-flex cursor-pointer text-gray-700 dark:text-gray-200"
+    <FrappeButton
+      :icon="isExapanded ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+      variant="ghost"
+      size="xs"
+      :tooltip="isExapanded ? t`Collapse item` : t`Expand item`"
+      :aria-label="isExapanded ? t`Collapse item` : t`Expand item`"
       @click="toggleExpand"
     />
   </div>
@@ -66,10 +69,14 @@
   />
 
   <div class="flex justify-center">
-    <feather-icon
-      name="trash"
-      class="w-4 text-xl text-red-500"
-      @click="removeAddedItem(row)"
+    <FrappeButton
+      icon="lucide-trash-2"
+      theme="red"
+      variant="ghost"
+      size="xs"
+      :tooltip="t`Remove item`"
+      :aria-label="t`Remove item`"
+      @click.stop="removeAddedItem(row)"
     />
   </div>
 
@@ -109,7 +116,7 @@
           :border="true"
           :value="row.transferUnit"
           :read-only="isReadOnly"
-          @change="(value:string) => row.set('transferUnit', value)"
+          @change="(value: string) => row.set('transferUnit', value)"
         />
       </div>
 
@@ -158,7 +165,7 @@
           :show-label="true"
           :border="true"
           :value="row.itemDiscountAmount"
-          :read-only="isDiscountReadOnly(row.itemDiscountPercent as number > 0)"
+          :read-only="isDiscountReadOnly((row.itemDiscountPercent as number) > 0)"
         />
       </div>
 
@@ -179,31 +186,25 @@
         />
       </div>
 
-      <div
-        v-if="row.links?.item && row.links?.item.hasBatch"
-        class="px-4 pt-6 col-span-2"
-      >
+      <div v-if="row.links?.item && row.links?.item.hasBatch" class="px-4 pt-6 col-span-2">
         <Link
           :df="{
             fieldname: 'batch',
             fieldtype: 'Link',
             target: 'Batch',
             label: t`Batch`,
-            filters: { item: row.item as string},
+            filters: { item: row.item as string },
           }"
           size="medium"
           :value="row.batch"
           :border="true"
           :show-label="true"
           :read-only="false"
-          @change="(value:string) => setBatch(value)"
+          @change="(value: string) => setBatch(value)"
         />
       </div>
 
-      <div
-        v-if="row.links?.item && row.links?.item.hasBatch"
-        class="px-4 pt-6 col-span-2"
-      >
+      <div v-if="row.links?.item && row.links?.item.hasBatch" class="px-4 pt-6 col-span-2">
         <Float
           :df="{
             fieldname: 'availableQtyInBatch',
@@ -231,7 +232,7 @@
           :show-label="true"
           :border="true"
           :required="hasSerialNumber"
-          @change="(value:string)=> setSerialNumber(value)"
+          @change="(value: string) => setSerialNumber(value)"
         />
       </div>
     </div>
@@ -239,6 +240,7 @@
 </template>
 
 <script lang="ts">
+import { Button as FrappeButton } from 'frappe-ui';
 import AutoComplete from 'src/components/Controls/AutoComplete.vue';
 import Currency from 'src/components/Controls/Currency.vue';
 import Data from 'src/components/Controls/Data.vue';
@@ -256,7 +258,15 @@ import { getPOSPermissionSetting } from 'src/utils/pos';
 
 export default defineComponent({
   name: 'ModernPOSSelectedItemRow',
-  components: { AutoComplete, Currency, Data, Float, Link, Text },
+  components: {
+    AutoComplete,
+    Currency,
+    Data,
+    Float,
+    Link,
+    Text,
+    FrappeButton,
+  },
   props: {
     row: { type: SalesInvoiceItem, required: true },
     batchAdded: { type: Boolean, default: false },
@@ -321,11 +331,7 @@ export default defineComponent({
     },
     'row.quantity': {
       async handler(newQuantity, oldQuantity) {
-        if (
-          this.hasSerialNumber &&
-          newQuantity &&
-          newQuantity !== oldQuantity
-        ) {
+        if (this.hasSerialNumber && newQuantity && newQuantity !== oldQuantity) {
           await this.fetchSerialNumbers();
         }
       },
@@ -374,8 +380,7 @@ export default defineComponent({
       }
     },
     handleOpenKeyboard(row: SalesInvoiceItem, field: string) {
-      const isDiscountField =
-        field === 'itemDiscountAmount' || field === 'itemDiscountPercent';
+      const isDiscountField = field === 'itemDiscountAmount' || field === 'itemDiscountPercent';
       if (
         this.isReadOnly ||
         (field === 'quantity' && this.isUOMConversionEnabled) ||
@@ -429,7 +434,7 @@ export default defineComponent({
           undefined,
           undefined,
           undefined,
-          this.row.batch
+          this.row.batch,
         )) ?? 0
       );
     },
@@ -445,11 +450,7 @@ export default defineComponent({
       await this.row.set('serialNumber', serialNumber);
       this.itemSerialNumbers[this.row.item as string] = serialNumber;
 
-      validateSerialNumberCount(
-        serialNumber,
-        Math.abs(this.row.quantity ?? 0),
-        this.row.item!
-      );
+      validateSerialNumberCount(serialNumber, Math.abs(this.row.quantity ?? 0), this.row.item!);
     },
     async fetchSerialNumbers() {
       if (!this.hasSerialNumber) {
@@ -461,8 +462,7 @@ export default defineComponent({
         return;
       }
 
-      const existingSerialNumbers =
-        this.itemSerialNumbers[this.row.item as string] ?? '';
+      const existingSerialNumbers = this.itemSerialNumbers[this.row.item as string] ?? '';
       const existingCount = existingSerialNumbers
         .split('\n')
         .filter((serialNumber) => serialNumber.trim()).length;
@@ -474,7 +474,7 @@ export default defineComponent({
       const serialNumbers = await getExistingActiveSerialNumbersForItem(
         fyo,
         this.row.item as string,
-        quantity
+        quantity,
       );
 
       if (!serialNumbers) {

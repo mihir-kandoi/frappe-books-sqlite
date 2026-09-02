@@ -29,7 +29,7 @@ import { POSProfile } from 'models/baseModels/POSProfile/PosProfile';
  */
 export type FormulaReturn = DocValue | DocValueMap[] | undefined | Doc[];
 export type Formula = (
-  fieldname?: string
+  fieldname?: string,
 ) => Promise<FormulaReturn> | FormulaReturn;
 export type FormulaConfig = { dependsOn?: string[]; formula: Formula };
 export type Default = (doc: Doc) => DocValue;
@@ -87,9 +87,7 @@ export interface Action {
   condition?: (doc: Doc) => boolean;
   group?: string;
   type?: 'primary' | 'secondary';
-  component?: {
-    template: string;
-  };
+  theme?: 'gray' | 'red';
 }
 
 export interface RenderData {
@@ -117,12 +115,7 @@ export interface TreeViewSettings {
 }
 
 export type DocStatus =
-  | ''
-  | 'Draft'
-  | 'Saved'
-  | 'NotSaved'
-  | 'Submitted'
-  | 'Cancelled';
+  '' | 'Draft' | 'Saved' | 'NotSaved' | 'Submitted' | 'Cancelled';
 
 export type LeadStatus =
   | ''
