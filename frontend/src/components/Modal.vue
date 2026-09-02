@@ -3,7 +3,7 @@
     :open="openModal"
     bare
     :size="size"
-    :dismissible="setCloseListener"
+    :dismissible="true"
     @close="$emit('closemodal')"
   >
     <div
@@ -55,10 +55,6 @@ export default defineComponent({
     size: {
       default: '2xl',
       type: String as PropType<DialogSize>,
-    },
-    setCloseListener: {
-      default: true,
-      type: Boolean,
     },
   },
   emits: ['closemodal'],

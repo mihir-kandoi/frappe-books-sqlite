@@ -15,6 +15,7 @@ class BooksPaymentMethod(Document):
 		from frappe.types import DF
 
 		account: DF.Link | None
+		requires_clearance_date: DF.Check
 		type: DF.Literal["Cash", "Bank", "Transfer"]
 	# end: auto-generated types
 

@@ -1,0 +1,84 @@
+<template>
+	<FrappeTextInput
+		:model-value="displayText"
+		:label="showLabel ? df.label : undefined"
+		:description="showLabel ? df.sub_label : undefined"
+		:required="required"
+		:size="frappeSize"
+		:variant="border ? 'outline' : 'ghost'"
+		:class="controlClasses"
+		:style="containerStyles"
+		:title="displayText"
+		disabled
+	>
+		<template v-if="$slots.trailing" #suffix>
+			<slot name="trailing"></slot>
+		</template>
+	</FrappeTextInput>
+</template>
+
+<script lang="ts">
+import { Doc } from "fyo/model/doc";
+import { TextInput as FrappeTextInput } from "frappe-ui";
+import { Field } from "schemas/types";
+import { fyo } from "src/initFyo";
+import { isNumeric } from "src/utils";
+import { defineComponent, PropType } from "vue";
+
+export default defineComponent({
+	name: "ReadOnlyValue",
+	components: { FrappeTextInput },
+	props: {
+		df: { type: Object as PropType<Field>, required: true },
+		value: {
+			type: [String, Number, Boolean, Object, Array] as PropType<
+				string | number | boolean | Record<string, unknown> | unknown[] | null
+			>,
+			default: null,
+		},
+		displayValue: String,
+		doc: { type: Object as PropType<Doc> },
+		border: { type: Boolean, default: false },
+		showLabel: { type: Boolean, default: false },
+		required: { type: Boolean, default: false },
+		size: { type: String, default: "large" },
+		textRight: {
+			type: [null, Boolean] as PropType<boolean | null>,
+			default: null,
+		},
+		containerStyles: { type: Object, default: () => ({}) },
+	},
+	computed: {
+		displayText(): string {
+			if (String(this.df.fieldtype) === "Secret") {
+				return this.value ? "••••••••" : "—";
+			}
+
+			const formatted = this.displayValue ?? this.formatValue(this.value, this.df, this.doc);
+			return formatted || "—";
+		},
+		frappeSize(): "sm" | "md" {
+			return this.size === "small" ? "sm" : "md";
+		},
+		controlClasses(): string[] {
+			const classes = ["font-sans", "[&_input]:cursor-not-allowed", "[&_input]:text-base"];
+			if (this.textRight ?? isNumeric(this.df)) {
+				classes.push("[&_input]:text-end");
+			}
+			if (this.$slots.trailing) {
+				classes.push("[&_input]:pe-16");
+			}
+			return classes;
+		},
+	},
+	methods: {
+		formatValue(value: unknown, field: Field, doc?: Doc): string {
+			try {
+				return fyo.format(value, field, doc);
+			} catch {
+				return value == null ? "" : String(value);
+			}
+		},
+	},
+});
+</script>

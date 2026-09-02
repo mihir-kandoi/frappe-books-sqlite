@@ -1,12 +1,24 @@
 <template>
+  <ReadOnlyValue
+    v-if="isReadOnly"
+    :df="df"
+    :value="value"
+    :doc="doc"
+    :border="border"
+    :show-label="showLabel"
+    :required="isRequired"
+    :size="size"
+    :text-right="textRight"
+    :container-styles="containerStyles"
+  />
   <component
+    v-else
     :is="pickerComponent"
     ref="input"
     :model-value="inputValue"
     :label="showLabel ? df.label : undefined"
     :description="showLabel ? df.sub_label : undefined"
     :placeholder="inputPlaceholder"
-    :disabled="isReadOnly"
     :required="isRequired"
     :clearable="true"
     :format="frappeDateFormat"
@@ -27,12 +39,14 @@ import { DateTime } from 'luxon';
 import { fyo } from 'src/initFyo';
 import { defineComponent } from 'vue';
 import Base from './Base.vue';
+import ReadOnlyValue from './ReadOnlyValue.vue';
 
 export default defineComponent({
   name: 'Date',
   components: {
     FrappeDatePicker: DatePicker,
     FrappeDateTimePicker: DateTimePicker,
+    ReadOnlyValue,
   },
   extends: Base,
   emits: ['input', 'focus'],

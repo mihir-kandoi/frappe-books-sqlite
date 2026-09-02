@@ -80,4 +80,4 @@ export enum ModelNameEnum {
 
 export type ModelName = keyof typeof ModelNameEnum;
 
-export type PaymentMethodType = 'Cash' | 'Bank';
+export type PaymentMethodType = 'Cash' | 'Bank' | 'Transfer';

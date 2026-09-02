@@ -1,10 +1,8 @@
 <script>
 import { t } from 'fyo';
-import Badge from 'src/components/Badge.vue';
 import { fyo } from 'src/initFyo';
 import { fuzzyMatch } from 'src/utils';
 import { getCreateFiltersFromListViewFilters } from 'src/utils/misc';
-import { markRaw } from 'vue';
 import AutoComplete from './AutoComplete.vue';
 
 export default {
@@ -104,22 +102,9 @@ export default {
         if (filters && !!fyo.singles.SystemSettings?.allowFilterBypass) {
           options = [
             {
-              component: markRaw({
-                template:
-                  '<span class="text-gray-600 dark:text-gray-400">{{ t`No results found, disable filters` }}</span>',
-              }),
+              label: t`Show unfiltered results`,
+              description: t`No results match the current filters`,
               action: () => this.disableFiltering(),
-              actionOnly: true,
-            },
-          ];
-        } else if (this.isFocused && (!this.doc || !this.df.create)) {
-          options = [
-            {
-              component: markRaw({
-                template:
-                  '<span class="text-gray-600 dark:text-gray-400">{{ t`No results found` }}</span>',
-              }),
-              action: () => {},
               actionOnly: true,
             },
           ];
@@ -135,23 +120,9 @@ export default {
     getCreateNewOption() {
       return {
         label: t`Create`,
+        description: this.linkValue || undefined,
         action: () => this.openNewDoc(),
         actionOnly: true,
-        component: markRaw({
-          template:
-            '<div class="flex items-center font-semibold">{{ t`Create` }}' +
-            '<Badge color="blue" class="ms-2" v-if="isNewValue">{{ linkValue }}</Badge>' +
-            '</div>',
-          computed: {
-            value: () => this.value,
-            linkValue: () => this.linkValue,
-            isNewValue: () => {
-              const values = this.suggestions.map((d) => d.label);
-              return this.linkValue && !values.includes(this.linkValue);
-            },
-          },
-          components: { Badge },
-        }),
       };
     },
     disableFiltering(keyword) {

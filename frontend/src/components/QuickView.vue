@@ -1,45 +1,64 @@
 <template>
-  <div style="min-width: 192px; max-width: 300px">
-    <div
-      class="p-2 flex justify-between"
-      :class="values.length ? 'border-b dark:border-gray-800' : ''"
-    >
+  <div class="w-72 font-sans">
+    <header class="border-b border-outline-gray-1 px-3 py-2.5">
       <p
         v-if="schema?.naming !== 'random' && !schema?.isChild"
-        class="font-semibold text-base text-gray-900 dark:text-gray-25"
+        class="truncate text-base font-medium text-ink-gray-9"
+        :title="name"
       >
         {{ name }}
       </p>
-      <p class="font-semibold text-base text-gray-600 dark:text-gray-400">
+      <p class="mt-0.5 truncate text-sm text-ink-gray-5">
         {{ schema?.label ?? '' }}
       </p>
+    </header>
+
+    <div v-if="isLoading" class="flex justify-center px-3 py-4">
+      <FrappeSpinner size="sm" class="text-ink-gray-5" />
     </div>
-    <div v-if="values.length" class="flex gap-2 p-2 flex-wrap">
-      <p
+
+    <dl
+      v-else-if="values.length"
+      class="custom-scroll custom-scroll-thumb1 max-h-64 overflow-y-auto py-1"
+    >
+      <div
         v-for="v of values"
         :key="v.label"
-        class="pill bg-gray-200 dark:bg-gray-800"
+        class="grid grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] items-baseline gap-3 px-3 py-1.5"
       >
-        <span class="text-gray-600 dark:text-gray-500">{{ v.label }}</span>
-        <span class="text-gray-800 dark:text-gray-300 ml-1.5">{{
-          v.value
-        }}</span>
-      </p>
-    </div>
+        <dt class="truncate text-sm text-ink-gray-5" :title="v.label">
+          {{ v.label }}
+        </dt>
+        <dd class="truncate text-sm text-ink-gray-8" :title="v.value">
+          {{ v.value }}
+        </dd>
+      </div>
+    </dl>
   </div>
 </template>
 <script lang="ts">
 import { isFalsy } from 'fyo/utils';
+import { Spinner as FrappeSpinner } from 'frappe-ui';
 import { Field } from 'schemas/types';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
+  name: 'QuickView',
+  components: { FrappeSpinner },
   props: {
     schemaName: { type: String, required: true },
     name: { type: String, required: true },
   },
   data() {
-    return { values: [] } as { values: { label: string; value: string }[] };
+    return {
+      isLoading: true,
+      valueRequest: 0,
+      values: [],
+    } as {
+      isLoading: boolean;
+      valueRequest: number;
+      values: { label: string; value: string }[];
+    };
   },
   computed: {
     schema() {
@@ -60,43 +79,56 @@ export default defineComponent({
   },
   methods: {
     async setValues() {
-      const fields: Field[] = (this.schema?.fields ?? []).filter(
-        (f) =>
-          f &&
-          f.fieldtype !== 'Table' &&
-          f.fieldtype !== 'AttachImage' &&
-          f.fieldtype !== 'Attachment' &&
-          f.fieldname !== 'name' &&
-          !f.hidden &&
-          !f.meta &&
-          !f.abstract &&
-          !f.computed
-      );
+      const request = ++this.valueRequest;
+      this.isLoading = true;
+      try {
+        const fields: Field[] = (this.schema?.fields ?? []).filter(
+          (f) =>
+            f &&
+            f.fieldtype !== 'Table' &&
+            f.fieldtype !== 'AttachImage' &&
+            f.fieldtype !== 'Attachment' &&
+            f.fieldname !== 'name' &&
+            !f.hidden &&
+            !f.meta &&
+            !f.abstract &&
+            !f.computed
+        );
 
-      const data = (
-        await this.fyo.db.getAll(this.schemaName, {
-          fields: fields.map((f) => f.fieldname),
-          filters: { name: this.name },
-        })
-      )[0];
+        const data = (
+          await this.fyo.db.getAll(this.schemaName, {
+            fields: fields.map((f) => f.fieldname),
+            filters: { name: this.name },
+          })
+        )[0];
 
-      if (!data) {
-        return;
+        if (request !== this.valueRequest) {
+          return;
+        }
+
+        if (!data) {
+          this.values = [];
+          return;
+        }
+
+        this.values = fields
+          .map((f) => {
+            const value = data[f.fieldname];
+            if (isFalsy(value)) {
+              return { value: '', label: '' };
+            }
+
+            return {
+              value: this.fyo.format(data[f.fieldname], f),
+              label: f.label,
+            };
+          })
+          .filter((i) => !!i.value);
+      } finally {
+        if (request === this.valueRequest) {
+          this.isLoading = false;
+        }
       }
-
-      this.values = fields
-        .map((f) => {
-          const value = data[f.fieldname];
-          if (isFalsy(value)) {
-            return { value: '', label: '' };
-          }
-
-          return {
-            value: this.fyo.format(data[f.fieldname], f),
-            label: f.label,
-          };
-        })
-        .filter((i) => !!i.value);
     },
   },
 });

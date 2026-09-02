@@ -1,78 +1,72 @@
 <template>
-  <div>
-    <div v-if="showLabel && df" :class="labelClasses">
-      {{ df.label }}
-    </div>
-    <div :class="containerClasses" class="flex gap-2 items-center">
-      <FrappeTextInput
-        class="min-w-0 flex-1"
-        :model-value="label"
-        :disabled="true"
-        :variant="frappeVariant"
-        :size="frappeSize"
-      />
-      <input
-        id="attachment"
-        ref="fileInput"
-        type="file"
-        accept="image/*,.pdf"
-        class="hidden"
-        :disabled="!!value"
-        @input="selectFile"
-      />
+  <div class="min-w-0">
+    <ReadOnlyValue
+      :df="df"
+      :value="value"
+      :display-value="value ? label : undefined"
+      :doc="doc"
+      :border="border"
+      :show-label="showLabel"
+      :required="isRequired"
+      :size="size"
+    >
+      <template v-if="value || !isReadOnly" #trailing>
+        <div class="ms-2 flex shrink-0 gap-1">
+          <FrappeButton
+            v-if="!value && !isReadOnly"
+            variant="ghost"
+            size="xs"
+            aria-label="Upload attachment"
+            @click="upload"
+          >
+            <template #icon><span class="lucide-upload size-4" /></template>
+          </FrappeButton>
 
-      <!-- Buttons -->
-      <div class="me-2 flex gap-1">
-        <!-- Upload Button -->
-        <FrappeButton
-          v-if="!value"
-          variant="ghost"
-          size="xs"
-          aria-label="Upload attachment"
-          @click="upload"
-        >
-          <template #icon><span class="lucide-upload size-4" /></template>
-        </FrappeButton>
+          <FrappeButton
+            v-if="value"
+            variant="ghost"
+            size="xs"
+            aria-label="Download attachment"
+            @click="download"
+          >
+            <template #icon><span class="lucide-download size-4" /></template>
+          </FrappeButton>
 
-        <!-- Download Button -->
-        <FrappeButton
-          v-if="value"
-          variant="ghost"
-          size="xs"
-          aria-label="Download attachment"
-          @click="download"
-        >
-          <template #icon><span class="lucide-download size-4" /></template>
-        </FrappeButton>
-
-        <!-- Clear Button -->
-        <FrappeButton
-          v-if="value && !isReadOnly"
-          variant="ghost"
-          size="xs"
-          aria-label="Remove attachment"
-          @click="clear"
-        >
-          <template #icon><span class="lucide-x size-4" /></template>
-        </FrappeButton>
-      </div>
-    </div>
+          <FrappeButton
+            v-if="value && !isReadOnly"
+            variant="ghost"
+            size="xs"
+            aria-label="Remove attachment"
+            @click="clear"
+          >
+            <template #icon><span class="lucide-x size-4" /></template>
+          </FrappeButton>
+        </div>
+      </template>
+    </ReadOnlyValue>
+    <input
+      id="attachment"
+      ref="fileInput"
+      type="file"
+      accept="image/*,.pdf"
+      class="hidden"
+      :disabled="!!value || isReadOnly"
+      @input="selectFile"
+    />
   </div>
 </template>
 <script lang="ts">
 import { t } from 'fyo';
 import { Attachment } from 'fyo/core/types';
-import {
-  Button as FrappeButton,
-  TextInput as FrappeTextInput,
-} from 'frappe-ui';
+import { Button as FrappeButton } from 'frappe-ui';
 import { Field } from 'schemas/types';
 import { convertFileToDataURL } from 'src/utils/misc';
 import { defineComponent, PropType } from 'vue';
 import Base from './Base.vue';
+import ReadOnlyValue from './ReadOnlyValue.vue';
 
 export default defineComponent({
-  components: { FrappeButton, FrappeTextInput },
+  components: { FrappeButton, ReadOnlyValue },
   extends: Base,
   props: {
     df: Object as PropType<Field>,

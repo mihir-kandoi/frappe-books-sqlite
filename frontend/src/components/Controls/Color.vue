@@ -1,9 +1,29 @@
 <template>
-  <div>
+  <ReadOnlyValue
+    v-if="isReadOnly"
+    :df="df"
+    :value="value"
+    :display-value="selectedColorLabel || undefined"
+    :doc="doc"
+    :border="border"
+    :show-label="showLabel"
+    :required="isRequired"
+    :size="size"
+    :container-styles="containerStyles"
+  >
+    <template v-if="value" #trailing>
+      <span
+        class="ms-2 size-3 shrink-0 rounded"
+        :style="{ backgroundColor: normalizedColor }"
+        aria-hidden="true"
+      />
+    </template>
+  </ReadOnlyValue>
+  <div v-else>
     <div v-if="showLabel" :class="labelClasses">
       {{ df.label }}
     </div>
-    <Popover :disabled="isReadOnly" placement="bottom-end">
+    <Popover placement="bottom-end">
       <template #target>
         <div tabindex="0" :class="[inputClasses, containerClasses]">
           <div class="flex items-center">
@@ -102,11 +122,13 @@
 <script>
 import Popover from 'src/components/Popover.vue';
 import Base from './Base.vue';
+import ReadOnlyValue from './ReadOnlyValue.vue';
 
 export default {
   name: 'Color',
   components: {
     Popover,
+    ReadOnlyValue,
   },
   extends: Base,
   computed: {

@@ -61,11 +61,23 @@ export async function printHtml(html: string): Promise<boolean> {
   popup.document.open();
   popup.document.write(`<!DOCTYPE html>${html}`);
   popup.document.close();
+  void printPopupWhenReady(popup).catch(() => {
+    if (!popup.closed) {
+      popup.close();
+    }
+  });
+  return true;
+}
+
+async function printPopupWhenReady(popup: Window) {
   await waitForPrintContent(popup);
+  if (popup.closed) {
+    return;
+  }
+
   popup.focus();
   popup.addEventListener('afterprint', () => popup.close(), { once: true });
   popup.print();
-  return true;
 }
 
 function getAcceptedExtensions(
@@ -96,9 +108,5 @@ async function waitForPrintContent(popup: Window) {
     Promise.all([imageReady, fontsReady]),
     new Promise<void>((resolve) => window.setTimeout(resolve, 3_000)),
   ]);
-  await new Promise<void>((resolve) =>
-    popup.requestAnimationFrame(() =>
-      popup.requestAnimationFrame(() => resolve())
-    )
-  );
+  await new Promise<void>((resolve) => window.setTimeout(resolve));
 }

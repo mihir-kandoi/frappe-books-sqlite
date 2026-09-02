@@ -105,6 +105,7 @@
       :open-applied-coupons-modal="openAppliedCouponsModal"
       :open-return-sales-invoice-modal="openReturnSalesInvoiceModal"
       :open-batch-selection-modal="openBatchSelectionModal"
+      :apply-pricing-rule-action="applyPricingRule"
       :selected-item-for-batch="selectedItemForBatch"
       :expanded-batch-id="expandedBatchId"
       @set-expanded-batch-id="setExpandedBatchId"
@@ -154,6 +155,7 @@ import PageHeader from 'src/components/PageHeader.vue';
 import { computed, defineComponent, inject } from 'vue';
 import { Payment } from 'models/baseModels/Payment/Payment';
 import { PaymentMethod } from 'models/baseModels/PaymentMethod/PaymentMethod';
+import { getPaymentMethodRequirements } from 'models/baseModels/PaymentMethod/requirements';
 import { ModalName, modalNames } from 'src/components/POS/types';
 import { POSProfile } from 'models/baseModels/POSProfile/PosProfile';
 import { InvoiceItem } from 'models/baseModels/InvoiceItem/InvoiceItem';
@@ -338,6 +340,7 @@ export default defineComponent({
     this.shortcuts?.delete(COMPONENT_NAME);
     toggleSidebar(true);
     this.removeQuickQtyListeners();
+    this.closeAllModals();
   },
   methods: {
     setQuickQtySelectedRow(row: SalesInvoiceItem) {
@@ -1206,6 +1209,8 @@ export default defineComponent({
           await this.makePayment();
         }
 
+        this.toggleModal('Payment', false);
+
         if (shouldPrint) {
           await routeTo(
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -1244,8 +1249,12 @@ export default defineComponent({
         ModelNameEnum.PaymentMethod,
         this.paymentMethod
       )) as PaymentMethod;
+      const requirements = getPaymentMethodRequirements(
+        paymentMethod.type,
+        paymentMethod.requiresClearanceDate
+      );
 
-      if (paymentMethod.type === 'Cash') {
+      if (requirements.isCash) {
         return;
       }
 
@@ -1255,11 +1264,11 @@ export default defineComponent({
         );
       }
 
-      if (!this.transferRefNo) {
+      if (requirements.requiresReferenceId && !this.transferRefNo) {
         throw new ValidationError(t`Please enter a reference number.`);
       }
 
-      if (!this.transferClearanceDate) {
+      if (requirements.requiresClearanceDate && !this.transferClearanceDate) {
         throw new ValidationError(t`Please select a clearance date.`);
       }
     },
@@ -1283,18 +1292,26 @@ export default defineComponent({
       await this.paymentDoc.set('amount', paymentAmount);
       await this.paymentDoc.set('referenceType', ModelNameEnum.SalesInvoice);
 
-      const paymentMethodDoc = await this.paymentDoc.loadAndGetLink(
+      const paymentMethodDoc = (await this.paymentDoc.loadAndGetLink(
         'paymentMethod'
+      )) as PaymentMethod;
+      const requirements = getPaymentMethodRequirements(
+        paymentMethodDoc?.type,
+        paymentMethodDoc?.requiresClearanceDate
       );
 
-      if (paymentMethodDoc?.type !== 'Cash') {
-        await this.paymentDoc.setMultiple({
-          referenceId: this.transferRefNo,
-          clearanceDate: this.transferClearanceDate,
-        });
+      if (requirements.requiresReferenceId) {
+        await this.paymentDoc.set('referenceId', this.transferRefNo);
       }
 
-      if (paymentMethodDoc?.type === 'Cash') {
+      if (requirements.requiresClearanceDate) {
+        await this.paymentDoc.set(
+          'clearanceDate',
+          this.transferClearanceDate
+        );
+      }
+
+      if (requirements.isCash) {
         if (this.paymentDoc.paymentType === 'Pay') {
           await this.paymentDoc.setMultiple({
             account: this.defaultPOSCashAccount,
@@ -1378,7 +1395,6 @@ export default defineComponent({
         await this.clearValues();
         this.setSinvDoc();
       }
-      this.toggleModal('Payment', false);
     },
     async clearValues() {
       this.setSinvDoc();
@@ -1401,6 +1417,11 @@ export default defineComponent({
       }
 
       return (this[`open${modal}Modal`] = !this[`open${modal}Modal`]);
+    },
+    closeAllModals() {
+      for (const modal of modalNames) {
+        this[`open${modal}Modal`] = false;
+      }
     },
     updateValues() {
       this.setTotalQuantity();

@@ -28,7 +28,6 @@
 
     <SavedInvoiceModal
       :open-modal="openSavedInvoiceModal"
-      :modal-status="openSavedInvoiceModal"
       @toggle-modal="emitEvent('toggleModal', 'SavedInvoice', false)"
       @selected-invoice-name="
         (invName) => emitEvent('selectedInvoiceName', invName)
@@ -71,7 +70,6 @@
 
     <ReturnSalesInvoiceModal
       :open-modal="openReturnSalesInvoiceModal"
-      :modal-status="openReturnSalesInvoiceModal"
       @selected-return-invoice="(value:any) => emitEvent('selectedReturnInvoice', value)"
       @toggle-modal="emitEvent('toggleModal', 'ReturnSalesInvoice', false)"
     />

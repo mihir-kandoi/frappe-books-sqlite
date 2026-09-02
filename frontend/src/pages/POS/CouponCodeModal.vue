@@ -3,7 +3,7 @@
     :open-modal="openModal"
     size="sm"
     class="h-auto w-full"
-    :set-close-listener="false"
+    @closemodal="cancelApplyCouponCode"
   >
     <p class="text-center font-semibold py-3">Apply Coupon Code</p>
     <div class="px-10">

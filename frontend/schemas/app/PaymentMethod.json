@@ -33,7 +33,13 @@
       "label": "Account",
       "fieldtype": "Link",
       "target": "Account"
+    },
+    {
+      "fieldname": "requiresClearanceDate",
+      "label": "Requires Clearance Date",
+      "fieldtype": "Check",
+      "default": false
     }
   ],
-  "quickEditFields": ["name", "type", "account"]
+  "quickEditFields": ["name", "type", "account", "requiresClearanceDate"]
 }

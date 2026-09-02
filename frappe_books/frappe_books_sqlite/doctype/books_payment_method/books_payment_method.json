@@ -9,7 +9,8 @@
  "engine": "InnoDB",
  "field_order": [
   "type",
-  "account"
+  "account",
+  "requires_clearance_date"
  ],
  "fields": [
   {
@@ -25,6 +26,12 @@
    "fieldtype": "Link",
    "label": "Account",
    "options": "Books Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "requires_clearance_date",
+   "fieldtype": "Check",
+   "label": "Requires Clearance Date"
   }
  ],
  "grid_page_length": 50,

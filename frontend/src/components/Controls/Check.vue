@@ -1,5 +1,18 @@
 <template>
+  <ReadOnlyValue
+    v-if="isReadOnly"
+    :df="df"
+    :value="value"
+    :doc="doc"
+    :border="border"
+    :show-label="showLabel"
+    :required="isRequired"
+    :size="size"
+    :text-right="textRight"
+    :container-styles="containerStyles"
+  />
   <div
+    v-else
     class="flex min-h-8 min-w-0 items-center"
     :class="spaceBetween ? 'justify-between gap-3' : ''"
   >
@@ -10,7 +23,6 @@
       ref="input"
       :model-value="getChecked(value)"
       :label="showLabel && labelRight ? df.label : undefined"
-      :disabled="isReadOnly"
       :required="isRequired"
       size="sm"
       :class="[
@@ -28,10 +40,11 @@
 import { Checkbox as FrappeCheckbox } from 'frappe-ui';
 import { defineComponent } from 'vue';
 import Base from './Base.vue';
+import ReadOnlyValue from './ReadOnlyValue.vue';
 
 export default defineComponent({
   name: 'Check',
-  components: { FrappeCheckbox },
+  components: { FrappeCheckbox, ReadOnlyValue },
   extends: Base,
   props: {
     spaceBetween: {

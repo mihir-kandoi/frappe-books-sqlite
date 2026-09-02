@@ -3,7 +3,7 @@
     :open-modal="openModal"
     size="sm"
     class="h-auto w-full"
-    :set-close-listener="false"
+    @closemodal="cancelPriceList"
   >
     <p class="text-center font-semibold py-3">{{ t`Apply Price List` }}</p>
     <div class="px-10">

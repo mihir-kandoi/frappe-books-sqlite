@@ -7,6 +7,7 @@ export class PaymentMethod extends Doc {
   name?: string;
   account?: Account;
   type?: PaymentMethodType;
+  requiresClearanceDate?: boolean;
 
   static getListViewSettings(): ListViewSettings {
     return {

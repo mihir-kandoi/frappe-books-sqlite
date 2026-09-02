@@ -1,19 +1,30 @@
 <template>
+  <ReadOnlyValue
+    v-if="isReadOnly"
+    :df="df"
+    :value="value"
+    :doc="doc"
+    :border="true"
+    :show-label="true"
+    :required="isRequired"
+    :size="size"
+    :text-right="true"
+  />
   <FrappeTextInput
+    v-else
     ref="input"
     :type="inputType"
     :model-value="round(value)"
     :label="df.label"
     :description="df.sub_label"
     :placeholder="inputPlaceholder"
-    :disabled="isReadOnly"
     :required="isRequired"
     :max="isNumeric(df) ? df.maxvalue : undefined"
     :min="isNumeric(df) ? df.minvalue : undefined"
     :size="size === 'large' ? 'lg' : 'md'"
     variant="outline"
     class="[&_input]:font-medium [&_input]:text-end"
-    :tabindex="isReadOnly ? '-1' : '0'"
+    tabindex="0"
     @blur="onBlur"
     @focus="onFocus"
   >
@@ -33,10 +44,11 @@ import { isPesa } from 'fyo/utils';
 import { fyo } from 'src/initFyo';
 import { defineComponent } from 'vue';
 import { Money } from 'pesa';
+import ReadOnlyValue from '../Controls/ReadOnlyValue.vue';
 
 export default defineComponent({
   name: 'FloatingLabelCurrencyInput',
-  components: { FrappeTextInput },
+  components: { FrappeTextInput, ReadOnlyValue },
   extends: FloatingLabelInputBase,
   computed: {
     currency(): string | undefined {

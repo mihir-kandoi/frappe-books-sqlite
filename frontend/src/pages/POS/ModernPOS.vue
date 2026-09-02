@@ -28,7 +28,6 @@
 
     <SavedInvoiceModal
       :open-modal="openSavedInvoiceModal"
-      :modal-status="openSavedInvoiceModal"
       @toggle-modal="emitEvent('toggleModal', 'SavedInvoice', false)"
       @selected-invoice-name="
         (invName) => emitEvent('selectedInvoiceName', invName)
@@ -71,7 +70,6 @@
 
     <ReturnSalesInvoiceModal
       :open-modal="openReturnSalesInvoiceModal"
-      :modal-status="openReturnSalesInvoiceModal"
       @selected-return-invoice="(value:any) => emitEvent('selectedReturnInvoice', value)"
       @toggle-modal="emitEvent('toggleModal', 'ReturnSalesInvoice', false)"
     />
@@ -88,8 +86,8 @@
       :modal-status="openKeyboardModal"
       :selected-item-field="selectedItemField"
       :selected-item-row="(selectedItemRow as SalesInvoiceItem)"
+      :apply-pricing-rule-action="applyPricingRuleAction"
       @toggle-modal="emitEvent('toggleModal', 'Keyboard', false)"
-      @apply-pricing-rule="emitEvent('applyPricingRule')"
     />
 
     <div
@@ -501,6 +499,10 @@ export default defineComponent({
     openAppliedCouponsModal: Boolean,
     openReturnSalesInvoiceModal: Boolean,
     openBatchSelectionModal: Boolean,
+    applyPricingRuleAction: {
+      type: Function as PropType<() => Promise<void>>,
+      required: true,
+    },
     totalQuantity: {
       type: Number,
       default: 0,

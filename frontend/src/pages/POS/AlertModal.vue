@@ -1,8 +1,9 @@
 <template>
   <Modal
+    :open-modal="openModal"
     size="md"
     class="h-auto w-full px-6 select-none"
-    :set-close-listener="false"
+    @closemodal="$emit('toggleModal', 'Alert')"
   >
     <p class="text-center font-semibold py-3">{{ t`Alert` }}</p>
     <hr class="dark:border-gray-800" />
@@ -39,7 +40,8 @@
       </div>
       <div class="col-span-2 flex justify-center mt-3">
         <Button
-          class="w-full py-5 bg-blue-500 dark:bg-blue-700"
+          class="w-full py-5"
+          type="primary"
           @click="$emit('saveAndContinue')"
         >
           <slot>
@@ -64,6 +66,12 @@ export default defineComponent({
   components: {
     Modal,
     Button,
+  },
+  props: {
+    openModal: {
+      type: Boolean,
+      default: false,
+    },
   },
   emits: ['toggleModal', 'saveAndContinue'],
   methods: {

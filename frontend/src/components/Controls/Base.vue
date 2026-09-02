@@ -1,5 +1,18 @@
 <template>
+  <ReadOnlyValue
+    v-if="isReadOnly"
+    :df="df"
+    :value="value"
+    :doc="doc"
+    :border="border"
+    :show-label="showLabel"
+    :required="isRequired"
+    :size="size"
+    :text-right="textRight"
+    :container-styles="containerStyles"
+  />
   <FrappeTextInput
+    v-else
     ref="input"
     spellcheck="false"
     :class="controlClasses"
@@ -8,7 +21,6 @@
     :label="showLabel ? df.label : undefined"
     :description="showLabel ? df.sub_label : undefined"
     :placeholder="inputPlaceholder"
-    :disabled="isReadOnly"
     :required="isRequired"
     :size="frappeSize"
     :variant="frappeVariant"
@@ -16,7 +28,7 @@
     :max="isNumeric(df) ? df.maxvalue : undefined"
     :min="isNumeric(df) ? df.minvalue : undefined"
     :style="containerStyles"
-    :tabindex="isReadOnly ? '-1' : '0'"
+    tabindex="0"
     @blur="onBlur"
     @focus="onFocus"
     @input="onInput"
@@ -30,10 +42,11 @@ import { isNumeric } from 'src/utils';
 import { evaluateReadOnly, evaluateRequired } from 'src/utils/doc';
 import { getIsNullOrUndef } from 'utils/index';
 import { defineComponent, PropType } from 'vue';
+import ReadOnlyValue from './ReadOnlyValue.vue';
 
 export default defineComponent({
   name: 'Base',
-  components: { FrappeTextInput },
+  components: { FrappeTextInput, ReadOnlyValue },
   inject: {
     injectedDoc: {
       from: 'doc',
@@ -89,10 +102,6 @@ export default defineComponent({
       if (this.showMandatory) {
         classes.push('[&_input]:border-red-400');
       }
-      if (this.isReadOnly) {
-        classes.push('books-readonly-control');
-      }
-
       return classes;
     },
     doc(): Doc | undefined {

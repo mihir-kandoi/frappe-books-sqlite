@@ -1,5 +1,10 @@
 <template>
-  <Modal size="sm" class="h-auto w-full" :set-close-listener="false">
+  <Modal
+    :open-modal="openModal"
+    size="sm"
+    class="h-auto w-full"
+    @closemodal="closeModal"
+  >
     <p class="text-center font-semibold py-3 text-gray-800 dark:text-gray-200">
       {{ t`Select the Batch` }}
     </p>
@@ -65,6 +70,10 @@ export default defineComponent({
     Link,
   },
   props: {
+    openModal: {
+      type: Boolean,
+      default: false,
+    },
     itemCode: {
       type: String,
       required: true,

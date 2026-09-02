@@ -24,7 +24,7 @@
           field.fieldtype === 'Table' ? 'col-span-2 text-base' : '',
           field.fieldtype === 'AttachImage' ? 'row-span-2' : '',
           field.fieldtype === 'Check'
-            ? 'self-end flex min-h-8 w-full items-center'
+            ? 'flex min-h-[54px] w-full items-end self-stretch'
             : 'self-start w-full',
           field.fieldname === 'termsAndConditions' ? 'col-span-2' : '',
           field.invisible ? 'invisible' : '',
@@ -45,6 +45,7 @@
         <FormControl
           v-else
           :ref="field.fieldname === 'name' ? 'nameField' : 'fields'"
+          class="w-full"
           :size="field.fieldtype === 'AttachImage' ? 'form' : undefined"
           :show-label="true"
           :border="true"

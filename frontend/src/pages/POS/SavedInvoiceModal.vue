@@ -1,8 +1,9 @@
 <template>
   <Modal
+    :open-modal="openModal"
     size="2xl"
     class="flex h-[calc(100vh-6rem)] max-h-[40rem] w-full flex-col p-5"
-    :set-close-listener="false"
+    @closemodal="closeModal"
   >
     <p class="text-center font-semibold dark:text-gray-400">
       {{ t`Invoices` }}
@@ -27,7 +28,7 @@
         :background="false"
         class="min-w-0 flex-1 h-full p-2 mt-2"
         :class="{ 'dark:bg-gray-890 underline': savedInvoiceList }"
-        @click="savedInvoiceList = true"
+        @click="showSavedInvoices(true)"
         >Saved</Button
       >
 
@@ -35,105 +36,31 @@
         :background="false"
         class="min-w-0 flex-1 h-full p-2 mt-2"
         :class="{ 'dark:bg-gray-890 underline': !savedInvoiceList }"
-        @click="savedInvoiceList = false"
+        @click="showSavedInvoices(false)"
         >Submitted</Button
       >
     </div>
 
-    <Row
-      :ratio="ratio"
-      class="
-        border
-        flex
-        items-center
-        mt-2
-        px-2
-        w-full
-        rounded-t-md
-        text-gray-600
-        dark:border-gray-800 dark:text-gray-400
-      "
-    >
-      <div
-        v-for="df in tableFields"
-        :key="df.fieldname"
-        class="flex items-center px-2 py-2 text-lg"
+    <InvoiceSelectionTable
+      v-model="selectedInvoiceName"
+      :rows="filteredInvoices"
+      :fields="tableFields"
+      :ratios="ratio"
+      :empty-text="t`No invoices found`"
+    />
+
+    <div class="mt-4 grid grid-cols-2 gap-3">
+      <Button class="w-full" @click="closeModal">
+        {{ t`Cancel` }}
+      </Button>
+      <Button
+        class="w-full"
+        type="primary"
+        :disabled="!selectedInvoiceName"
+        @click="openSelectedInvoice"
       >
-        {{ df.label }}
-      </div>
-    </Row>
-
-    <div
-      v-if="filteredInvoices.length"
-      class="
-        min-h-0
-        flex-1
-        w-full
-        overflow-y-auto
-        custom-scroll custom-scroll-thumb2
-      "
-    >
-      <Row
-        v-for="row in filteredInvoices"
-        :key="row.name"
-        :ratio="ratio"
-        :border="true"
-        class="
-          border-b border-l border-r
-          dark:border-gray-800 dark:bg-gray-890
-          flex
-          group
-          h-row-mid
-          hover:bg-gray-25
-          items-center
-          justify-center
-          px-2
-          w-full
-        "
-        role="button"
-        tabindex="0"
-        @click="$emit('selectedInvoiceName', row)"
-        @keydown.enter="$emit('selectedInvoiceName', row)"
-      >
-        <FormControl
-          v-for="df in tableFields"
-          :key="df.fieldname"
-          size="large"
-          :df="df"
-          :value="row[df.fieldname]"
-          :read-only="true"
-        />
-      </Row>
-    </div>
-
-    <div
-      v-else
-      class="
-        flex
-        min-h-0
-        flex-1
-        items-center
-        justify-center
-        text-sm text-gray-600
-        dark:text-gray-400
-      "
-    >
-      {{ t`No invoices found` }}
-    </div>
-
-    <div class="row-start-6 grid grid-cols-2 gap-4 mt-4">
-      <div class="col-span-2">
-        <Button
-          class="w-full p-5 bg-red-500 dark:bg-red-700"
-          @click="$emit('toggleModal', 'SavedInvoice')"
-        >
-          <slot>
-            <p class="uppercase text-lg text-white font-semibold">
-              {{ t`Cancel` }}
-            </p>
-          </slot>
-        </Button>
-      </div>
+        {{ t`Open Invoice` }}
+      </Button>
     </div>
   </Modal>
 </template>
@@ -141,10 +68,9 @@
 <script lang="ts">
 import Button from 'src/components/Button.vue';
 import Modal from 'src/components/Modal.vue';
-import Row from 'src/components/Row.vue';
-import FormControl from 'src/components/Controls/FormControl.vue';
+import InvoiceSelectionTable from 'src/components/POS/InvoiceSelectionTable.vue';
 import { SalesInvoice } from 'models/baseModels/SalesInvoice/SalesInvoice';
-import { defineComponent, inject } from 'vue';
+import { defineComponent } from 'vue';
 import { ModelNameEnum } from 'models/types';
 import { Field } from 'schemas/types';
 import { Money } from 'pesa';
@@ -155,25 +81,20 @@ export default defineComponent({
   components: {
     Modal,
     Button,
-    FormControl,
-    Row,
+    InvoiceSelectionTable,
     FrappeTextInput,
   },
   props: {
-    modalStatus: Boolean,
+    openModal: Boolean,
   },
   emits: ['toggleModal', 'selectedInvoiceName'],
-  setup() {
-    return {
-      sinvDoc: inject('sinvDoc') as SalesInvoice,
-    };
-  },
   data() {
     return {
       savedInvoiceList: true,
       savedInvoices: [] as SalesInvoice[],
       submittedInvoices: [] as SalesInvoice[],
       invoiceSearchTerm: '',
+      selectedInvoiceName: '',
     };
   },
   computed: {
@@ -221,11 +142,15 @@ export default defineComponent({
     },
   },
   watch: {
-    async modalStatus(newVal) {
+    async openModal(newVal) {
       if (newVal) {
+        this.selectedInvoiceName = '';
         await this.setSavedInvoices();
         await this.setSubmittedInvoices();
       }
+    },
+    invoiceSearchTerm() {
+      this.selectedInvoiceName = '';
     },
   },
   async mounted() {
@@ -257,18 +182,28 @@ export default defineComponent({
         (invoice) => !(invoice.outstandingAmount as Money).isZero()
       );
     },
-    async selectedInvoice(row: SalesInvoice) {
-      let selectedInvoiceDoc = (await this.fyo.doc.getDoc(
-        ModelNameEnum.SalesInvoice,
-        row.name
-      )) as SalesInvoice;
-
-      this.sinvDoc = selectedInvoiceDoc;
+    closeModal() {
+      this.selectedInvoiceName = '';
       this.$emit('toggleModal', 'SavedInvoice');
+    },
+    openSelectedInvoice() {
+      const selectedInvoice = this.filteredInvoices.find(
+        (invoice) => invoice.name === this.selectedInvoiceName
+      );
+      if (!selectedInvoice) {
+        return;
+      }
+
+      this.$emit('selectedInvoiceName', selectedInvoice);
+      this.closeModal();
+    },
+    showSavedInvoices(saved: boolean) {
+      this.savedInvoiceList = saved;
+      this.selectedInvoiceName = '';
     },
     handleEnterKey() {
       if (this.filteredInvoices.length === 1) {
-        this.$emit('selectedInvoiceName', this.filteredInvoices[0]);
+        this.selectedInvoiceName = String(this.filteredInvoices[0].name);
       }
     },
   },

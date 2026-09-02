@@ -1,5 +1,18 @@
 <template>
+  <ReadOnlyValue
+    v-if="isReadOnly"
+    :df="df"
+    :value="value"
+    :doc="doc"
+    :border="border"
+    :show-label="showLabel"
+    :required="isRequired"
+    :size="size"
+    :text-right="textRight"
+    :container-styles="containerStyles"
+  />
   <FrappeSelect
+    v-else
     ref="input"
     :model-value="selectValue"
     :open="dropdownVisible"
@@ -7,7 +20,6 @@
     :label="showLabel ? df.label : undefined"
     :description="showLabel ? df.sub_label : undefined"
     :placeholder="inputPlaceholder"
-    :disabled="isReadOnly"
     :required="isRequired"
     :size="frappeSize"
     :variant="frappeVariant"
@@ -26,10 +38,11 @@ import { Select as FrappeSelect } from 'frappe-ui';
 import { SelectOption } from 'schemas/types';
 import { defineComponent, nextTick } from 'vue';
 import Base from './Base.vue';
+import ReadOnlyValue from './ReadOnlyValue.vue';
 
 export default defineComponent({
   name: 'Select',
-  components: { FrappeSelect },
+  components: { FrappeSelect, ReadOnlyValue },
   extends: Base,
   emits: ['focus'],
   props: {

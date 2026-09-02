@@ -1,5 +1,10 @@
 <template>
-  <Modal :open-modal="openModal" size="2xl" class="w-full p-4">
+  <Modal
+    :open-modal="openModal && isValuesSeeded"
+    size="2xl"
+    class="w-full p-4"
+    @closemodal="$emit('toggleModal', 'ShiftClose', false)"
+  >
     <h1 class="text-xl font-semibold text-center dark:text-gray-100 pb-4">
       {{ t`Close POS Shift` }}
     </h1>
@@ -116,12 +121,6 @@ export default defineComponent({
         }
       },
     },
-  },
-  async mounted() {
-    await this.prepareShift();
-  },
-  async activated() {
-    await this.prepareShift();
   },
   methods: {
     async prepareShift() {
@@ -240,7 +239,6 @@ export default defineComponent({
 
         await this.fyo.singles.POSSettings?.setAndSync('isShiftOpen', false);
         this.$emit('toggleModal', 'ShiftClose');
-        window.location.reload();
       } catch (error) {
         return showToast({
           type: 'error',

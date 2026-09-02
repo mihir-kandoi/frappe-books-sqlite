@@ -29,6 +29,18 @@ export async function showDialog<DO extends DialogOptions>(options: DO) {
       preWrappedButtons.find(({ isEscape }) => isEscape) ??
       (preWrappedButtons.length === 1 ? preWrappedButtons[0] : undefined);
 
+    const settleFromDismiss = async () => {
+      if (escapeButton) {
+        await settleFromAction(escapeButton);
+        return;
+      }
+
+      if (!settled) {
+        settled = true;
+        resolve(undefined);
+      }
+    };
+
     const actions = preWrappedButtons.map((config) => {
       return {
         label: config.label,
@@ -52,12 +64,8 @@ export async function showDialog<DO extends DialogOptions>(options: DO) {
         : undefined,
       theme: getDialogTheme(options.type),
       actions,
-      dismissible: Boolean(escapeButton),
-      onCancel: async () => {
-        if (escapeButton) {
-          await settleFromAction(escapeButton);
-        }
-      },
+      dismissible: true,
+      onCancel: settleFromDismiss,
     });
   });
 }

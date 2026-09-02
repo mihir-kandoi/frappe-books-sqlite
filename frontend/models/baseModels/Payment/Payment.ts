@@ -30,6 +30,7 @@ import { PaymentType, PaymentTypeEnum } from './types';
 import { PartyRoleEnum } from '../Party/types';
 import { TaxSummary } from '../TaxSummary/TaxSummary';
 import { PaymentMethod } from '../PaymentMethod/PaymentMethod';
+import { getPaymentMethodRequirements } from '../PaymentMethod/requirements';
 
 type AccountTypeMap = Record<AccountTypeEnum, string[] | undefined>;
 
@@ -232,17 +233,17 @@ export class Payment extends Transactional {
   }
 
   async validateReferencesAreSet() {
-    const type = (await this.paymentMethodDoc()).type;
+    const paymentMethod = await this.paymentMethodDoc();
+    const requirements = getPaymentMethodRequirements(
+      paymentMethod.type,
+      paymentMethod.requiresClearanceDate
+    );
 
-    if (type !== 'Bank') {
-      return;
-    }
-
-    if (!this.clearanceDate) {
+    if (requirements.requiresClearanceDate && !this.clearanceDate) {
       throw new ValidationError(t`Clearance Date not set.`);
     }
 
-    if (!this.referenceId) {
+    if (requirements.requiresReferenceId && !this.referenceId) {
       throw new ValidationError(t`Reference Id not set.`);
     }
   }

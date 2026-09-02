@@ -20,6 +20,11 @@
 
 @tailwind utilities;
 
+html,
+body {
+  @apply font-sans;
+}
+
 html {
   color: theme('colors.black');
 }
@@ -33,26 +38,6 @@ html.dark {
 html.dark input[type='date']::-webkit-calendar-picker-indicator {
   background-color: transparent;
   color-scheme: dark;
-}
-
-/*
-  Frappe UI intentionally mutes disabled controls. Books also uses `disabled`
-  to make saved and submitted document fields read-only, so that default makes
-  real values look like placeholders. Keep read-only values at the normal text
-  contrast while leaving empty placeholders and disabled actions muted.
- */
-.books-readonly-control:is(input, textarea)[data-slot='control']:disabled,
-.books-readonly-control :is(input, textarea)[data-slot='control']:disabled {
-  @apply text-ink-gray-8;
-  -webkit-text-fill-color: currentColor;
-  opacity: 1;
-}
-
-.books-readonly-control:is([data-slot='trigger'])[data-disabled]:not([data-placeholder]),
-.books-readonly-control
-  [data-slot='trigger'][data-disabled]:not([data-placeholder]) {
-  @apply text-ink-gray-8;
-  opacity: 1;
 }
 
 /*

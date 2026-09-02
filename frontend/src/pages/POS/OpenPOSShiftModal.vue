@@ -1,6 +1,6 @@
 <template>
   <Modal
-    :open-modal="openModal && !isDismissed"
+    :open-modal="openModal && !isDismissed && isValuesSeeded"
     size="2xl"
     class="w-full p-4"
     @closemodal="handleDismiss"

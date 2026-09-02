@@ -8,7 +8,7 @@
     @update:open="setOpen"
   >
     <template #trigger>
-      <div class="h-full">
+      <div class="flex h-full items-center">
         <slot
           name="target"
           :toggle-popover="togglePopover"

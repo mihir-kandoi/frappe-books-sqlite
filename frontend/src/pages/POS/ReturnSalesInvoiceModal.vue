@@ -1,8 +1,9 @@
 <template>
   <Modal
+    :open-modal="openModal"
     size="2xl"
     class="flex h-[calc(100vh-6rem)] max-h-[40rem] w-full flex-col p-5"
-    :set-close-listener="false"
+    @closemodal="closeModal"
   >
     <p class="text-center font-semibold dark:text-gray-400">
       {{ t`Invoices` }}
@@ -24,86 +25,13 @@
 
     <hr class="mt-2 dark:border-gray-800" />
 
-    <Row
-      :ratio="ratio"
-      class="
-        border
-        flex
-        items-center
-        mt-2
-        px-2
-        w-full
-        rounded-t-md
-        text-gray-600
-        dark:border-gray-800 dark:text-gray-400
-      "
-    >
-      <div
-        v-for="df in tableFields"
-        :key="df.fieldname"
-        class="flex items-center px-2 py-2 text-lg"
-      >
-        {{ df.label }}
-      </div>
-    </Row>
-
-    <div
-      v-if="paginatedInvoices.length"
-      class="
-        min-h-0
-        flex-1
-        w-full
-        overflow-y-auto
-        custom-scroll custom-scroll-thumb2
-      "
-    >
-      <Row
-        v-for="row in paginatedInvoices"
-        :key="row.name"
-        :ratio="ratio"
-        :border="true"
-        class="
-          border-b border-l border-r
-          dark:border-gray-800 dark:bg-gray-890
-          flex
-          group
-          h-row-mid
-          hover:bg-gray-25
-          items-center
-          justify-center
-          px-2
-          w-full
-        "
-        role="button"
-        tabindex="0"
-        @click="returnInvoice(row as SalesInvoice)"
-        @keydown.enter="returnInvoice(row as SalesInvoice)"
-      >
-        <FormControl
-          v-for="df in tableFields"
-          :key="df.fieldname"
-          size="large"
-          :df="df"
-          :value="row[df.fieldname]"
-          :read-only="true"
-        />
-      </Row>
-    </div>
-
-    <div
-      v-else
-      class="
-        flex
-        min-h-0
-        flex-1
-        items-center
-        justify-center
-        text-sm text-gray-600
-        dark:text-gray-400
-      "
-    >
-      {{ t`No invoices found` }}
-    </div>
+    <InvoiceSelectionTable
+      v-model="selectedInvoiceName"
+      :rows="paginatedInvoices"
+      :fields="tableFields"
+      :ratios="ratio"
+      :empty-text="t`No invoices found`"
+    />
 
     <div v-if="filteredInvoices.length" class="mt-1 mb-1">
       <Paginator
@@ -113,19 +41,18 @@
       />
     </div>
 
-    <div class="row-start-6 grid grid-cols-2 gap-4 mt-1">
-      <div class="col-span-2">
-        <Button
-          class="w-full p-5 bg-red-500 dark:bg-red-700"
-          @click="$emit('toggleModal', 'ReturnSalesInvoice')"
-        >
-          <slot>
-            <p class="uppercase text-lg text-white font-semibold">
-              {{ t`Cancel` }}
-            </p>
-          </slot>
-        </Button>
-      </div>
+    <div class="mt-2 grid grid-cols-2 gap-3">
+      <Button class="w-full" @click="closeModal">
+        {{ t`Cancel` }}
+      </Button>
+      <Button
+        class="w-full"
+        type="primary"
+        :disabled="!selectedInvoiceName"
+        @click="returnSelectedInvoice"
+      >
+        {{ t`Create Return` }}
+      </Button>
     </div>
   </Modal>
 </template>
@@ -133,10 +60,9 @@
 <script lang="ts">
 import Button from 'src/components/Button.vue';
 import Modal from 'src/components/Modal.vue';
-import Row from 'src/components/Row.vue';
-import FormControl from 'src/components/Controls/FormControl.vue';
+import InvoiceSelectionTable from 'src/components/POS/InvoiceSelectionTable.vue';
 import { SalesInvoice } from 'models/baseModels/SalesInvoice/SalesInvoice';
-import { defineComponent, inject } from 'vue';
+import { defineComponent } from 'vue';
 import { ModelNameEnum } from 'models/types';
 import { Field } from 'schemas/types';
 import { Money } from 'pesa';
@@ -148,26 +74,21 @@ export default defineComponent({
   components: {
     Modal,
     Button,
-    FormControl,
-    Row,
+    InvoiceSelectionTable,
     Paginator,
     FrappeTextInput,
   },
   props: {
-    modalStatus: Boolean,
+    openModal: Boolean,
   },
   emits: ['toggleModal', 'selectedReturnInvoice'],
-  setup() {
-    return {
-      sinvDoc: inject('sinvDoc') as SalesInvoice,
-    };
-  },
   data() {
     return {
       returnedInvoices: [] as SalesInvoice[],
       invoiceSearchTerm: '',
       pageStart: 0,
       pageEnd: 20,
+      selectedInvoiceName: '',
     };
   },
   computed: {
@@ -215,14 +136,16 @@ export default defineComponent({
     },
   },
   watch: {
-    async modalStatus(newVal) {
+    async openModal(newVal) {
       if (newVal) {
+        this.selectedInvoiceName = '';
         await this.setReturnedInvoices();
       }
     },
     invoiceSearchTerm() {
       this.pageStart = 0;
       this.pageEnd = this.pageEnd - this.pageStart || 20;
+      this.selectedInvoiceName = '';
     },
   },
   async mounted() {
@@ -233,18 +156,27 @@ export default defineComponent({
   },
 
   methods: {
-    returnInvoice(row: SalesInvoice) {
-      this.$emit('selectedReturnInvoice', row.name);
+    closeModal() {
+      this.selectedInvoiceName = '';
       this.$emit('toggleModal', 'ReturnSalesInvoice');
+    },
+    returnSelectedInvoice() {
+      if (!this.selectedInvoiceName) {
+        return;
+      }
+
+      this.$emit('selectedReturnInvoice', this.selectedInvoiceName);
+      this.closeModal();
     },
     handleSearchEnter() {
       if (this.filteredInvoices.length === 1) {
-        this.returnInvoice(this.filteredInvoices[0] as SalesInvoice);
+        this.selectedInvoiceName = String(this.filteredInvoices[0].name);
       }
     },
     setPageIndices({ start, end }: { start: number; end: number }) {
       this.pageStart = start;
       this.pageEnd = end;
+      this.selectedInvoiceName = '';
     },
     async setReturnedInvoices() {
       const allInvoices = await this.fyo.db.getAll(ModelNameEnum.SalesInvoice, {

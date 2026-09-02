@@ -531,6 +531,7 @@
       "fields": {
         "account": "account",
         "name": "name",
+        "requiresClearanceDate": "requires_clearance_date",
         "type": "type"
       }
     },

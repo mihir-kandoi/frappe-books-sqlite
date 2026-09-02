@@ -3,7 +3,7 @@
     :open-modal="openModal"
     size="sm"
     class="h-96 w-full"
-    :set-close-listener="false"
+    @closemodal="cancelLoyaltyProgram"
   >
     <p class="text-center py-4 dark:text-gray-100">Redeem Loyalty Points</p>
 

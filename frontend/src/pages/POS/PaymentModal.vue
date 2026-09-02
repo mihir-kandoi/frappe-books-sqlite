@@ -1,250 +1,161 @@
 <template>
-  <Modal
-    :open-modal="openModal"
-    size="7xl"
-    class="w-full max-w-xl ml-auto"
-    :set-close-listener="false"
+  <FrappeDialog
+    :open="openModal"
+    :title="paymentTitle"
+    size="2xl"
+    :dismissible="true"
+    :show-close-button="true"
+    @close="cancelTransaction"
   >
     <div
       v-if="sinvDoc.fieldMap"
-      class="max-h-[calc(100vh-2rem)] overflow-y-auto px-4 py-6 grid"
+      class="grid gap-6 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
     >
-      <Currency
-        :df="{
-          ...fyo.fieldMap.PaymentFor.amount,
-          label: sinvDoc.isReturn ? t`Refund Amount` : t`Paid Amount`,
-        }"
-        :show-label="true"
-        :read-only="false"
-        :border="true"
-        :text-right="true"
-        :value="paidAmount"
-        @change="(amount:Money)=>  $emit('setPaidAmount', (amount as Money).float)"
+      <PaymentSummary
+        :sinv-doc="sinvDoc"
+        :total-taxed-amount="totalTaxedAmount"
+        :item-discounts="itemDiscounts"
+        :is-discounting-enabled="isDiscountingEnabled"
       />
-      <div class="grid grid-cols-2 gap-6">
-        <Button
-          v-for="method in paymentMethods"
-          :key="method"
-          class="w-full py-5 bg-teal-500"
-          @click="setPaymentMethodAndAmount(method)"
+
+      <section class="min-w-0 space-y-5" aria-label="Payment details">
+        <Currency
+          :df="{
+            ...fyo.fieldMap.PaymentFor.amount,
+            label: sinvDoc.isReturn ? t`Refund amount` : t`Paid amount`,
+          }"
+          :show-label="true"
+          :read-only="false"
+          :border="true"
+          :text-right="true"
+          :value="paidAmount"
+          size="large"
+          @change="
+            (amount: Money) => $emit('setPaidAmount', amount.float)
+          "
+        />
+
+        <PaymentMethodSelector
+          :methods="paymentMethodNames"
+          :selected="paymentMethod"
+          @select="setPaymentMethodAndAmount"
+        />
+
+        <div class="min-h-14">
+          <div
+            v-if="showReferenceField || showClearanceDate"
+            class="grid gap-4 sm:grid-cols-2"
+          >
+            <Data
+              v-if="showReferenceField"
+              :df="fyo.fieldMap.Payment.referenceId"
+              :show-label="true"
+              :border="true"
+              :required="true"
+              :read-only="false"
+              :value="transferRefNo"
+              :class="showClearanceDate ? '' : 'sm:col-span-2'"
+              @change="(value: string) => $emit('setTransferRefNo', value)"
+            />
+
+            <DateControl
+              v-if="showClearanceDate"
+              :df="fyo.fieldMap.Payment.clearanceDate"
+              :show-label="true"
+              :border="true"
+              :required="true"
+              :read-only="false"
+              :value="transferClearanceDate"
+              @change="
+                (value: Date) => $emit('setTransferClearanceDate', value)
+              "
+            />
+          </div>
+        </div>
+
+        <div
+          v-if="showSettlementAmount"
+          class="flex items-center justify-between gap-4 rounded-lg px-3 py-2.5"
+          :class="settlementClasses"
+          role="status"
         >
-          <slot>
-            <p class="uppercase text-lg text-white font-semibold">
-              {{ t`${method}` }}
-            </p>
-          </slot>
-        </Button>
-      </div>
+          <span class="text-sm font-medium">{{ settlementLabel }}</span>
+          <span class="text-lg font-semibold tabular-nums">
+            {{ fyo.format(settlementAmount, 'Currency') }}
+          </span>
+        </div>
+      </section>
+    </div>
 
-      <div class="mt-8 grid grid-cols-2 gap-6">
-        <Data
-          v-if="showTransferFields"
-          :df="fyo.fieldMap.Payment.referenceId"
-          :show-label="true"
-          :border="true"
-          :required="true"
-          :read-only="false"
-          :value="transferRefNo"
-          @change="(value:string) => $emit('setTransferRefNo', value)"
-        />
-
-        <Date
-          v-if="showTransferFields"
-          :df="fyo.fieldMap.Payment.clearanceDate"
-          :show-label="true"
-          :border="true"
-          :required="true"
-          :read-only="false"
-          :value="transferClearanceDate"
-          @change="(value:Date) => $emit('setTransferClearanceDate', value)"
-        />
-      </div>
-
-      <div class="mt-14 grid grid-cols-2 gap-6">
-        <Currency
-          :class="{ invisible: !showPaidChange }"
-          :df="{
-            label: t`Paid Change`,
-            fieldtype: 'Currency',
-            fieldname: 'paidChange',
-          }"
-          :read-only="true"
-          :show-label="true"
-          :border="true"
-          :text-right="true"
-          :value="paidChange"
-        />
-
-        <Currency
-          :class="{ invisible: !showBalanceAmount }"
-          :df="{
-            label: t`Balance Amount`,
-            fieldtype: 'Currency',
-            fieldname: 'balanceAmount',
-          }"
-          :read-only="true"
-          :show-label="true"
-          :border="true"
-          :text-right="true"
-          :value="balanceAmount"
-        />
-      </div>
-
-      <div
-        class="mb-14 row-start-4 row-span-2 grid grid-cols-2 gap-x-6 gap-y-11"
-      >
-        <Currency
-          :df="sinvDoc.fieldMap.netTotal"
-          :read-only="true"
-          :show-label="true"
-          :border="true"
-          :text-right="true"
-          :value="sinvDoc?.netTotal"
-        />
-
-        <Currency
-          :df="{
-            label: t`Taxes and Charges`,
-            fieldtype: 'Currency',
-            fieldname: 'taxesAndCharges',
-          }"
-          :read-only="true"
-          :show-label="true"
-          :border="true"
-          :text-right="true"
-          :value="totalTaxedAmount"
-        />
-
-        <Currency
-          :df="sinvDoc.fieldMap.baseGrandTotal"
-          :read-only="true"
-          :show-label="true"
-          :border="true"
-          :text-right="true"
-          :value="sinvDoc?.baseGrandTotal"
-        />
-
-        <Currency
-          v-if="isDiscountingEnabled"
-          :df="sinvDoc.fieldMap.discountAmount"
-          :read-only="true"
-          :show-label="true"
-          :border="true"
-          :text-right="true"
-          :value="itemDiscounts"
-        />
-
-        <Currency
-          :df="sinvDoc.fieldMap.grandTotal"
-          :read-only="true"
-          :show-label="true"
-          :border="true"
-          :text-right="true"
-          :value="sinvDoc?.grandTotal"
-        />
-
-        <Currency
-          :df="sinvDoc.fieldMap.outstandingAmount"
-          :read-only="true"
-          :show-label="true"
-          :border="true"
-          :text-right="true"
-          :value="sinvDoc?.outstandingAmount"
-        />
-      </div>
-
-      <div class="grid grid-cols-2 gap-4 bottom-8">
-        <div class="col-span-1">
-          <Button
-            class="w-full"
-            :style="{
-              backgroundColor: fyo.singles.Defaults?.submitButtonColour,
-            }"
-            style="padding: 1.35rem"
+    <template #actions>
+      <div class="flex w-full flex-wrap items-center justify-between gap-2">
+        <FrappeButton theme="gray" variant="ghost" @click="cancelTransaction">
+          {{ t`Cancel` }}
+        </FrappeButton>
+        <div class="flex flex-wrap items-center justify-end gap-2">
+          <FrappeButton
+            theme="gray"
+            variant="subtle"
             @click="submitTransaction"
           >
-            <slot>
-              <p class="uppercase text-lg text-white font-semibold">
-                {{ t`Submit` }}
-              </p>
-            </slot>
-          </Button>
-        </div>
-
-        <div class="col-span-1">
-          <Button
-            class="w-full"
-            :style="{
-              backgroundColor: fyo.singles.Defaults?.cancelButtonColour,
-            }"
-            style="padding: 1.35rem"
-            @click="cancelTransaction"
-          >
-            <slot>
-              <p class="uppercase text-lg text-white font-semibold">
-                {{ t`Cancel` }}
-              </p>
-            </slot>
-          </Button>
-        </div>
-
-        <div class="col-span-1">
-          <Button
-            class="w-full"
-            :style="{ backgroundColor: fyo.singles.Defaults?.payButtonColour }"
-            style="padding: 1.35rem"
-            @click="payTransaction"
-          >
-            <slot>
-              <p class="uppercase text-lg text-white font-semibold">
-                {{ t`Pay` }}
-              </p>
-            </slot>
-          </Button>
-        </div>
-
-        <div class="col-span-1">
-          <Button
-            class="w-full"
-            :style="{
-              backgroundColor: fyo.singles.Defaults?.payAndPrintButtonColour,
-            }"
-            style="padding: 1.35rem"
+            {{ t`Submit only` }}
+          </FrappeButton>
+          <FrappeButton
+            theme="gray"
+            variant="subtle"
+            :disabled="isPayDisabled"
             @click="payAndPrintTransaction"
           >
-            <slot>
-              <p class="uppercase text-lg text-white font-semibold">
-                {{ t`Pay & Print` }}
-              </p>
-            </slot>
-          </Button>
+            {{ t`Pay & print` }}
+          </FrappeButton>
+          <FrappeButton
+            theme="gray"
+            variant="solid"
+            :disabled="isPayDisabled"
+            @click="payTransaction"
+          >
+            {{ sinvDoc.isReturn ? t`Refund` : t`Pay` }}
+          </FrappeButton>
         </div>
       </div>
-    </div>
-  </Modal>
+    </template>
+  </FrappeDialog>
 </template>
 
 <script lang="ts">
-import Button from 'src/components/Button.vue';
+import { SalesInvoice } from 'models/baseModels/SalesInvoice/SalesInvoice';
+import {
+  getPaymentMethodRequirements,
+  PaymentMethodRequirements,
+} from 'models/baseModels/PaymentMethod/requirements';
+import { ModelNameEnum, PaymentMethodType } from 'models/types';
+import { Money } from 'pesa';
 import Currency from 'src/components/Controls/Currency.vue';
 import Data from 'src/components/Controls/Data.vue';
-import Date from 'src/components/Controls/Date.vue';
-import Modal from 'src/components/Modal.vue';
-import { Money } from 'pesa';
-import { SalesInvoice } from 'models/baseModels/SalesInvoice/SalesInvoice';
-import { defineComponent, inject } from 'vue';
+import DateControl from 'src/components/Controls/Date.vue';
+import PaymentMethodSelector from 'src/components/POS/PaymentMethodSelector.vue';
+import PaymentSummary from 'src/components/POS/PaymentSummary.vue';
 import { fyo } from 'src/initFyo';
-import { ModelNameEnum } from 'models/types';
 import { showToast } from 'src/utils/interactive';
+import { Button as FrappeButton, Dialog as FrappeDialog } from 'frappe-ui';
+import { defineComponent, inject } from 'vue';
+
+type PaymentMethodOption = {
+  name: string;
+  type?: PaymentMethodType;
+  requiresClearanceDate?: boolean;
+};
 
 export default defineComponent({
   name: 'PaymentModal',
   components: {
-    Modal,
     Currency,
-    Button,
     Data,
-    Date,
+    DateControl,
+    FrappeButton,
+    FrappeDialog,
+    PaymentMethodSelector,
+    PaymentSummary,
   },
   props: {
     openModal: Boolean,
@@ -271,57 +182,79 @@ export default defineComponent({
   },
   data() {
     return {
-      paymentMethods: [] as string[],
+      paymentMethods: [] as PaymentMethodOption[],
     };
   },
   computed: {
-    isPaymentMethodIsCash(): boolean {
-      return this.paymentMethod === 'Cash';
+    paymentTitle(): string {
+      return this.sinvDoc.isReturn
+        ? this.fyo.t`Complete refund`
+        : this.fyo.t`Complete payment`;
     },
-    showTransferFields(): boolean {
-      return !!this.paymentMethod && !this.isPaymentMethodIsCash;
+    isPaymentMethodCash(): boolean {
+      return this.paymentRequirements.isCash;
+    },
+    paymentMethodNames(): string[] {
+      return this.paymentMethods.map(({ name }) => name);
+    },
+    paymentRequirements(): PaymentMethodRequirements {
+      const selectedMethod = this.paymentMethods.find(
+        ({ name }) => name === this.paymentMethod
+      );
+      return getPaymentMethodRequirements(
+        selectedMethod?.type,
+        selectedMethod?.requiresClearanceDate
+      );
+    },
+    showReferenceField(): boolean {
+      return this.paymentRequirements.requiresReferenceId;
+    },
+    showClearanceDate(): boolean {
+      return this.paymentRequirements.requiresClearanceDate;
     },
     balanceAmount(): Money {
-      const grandTotal = this.sinvDoc?.grandTotal ?? fyo.pesa(0);
-      return grandTotal.sub(this.paidAmount);
+      return (this.sinvDoc.grandTotal ?? fyo.pesa(0)).sub(this.paidAmount);
     },
     paidChange(): Money {
-      const grandTotal = this.sinvDoc?.grandTotal ?? fyo.pesa(0);
-      return this.paidAmount.sub(grandTotal);
+      return this.paidAmount.sub(
+        this.sinvDoc.grandTotal ?? fyo.pesa(0)
+      );
     },
     showBalanceAmount(): boolean {
-      if (this.paidAmount.float === 0) {
-        return false;
-      }
-
-      if (
-        this.fyo
-          .pesa(this.paidAmount.float)
-          .gte(this.sinvDoc?.grandTotal ?? fyo.pesa(0))
-      ) {
-        return false;
-      }
-
-      return true;
+      return this.paidAmount.float > 0 && this.balanceAmount.isPositive();
     },
     showPaidChange(): boolean {
-      if (this.sinvDoc.isReturn || !this.isPaymentMethodIsCash) {
-        return false;
-      }
-
-      if (this.fyo.pesa(this.paidAmount.float).eq(fyo.pesa(0))) {
-        return false;
-      }
-
-      if (
-        this.fyo
-          .pesa(this.paidAmount.float)
-          .gt(this.sinvDoc?.grandTotal ?? fyo.pesa(0))
-      ) {
+      return Boolean(
+        !this.sinvDoc.isReturn &&
+          this.isPaymentMethodCash &&
+          this.paidChange.isPositive()
+      );
+    },
+    showSettlementAmount(): boolean {
+      return this.showBalanceAmount || this.showPaidChange;
+    },
+    settlementAmount(): Money {
+      return this.showPaidChange ? this.paidChange : this.balanceAmount;
+    },
+    settlementLabel(): string {
+      return this.showPaidChange
+        ? this.fyo.t`Change due`
+        : this.fyo.t`Balance due`;
+    },
+    settlementClasses(): string {
+      return this.showPaidChange
+        ? 'bg-surface-green-2 text-ink-green-7'
+        : 'bg-surface-amber-2 text-ink-amber-7';
+    },
+    isPayDisabled(): boolean {
+      if (!this.paymentMethod || this.paidAmount.float <= 0) {
         return true;
       }
 
-      return false;
+      return Boolean(
+        (this.showReferenceField && !this.transferRefNo) ||
+          (this.showClearanceDate && !this.transferClearanceDate)
+      );
     },
   },
   async mounted() {
@@ -329,56 +262,61 @@ export default defineComponent({
   },
   methods: {
     setPaymentMethodAndAmount(paymentMethod?: string) {
-      if (paymentMethod) {
-        const outstandingAmount =
-          this.sinvDoc.outstandingAmount ?? this.fyo.pesa(0);
-        const grandTotal = this.sinvDoc.grandTotal ?? this.fyo.pesa(0);
-        const paymentAmount = outstandingAmount.isZero()
-          ? grandTotal.abs()
-          : outstandingAmount.abs();
+      if (!paymentMethod) {
+        return;
+      }
 
-        this.$emit('setPaymentMethod', paymentMethod);
-        this.$emit('setPaidAmount', paymentAmount.float);
+      const outstandingAmount =
+        this.sinvDoc.outstandingAmount ?? this.fyo.pesa(0);
+      const grandTotal = this.sinvDoc.grandTotal ?? this.fyo.pesa(0);
+      const paymentAmount = outstandingAmount.isZero()
+        ? grandTotal.abs()
+        : outstandingAmount.abs();
 
-        if (paymentMethod === 'Cash') {
-          this.$emit('setTransferRefNo', '');
-          this.$emit('setTransferClearanceDate', undefined);
-        }
+      this.$emit('setPaymentMethod', paymentMethod);
+      this.$emit('setPaidAmount', paymentAmount.float);
+
+      const selectedMethod = this.paymentMethods.find(
+        ({ name }) => name === paymentMethod
+      );
+      const requirements = getPaymentMethodRequirements(
+        selectedMethod?.type,
+        selectedMethod?.requiresClearanceDate
+      );
+      if (requirements.isCash) {
+        this.$emit('setTransferRefNo', '');
+        this.$emit('setTransferClearanceDate', undefined);
+      } else if (!requirements.requiresClearanceDate) {
+        this.$emit('setTransferClearanceDate', undefined);
       }
     },
     async setPaymentMethods() {
-      this.paymentMethods = (
-        (await this.fyo.db.getAll(ModelNameEnum.PaymentMethod, {
-          fields: ['name'],
-        })) as { name: string }[]
-      ).map((d) => d.name);
+      const methods = (await this.fyo.db.getAll(ModelNameEnum.PaymentMethod, {
+        fields: ['name', 'type', 'requiresClearanceDate'],
+      })) as PaymentMethodOption[];
+      this.paymentMethods = methods;
     },
     submitTransaction() {
       this.$emit('createTransaction');
     },
     payTransaction() {
-      if (!this.validatePaymentDetails()) {
-        return;
+      if (this.validatePaymentDetails()) {
+        this.$emit('createTransaction', false, true);
       }
-
-      this.$emit('createTransaction', false, true);
     },
     payAndPrintTransaction() {
-      if (!this.validatePaymentDetails()) {
-        return;
+      if (this.validatePaymentDetails()) {
+        this.$emit('createTransaction', true, true);
       }
-
-      this.$emit('createTransaction', true, true);
     },
     validatePaymentDetails(): boolean {
       let message = '';
 
       if (!this.paymentMethod) {
-        message = this.fyo
-          .t`Please select a payment method before proceeding with payment.`;
-      } else if (this.showTransferFields && !this.transferRefNo) {
+        message = this.fyo.t`Please select a payment method.`;
+      } else if (this.showReferenceField && !this.transferRefNo) {
         message = this.fyo.t`Please enter a reference number.`;
-      } else if (this.showTransferFields && !this.transferClearanceDate) {
+      } else if (this.showClearanceDate && !this.transferClearanceDate) {
         message = this.fyo.t`Please select a clearance date.`;
       }
 

@@ -66,7 +66,9 @@ def get_pos_context(search: str = "", limit: int = 80) -> dict[str, Any]:
 		"default_customer": (profile.pos_customer if profile else None)
 		or frappe.db.get_single_value("Books Defaults", "pos_customer"),
 		"payment_methods": frappe.get_all(
-			"Books Payment Method", fields=["name", "type", "account"], order_by="name asc"
+			"Books Payment Method",
+			fields=["name", "type", "account", "requires_clearance_date"],
+			order_by="name asc",
 		),
 	}
 
