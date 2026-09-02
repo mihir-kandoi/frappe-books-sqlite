@@ -1,10 +1,10 @@
 <template>
   <div class="flex flex-col flex-1 bg-gray-25 dark:bg-gray-875">
     <PageHeader :border="true" :title="t`Print View`">
-      <AutoComplete
+      <SelectControl
         v-if="templateList.length"
         :df="{
-          fieldtype: 'AutoComplete',
+          fieldtype: 'Select',
           fieldname: 'templateName',
           label: t`Template Name`,
           options: templateList.map((n) => ({ label: n, value: n })),
@@ -54,7 +54,7 @@ import { Action } from 'fyo/model/types';
 import { PrintTemplate } from 'models/baseModels/PrintTemplate';
 import { ModelNameEnum } from 'models/types';
 import Button from 'src/components/Button.vue';
-import AutoComplete from 'src/components/Controls/AutoComplete.vue';
+import SelectControl from 'src/components/Controls/Select.vue';
 import DropdownWithActions from 'src/components/DropdownWithActions.vue';
 import PageHeader from 'src/components/PageHeader.vue';
 import { handleErrorWithDialog } from 'src/errorHandling';
@@ -71,7 +71,7 @@ export default defineComponent({
   components: {
     PageHeader,
     Button,
-    AutoComplete,
+    SelectControl,
     PrintContainer,
     DropdownWithActions,
   },
@@ -87,6 +87,7 @@ export default defineComponent({
       templateDoc: null,
       templateName: null,
       templateList: [],
+      templateRequest: 0,
     } as {
       doc: null | Doc;
       scale: number;
@@ -94,6 +95,7 @@ export default defineComponent({
       templateDoc: null | PrintTemplate;
       templateName: null | string;
       templateList: string[];
+      templateRequest: number;
     };
   },
   computed: {
@@ -179,8 +181,7 @@ export default defineComponent({
       return actions;
     },
   },
-  async mounted() {
-    await this.initialize();
+  mounted() {
     if (fyo.store.isDevelopment) {
       // @ts-ignore
       window.pv = this;
@@ -219,6 +220,7 @@ export default defineComponent({
       this.scale = Math.min(containerWidth / width, 1);
     },
     reset() {
+      this.templateRequest += 1;
       this.doc = null;
       this.values = null;
       this.templateList = [];
@@ -227,20 +229,34 @@ export default defineComponent({
     },
     async onTemplateNameChange(value: string | null): Promise<void> {
       if (!value) {
+        this.templateRequest += 1;
+        this.templateName = null;
         this.templateDoc = null;
         return;
       }
 
+      if (value === this.templateName && this.templateDoc?.name === value) {
+        return;
+      }
+
+      const request = ++this.templateRequest;
       this.templateName = value;
       try {
-        this.templateDoc = (await this.fyo.doc.getDoc(
+        const templateDoc = (await this.fyo.doc.getDoc(
           ModelNameEnum.PrintTemplate,
-          this.templateName
+          value
         )) as PrintTemplate;
+        if (request !== this.templateRequest) {
+          return;
+        }
+
+        this.templateDoc = templateDoc;
+        this.setScale();
       } catch (error) {
-        await handleErrorWithDialog(error);
+        if (request === this.templateRequest) {
+          await handleErrorWithDialog(error);
+        }
       }
-      this.setScale();
     },
     async setTemplateList(): Promise<void> {
       const list = (await this.fyo.db.getAllRaw(ModelNameEnum.PrintTemplate, {
