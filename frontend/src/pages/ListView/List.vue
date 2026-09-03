@@ -1,119 +1,51 @@
 <template>
-  <div class="text-base flex flex-col overflow-hidden">
-    <!-- Title Row -->
-    <div
-      class="flex items-center"
-      :style="{
-        paddingRight: dataSlice.length > 13 ? 'var(--w-scrollbar)' : '',
-      }"
+  <div class="flex flex-col overflow-hidden text-base">
+    <FrappeList
+      v-if="dataSlice.length"
+      :columns="listColumns"
+      :selectable="isSelectionMode"
+      :selection="selectedItems"
+      :row-height="48"
+      divider="full"
+      class="custom-scroll custom-scroll-thumb1 min-h-0 flex-1 overflow-y-auto text-ink-gray-8 list-gap-4 list-row-px-3"
+      @update:selection="updateSelection"
     >
-      <div
-        v-if="!isSelectionMode"
-        class="w-8 text-end me-2 text-gray-700 dark:text-gray-400"
-      >
-        #
-      </div>
-      <div v-else class="w-8 flex justify-end me-2">
-        <Check
-          :df="{
-            fieldtype: 'Check',
-            fieldname: 'selectAll',
-            label: '',
-          }"
-          :show-label="false"
-          :value="isAllSelected"
-          @change="toggleSelectAll"
-        />
-      </div>
-      <Row
-        class="flex-1 text-gray-700 dark:text-gray-400 h-row-mid"
-        :column-count="columns.length"
-        gap="1rem"
-      >
-        <div
-          v-for="(column, i) in columns"
+      <FrappeListHeader class="sticky top-0 z-10 bg-surface-white">
+        <FrappeListHeaderCell class="justify-end pe-2">#</FrappeListHeaderCell>
+        <FrappeListHeaderCell
+          v-for="column in columns"
           :key="column.label"
-          class="
-            overflow-x-auto
-            no-scrollbar
-            whitespace-nowrap
-            h-row
-            items-center
-            flex
-          "
-          :class="{
-            'ms-auto': isNumeric(column.fieldtype),
-            'pe-4': i === columns.length - 1,
-          }"
+          :class="isNumeric(column.fieldtype) ? 'justify-end' : ''"
         >
           {{ column.label }}
-        </div>
-      </Row>
-    </div>
-    <hr class="dark:border-gray-800" />
+        </FrappeListHeaderCell>
+      </FrappeListHeader>
 
-    <!-- Data Rows -->
-    <div
-      v-if="dataSlice.length !== 0"
-      class="
-        overflow-y-auto
-        dark:dark-scroll
-        custom-scroll custom-scroll-thumb1
-      "
-    >
-      <div v-for="(row, i) in dataSlice" :key="(row.name as string)">
-        <!-- Row Content -->
-        <div class="flex hover:bg-gray-50 dark:hover:bg-gray-850 items-center">
-          <div
-            v-if="!isSelectionMode"
-            class="w-8 text-end me-2 text-gray-700 dark:text-gray-400"
+      <FrappeListRows :items="dataSlice" row-key="name">
+        <template #default="{ item: row, index, value }">
+          <FrappeListRow
+            :value="value"
+            @click="isSelectionMode ? undefined : $emit('openDoc', row.name)"
           >
-            {{ i + pageStart + 1 }}
-          </div>
-          <div v-else class="w-8 flex justify-end me-2">
-            <Check
-              :df="{
-                fieldtype: 'Check',
-                fieldname: 'selectItem',
-                label: '',
-              }"
-              :show-label="false"
-              :value="selectedItems.includes(row.name as string)"
-              @change="toggleItemSelection(row.name as string)"
-            />
-          </div>
-
-          <Row
-            gap="1rem"
-            class="
-              cursor-pointer
-              text-gray-900
-              dark:text-gray-300
-              flex-1
-              h-row-mid
-            "
-            :column-count="columns.length"
-            @click="isSelectionMode ? null : $emit('openDoc', row.name)"
-          >
-            <ListCell
-              v-for="(column, c) in columns"
+            <FrappeListCell class="justify-end pe-2 text-ink-gray-5">
+              {{ index + pageStart + 1 }}
+            </FrappeListCell>
+            <FrappeListCell
+              v-for="column in columns"
               :key="column.label"
-              :class="{
-                'text-end': isNumeric(column.fieldtype),
-                'pe-4': c === columns.length - 1,
-              }"
-              :row="(row as RenderData)"
-              :column="column"
-              @status-found="handleStatusFound"
-            />
-          </Row>
-        </div>
-        <hr
-          v-if="!(i === dataSlice.length - 1 && i > 13)"
-          class="dark:border-gray-800"
-        />
-      </div>
-    </div>
+              :class="isNumeric(column.fieldtype) ? 'justify-end text-end' : ''"
+            >
+              <ListCell
+                class="min-w-0 flex-1"
+                :row="(row as RenderData)"
+                :column="column"
+                @status-found="handleStatusFound"
+              />
+            </FrappeListCell>
+          </FrappeListRow>
+        </template>
+      </FrappeListRows>
+    </FrappeList>
 
     <!-- Pagination Footer -->
     <div v-if="data?.length" class="mt-auto">
@@ -142,11 +74,17 @@
 </template>
 <script lang="ts">
 import { ListViewSettings, RenderData } from 'fyo/model/types';
+import {
+  List as FrappeList,
+  ListCell as FrappeListCell,
+  ListHeader as FrappeListHeader,
+  ListHeaderCell as FrappeListHeaderCell,
+  ListRow as FrappeListRow,
+  ListRows as FrappeListRows,
+} from 'frappe-ui/list';
 import { cloneDeep } from 'lodash';
 import Button from 'src/components/Button.vue';
-import Check from 'src/components/Controls/Check.vue';
 import Paginator from 'src/components/Paginator.vue';
-import Row from 'src/components/Row.vue';
 import { fyo } from 'src/initFyo';
 import { isNumeric } from 'src/utils';
 import { QueryFilter } from 'utils/db/types';
@@ -156,10 +94,14 @@ import ListCell from './ListCell.vue';
 export default defineComponent({
   name: 'List',
   components: {
-    Row,
+    FrappeList,
+    FrappeListCell,
+    FrappeListHeader,
+    FrappeListHeaderCell,
+    FrappeListRow,
+    FrappeListRows,
     ListCell,
     Button,
-    Check,
     Paginator,
   },
   props: {
@@ -192,10 +134,8 @@ export default defineComponent({
     count() {
       return this.pageEnd - this.pageStart + 1;
     },
-    isAllSelected(): boolean {
-      return (
-        this.data.length > 0 && this.selectedItems.length === this.data.length
-      );
+    listColumns(): string[] {
+      return ['2rem', ...this.columns.map(() => 'minmax(0, 1fr)')];
     },
     columns() {
       let columns = this.listConfig?.columns ?? [];
@@ -303,19 +243,8 @@ export default defineComponent({
       })) as RenderData[];
       this.$emit('updatedData', filters);
     },
-    toggleItemSelection(itemName: string) {
-      const index = this.selectedItems.indexOf(itemName);
-      if (index > -1) {
-        this.selectedItems.splice(index, 1);
-      } else {
-        this.selectedItems.push(itemName);
-      }
-      this.$emit('selected-items-changed', this.selectedItems);
-    },
-    toggleSelectAll(checked: boolean) {
-      this.selectedItems = checked
-        ? this.data.map((row) => row.name as string)
-        : [];
+    updateSelection(selectedItems: string[]) {
+      this.selectedItems = selectedItems;
       this.$emit('selected-items-changed', this.selectedItems);
     },
   },

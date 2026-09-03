@@ -32,7 +32,7 @@
         :aria-label="t`Create new entry`"
         @click="handleMakeNewDoc"
       >
-        <feather-icon name="plus" class="w-4 h-4" />
+        <Icon name="plus" class="w-4 h-4" />
       </Button>
     </PageHeader>
     <List
@@ -64,6 +64,7 @@ import { Dropdown as FrappeDropdown, type DropdownOptions } from 'frappe-ui';
 import Button from 'src/components/Button.vue';
 import ExportWizard from 'src/components/ExportWizard.vue';
 import FilterDropdown from 'src/components/FilterDropdown.vue';
+import Icon from 'src/components/Icon.vue';
 import Modal from 'src/components/Modal.vue';
 import PageHeader from 'src/components/PageHeader.vue';
 
@@ -85,6 +86,7 @@ export default defineComponent({
     List,
     Button,
     FilterDropdown,
+    Icon,
     Modal,
     ExportWizard,
     FrappeDropdown,

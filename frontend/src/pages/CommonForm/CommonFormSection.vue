@@ -1,18 +1,22 @@
 <template>
   <div v-if="(fields ?? []).length > 0">
-    <FrappeButton
+    <div
       v-if="showTitle && title && collapsible"
-      class="!h-auto w-full !justify-between !px-0 text-start"
+      class="-mx-2"
       :class="collapsed ? '' : 'mb-4'"
-      variant="ghost"
-      :icon-right="collapsed ? 'lucide-chevron-down' : 'lucide-chevron-up'"
-      :aria-expanded="!collapsed"
-      @click="toggleCollapsed"
     >
-      <h2 class="text-base font-semibold text-ink-gray-9">
-        {{ title }}
-      </h2>
-    </FrappeButton>
+      <FrappeButton
+        class="!h-auto w-full !justify-between !px-2 text-start"
+        variant="ghost"
+        :icon-right="collapsed ? 'lucide-chevron-down' : 'lucide-chevron-up'"
+        :aria-expanded="!collapsed"
+        @click="toggleCollapsed"
+      >
+        <h2 class="text-base font-semibold text-ink-gray-9">
+          {{ title }}
+        </h2>
+      </FrappeButton>
+    </div>
     <h2 v-else-if="showTitle && title" class="mb-4 text-base font-semibold text-ink-gray-9">
       {{ title }}
     </h2>
@@ -25,7 +29,7 @@
           field.fieldtype === 'Table' ? 'col-span-2 text-base' : '',
           field.fieldtype === 'AttachImage' ? 'row-span-2' : '',
           field.fieldtype === 'Check'
-            ? 'flex min-h-15 w-full items-end self-stretch'
+            ? 'min-h-8 w-full self-end'
             : 'self-start w-full',
           field.fieldname === 'termsAndConditions' ? 'col-span-2' : '',
           field.invisible ? 'invisible' : '',

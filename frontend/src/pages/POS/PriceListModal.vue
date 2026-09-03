@@ -22,9 +22,9 @@
             />
           </div>
           <div class="w-10 flex justify-end items-center">
-            <feather-icon
+            <Icon
               name="trash"
-              class="w-5 text-xl text-red-500"
+              class="size-5 text-ink-red-5"
               @click="removePriceList"
             />
           </div>
@@ -73,6 +73,7 @@ import { defineComponent, inject } from 'vue';
 import Button from 'src/components/Button.vue';
 import { showToast } from 'src/utils/interactive';
 import Link from 'src/components/Controls/Link.vue';
+import Icon from 'src/components/Icon.vue';
 import { SalesInvoice } from 'models/baseModels/SalesInvoice/SalesInvoice';
 
 export default defineComponent({
@@ -81,6 +82,7 @@ export default defineComponent({
     Link,
     Modal,
     Button,
+    Icon,
   },
   props: {
     openModal: Boolean,

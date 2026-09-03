@@ -26,7 +26,7 @@
         :icon="true"
         @click="toggleEditMode"
       >
-        <feather-icon name="edit" class="w-4 h-4" />
+        <Icon name="edit" class="w-4 h-4" />
       </Button>
       <DropdownWithActions v-if="actions.length" :actions="actions" />
       <Button v-if="doc?.canSave" type="primary" @click="sync()">
@@ -198,6 +198,7 @@ import FormControl from 'src/components/Controls/FormControl.vue';
 import Link from 'src/components/Controls/Link.vue';
 import DropdownWithActions from 'src/components/DropdownWithActions.vue';
 import HorizontalResizer from 'src/components/HorizontalResizer.vue';
+import Icon from 'src/components/Icon.vue';
 import Modal from 'src/components/Modal.vue';
 import PageHeader from 'src/components/PageHeader.vue';
 import ShortcutKeys from 'src/components/ShortcutKeys.vue';
@@ -237,6 +238,7 @@ export default defineComponent({
     DropdownWithActions,
     PrintContainer,
     HorizontalResizer,
+    Icon,
     TemplateEditor,
     FormControl,
     TemplateBuilderHint,

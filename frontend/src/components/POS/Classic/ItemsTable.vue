@@ -1,79 +1,63 @@
 <template>
   <div class="flex min-h-0 flex-1 flex-col">
-    <Row
-      :ratio="ratio"
-      class="
-        border
-        dark:border-gray-800
-        flex
-        items-center
-        mt-4
-        px-2
-        rounded-t-md
-        text-gray-600
-        dark:text-gray-400
-        w-full
-      "
+    <FrappeList
+      :columns="listColumns"
+      :row-height="48"
+      divider="full"
+      class="mt-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border border-outline-gray-1 list-gap-2 [--list-row-padding-x:0px]"
     >
-      <div
+      <FrappeListHeader>
+        <FrappeListHeaderCell
         v-for="df in tableFields"
         :key="df.fieldname"
-        class="flex items-center px-2 py-2 text-lg"
-        :class="{
-        'ms-auto': isNumeric(df as Field),
-      }"
-      >
-        {{ df.label }}
-      </div>
-    </Row>
+          class="px-3"
+          :class="isNumeric(df as Field) ? 'justify-end' : ''"
+        >
+          {{ df.label }}
+        </FrappeListHeaderCell>
+      </FrappeListHeader>
 
-    <div
-      class="min-h-0 flex-1 overflow-y-auto custom-scroll custom-scroll-thumb2"
-    >
-      <Row
-        v-if="items"
-        v-for="row in items as POSItem[]"
-        :key="row.name"
-        :ratio="ratio"
-        :border="true"
-        class="
-          border-b border-l border-r
-          dark:border-gray-800
-          flex
-          group
-          h-row-mid
-          hover:bg-gray-25
-          dark:bg-gray-890
-          cursor-pointer
-          items-center
-          justify-center
-          px-2
-          w-full
-        "
-        role="button"
-        tabindex="0"
-        :aria-label="`Add ${row.name}`"
-        @click="handleChange(row)"
-        @keydown.enter.prevent="handleChange(row)"
-        @keydown.space.prevent="handleChange(row)"
-      >
-        <FormControl
-          v-for="df in tableFields"
-          :key="df.fieldname"
-          size="large"
-          class="pointer-events-none select-none"
-          :df="df"
-          :value="(row as POSItem)[df.fieldname as keyof POSItem]"
-          :readOnly="true"
-        />
-      </Row>
-    </div>
+      <div class="custom-scroll custom-scroll-thumb2 min-h-0 flex-1 overflow-y-auto">
+        <FrappeListRows v-if="items" :items="items as POSItem[]" row-key="name">
+          <template #default="{ item: row, value }">
+            <FrappeListRow
+              :value="value"
+              class="text-ink-gray-8"
+              :aria-label="`Add ${row.name}`"
+              @click="handleChange(row)"
+            >
+              <FrappeListCell
+                v-for="df in tableFields"
+                :key="df.fieldname"
+                class="min-w-0"
+                :class="isNumeric(df as Field) ? 'justify-end text-end' : ''"
+              >
+                <FormControl
+                  size="large"
+                  class="pointer-events-none min-w-0 flex-1 select-none"
+                  :df="df"
+                  :value="(row as POSItem)[df.fieldname as keyof POSItem]"
+                  :readOnly="true"
+                />
+              </FrappeListCell>
+            </FrappeListRow>
+          </template>
+        </FrappeListRows>
+      </div>
+    </FrappeList>
   </div>
 </template>
 
 <script lang="ts">
 import FormControl from 'src/components/Controls/FormControl.vue';
-import Row from 'src/components/Row.vue';
+import {
+  List as FrappeList,
+  ListCell as FrappeListCell,
+  ListHeader as FrappeListHeader,
+  ListHeaderCell as FrappeListHeaderCell,
+  ListRow as FrappeListRow,
+  ListRows as FrappeListRows,
+} from 'frappe-ui/list';
 import { isNumeric } from 'src/utils';
 import { defineComponent } from 'vue';
 import { Field } from 'schemas/types';
@@ -81,7 +65,15 @@ import { POSItem } from '../types';
 
 export default defineComponent({
   name: 'ItemsTable',
-  components: { FormControl, Row },
+  components: {
+    FormControl,
+    FrappeList,
+    FrappeListCell,
+    FrappeListHeader,
+    FrappeListHeaderCell,
+    FrappeListRow,
+    FrappeListRows,
+  },
   emits: ['addItem', 'updateValues'],
   props: {
     items: Array,
@@ -94,6 +86,9 @@ export default defineComponent({
   computed: {
     ratio() {
       return [1.6, 0.9, 0.8, 0.7];
+    },
+    listColumns(): string[] {
+      return this.ratio.map((ratio) => `minmax(0, ${ratio}fr)`);
     },
     tableFields() {
       const fields = [

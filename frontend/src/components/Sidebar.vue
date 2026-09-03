@@ -88,7 +88,7 @@
         @click="openDocumentation"
       >
         <template #prefix>
-          <feather-icon name="help-circle" class="h-4 w-4 flex-shrink-0" />
+          <Icon name="help-circle" class="h-4 w-4 flex-shrink-0" />
         </template>
       </FrappeSidebarItem>
 
@@ -98,7 +98,7 @@
         @click="viewShortcuts = true"
       >
         <template #prefix>
-          <feather-icon name="command" class="h-4 w-4 flex-shrink-0" />
+          <Icon name="command" class="h-4 w-4 flex-shrink-0" />
         </template>
       </FrappeSidebarItem>
 
@@ -110,7 +110,7 @@
         @click="$emit('change-db-file')"
       >
         <template #prefix>
-          <feather-icon name="database" class="h-4 w-4 flex-shrink-0" />
+          <Icon name="database" class="h-4 w-4 flex-shrink-0" />
         </template>
       </FrappeSidebarItem>
 
@@ -121,7 +121,7 @@
           @click="() => reportIssue()"
         >
           <template #prefix>
-            <feather-icon name="flag" class="h-4 w-4 flex-shrink-0" />
+            <Icon name="flag" class="h-4 w-4 flex-shrink-0" />
           </template>
         </FrappeSidebarItem>
 
@@ -143,7 +143,7 @@
           "
           @click="() => toggleSidebar()"
         >
-          <feather-icon name="chevrons-left" class="w-4 h-4" />
+          <Icon name="chevrons-left" class="w-4 h-4" />
         </Button>
       </div>
     </div>

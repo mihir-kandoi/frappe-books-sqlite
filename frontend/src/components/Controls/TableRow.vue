@@ -1,12 +1,11 @@
 <template>
-  <Row
-    :ratio="ratio"
-    class="w-full px-2 group flex items-center justify-center h-row-mid"
+  <FrappeListRow
+    class="group min-h-12 w-full"
     :class="readOnly ? '' : 'hover:bg-gray-25 dark:hover:bg-gray-900'"
   >
     <!-- Index or Remove button -->
-    <div
-      class="flex items-center ps-2 text-gray-600 dark:text-gray-400"
+    <FrappeListCell
+      class="justify-center text-gray-600 dark:text-gray-400"
       @mouseenter="isIndexHovered = true"
       @mouseleave="isIndexHovered = false"
     >
@@ -28,43 +27,52 @@
           {{ row.idx + 1 }}
         </span>
       </FrappeButton>
-    </div>
+    </FrappeListCell>
 
     <!-- Data Input Form Control -->
-    <FormControl
+    <FrappeListCell
       v-for="df in tableFields"
       :key="df.fieldname"
       class="min-w-0 self-center"
-      :size="size"
-      :df="df"
-      :value="row[df.fieldname]"
-      @change="(value) => onChange(df, value)"
-    />
-    <Button
-      v-if="canEditRow"
-      :icon="true"
-      :padding="false"
-      :background="false"
-      size="sm"
-      @click="openRowQuickEdit"
     >
-      <feather-icon name="edit" class="w-4 h-4 text-gray-600 dark:text-gray-400" />
-    </Button>
+      <FormControl
+        class="min-w-0 flex-1"
+        :size="size"
+        :df="df"
+        :value="row[df.fieldname]"
+        @change="(value) => onChange(df, value)"
+      />
+    </FrappeListCell>
+    <FrappeListCell v-if="canEditRow" class="justify-center">
+      <Button
+        :icon="true"
+        :padding="false"
+        :background="false"
+        size="sm"
+        @click="openRowQuickEdit"
+      >
+        <Icon name="edit" class="w-4 h-4 text-gray-600 dark:text-gray-400" />
+      </Button>
+    </FrappeListCell>
 
     <!-- Error Display -->
-    <div
+    <FrappeListCell
       v-if="hasErrors"
       class="text-xs text-red-600 ps-2 col-span-full relative"
       style="bottom: 0.75rem; height: 0px"
     >
       {{ getErrorString() }}
-    </div>
-  </Row>
+    </FrappeListCell>
+  </FrappeListRow>
 </template>
 <script>
 import { Doc } from 'fyo/model/doc';
 import { Button as FrappeButton } from 'frappe-ui';
-import Row from 'src/components/Row.vue';
+import {
+  ListCell as FrappeListCell,
+  ListRow as FrappeListRow,
+} from 'frappe-ui/list';
+import Icon from 'src/components/Icon.vue';
 import { getErrorMessage } from 'src/utils';
 import { computed, nextTick } from 'vue';
 import Button from '../Button.vue';
@@ -73,10 +81,12 @@ import FormControl from './FormControl.vue';
 export default {
   name: 'TableRow',
   components: {
-    Row,
+    FrappeListRow,
+    FrappeListCell,
     FormControl,
     Button,
     FrappeButton,
+    Icon,
   },
   provide() {
     return {
@@ -87,8 +97,6 @@ export default {
     row: Doc,
     tableFields: Array,
     size: String,
-    ratio: Array,
-    isNumeric: Function,
     readOnly: Boolean,
     canEditRow: {
       type: Boolean,

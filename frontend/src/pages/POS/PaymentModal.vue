@@ -30,9 +30,7 @@
           :text-right="true"
           :value="paidAmount"
           size="large"
-          @change="
-            (amount: Money) => $emit('setPaidAmount', amount.float)
-          "
+          @change="(amount: Money) => $emit('setPaidAmount', amount)"
         />
 
         <PaymentMethodSelector
@@ -257,24 +255,35 @@ export default defineComponent({
       );
     },
   },
-  async mounted() {
-    await this.setPaymentMethods();
+  watch: {
+    openModal(isOpen: boolean) {
+      if (isOpen) {
+        void this.initializePayment();
+      }
+    },
   },
   methods: {
+    async initializePayment() {
+      this.$emit('setPaidAmount', this.getDefaultPaymentAmount());
+      await this.setPaymentMethods();
+    },
+    getDefaultPaymentAmount(): Money {
+      const outstandingAmount =
+        this.sinvDoc.outstandingAmount ?? this.fyo.pesa(0);
+      const grandTotal = this.sinvDoc.grandTotal ?? this.fyo.pesa(0);
+
+      return (outstandingAmount.isZero()
+        ? grandTotal
+        : outstandingAmount
+      ).abs();
+    },
     setPaymentMethodAndAmount(paymentMethod?: string) {
       if (!paymentMethod) {
         return;
       }
 
-      const outstandingAmount =
-        this.sinvDoc.outstandingAmount ?? this.fyo.pesa(0);
-      const grandTotal = this.sinvDoc.grandTotal ?? this.fyo.pesa(0);
-      const paymentAmount = outstandingAmount.isZero()
-        ? grandTotal.abs()
-        : outstandingAmount.abs();
-
       this.$emit('setPaymentMethod', paymentMethod);
-      this.$emit('setPaidAmount', paymentAmount.float);
+      this.$emit('setPaidAmount', this.getDefaultPaymentAmount());
 
       const selectedMethod = this.paymentMethods.find(
         ({ name }) => name === paymentMethod

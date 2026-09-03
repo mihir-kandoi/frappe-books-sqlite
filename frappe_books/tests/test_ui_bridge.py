@@ -236,6 +236,27 @@ class IntegrationTestUiBridge(IntegrationTestCase):
 
 		self.assertEqual(frappe.db.get_value("Books Item", name, "rate"), 10)
 
+	def test_numeric_strings_are_coerced_before_controller_validation(self):
+		income = make_account("Bridge Numeric Income", root_type="Income", account_type="Income Account")
+		expense = make_account("Bridge Numeric Expense", root_type="Expense", account_type="Expense Account")
+		item = make_item(income.name, expense.name, rate=10)
+		inserted = self.bridge.get("Item", item.name)
+
+		updated = self.bridge.update(
+			"Item",
+			{
+				"name": item.name,
+				"rate": "16.00000000000",
+				"trackItem": "1",
+				"uomConversions": [{"uom": "Kg", "conversionFactor": "2.5"}],
+				"__expectedModified": inserted["modified"],
+			},
+		)
+
+		self.assertEqual(updated["rate"], 16)
+		self.assertEqual(updated["trackItem"], 1)
+		self.assertEqual(updated["uomConversions"][0]["conversionFactor"], 2.5)
+
 	def test_child_tables_round_trip_through_draft_writes(self):
 		account = make_account("Bridge Tax Account", root_type="Liability", account_type="Tax")
 		name = unique_name("Bridge Tax")

@@ -8,17 +8,17 @@
     </div>
 
     <!-- Line Chart -->
-    <FrappeLineChart
-      v-if="chartData.data.length"
-      class="mt-4 h-56 w-full"
-      :data="chartData.data"
-      x="yearmonth"
-      :y="['inflow', 'outflow']"
-      :palette="chartData.colors"
-      :series-config="chartData.seriesConfig"
-      :x-axis="chartData.xAxis"
-      :y-axis="chartData.yAxis"
-    />
+    <div v-if="chartData.data.length" class="mt-4 h-56 w-full">
+      <FrappeLineChart
+        :data="chartData.data"
+        x="yearmonth"
+        :y="['inflow', 'outflow']"
+        :palette="chartData.colors"
+        :series-config="chartData.seriesConfig"
+        :x-axis="chartData.xAxis"
+        :y-axis="chartData.yAxis"
+      />
+    </div>
   </div>
 </template>
 <script lang="ts">

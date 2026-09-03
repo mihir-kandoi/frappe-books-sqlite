@@ -9,7 +9,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 import frappe
-from frappe.utils import flt, get_datetime, get_system_timezone
+from frappe.utils import cast, cint, flt, get_datetime, get_system_timezone
 
 from frappe_books.ui_bridge.mapping import (
 	SOURCE_META_TO_TARGET,
@@ -27,6 +27,7 @@ READ_METHODS = {"get", "getAll", "getSingleValues", "exists", "close"}
 WRITE_METHODS = {"insert", "update", "rename", "delete", "deleteAll"}
 PROTECTED_WRITE_SCHEMAS = {"AccountingLedgerEntry", "StockLedgerEntry"}
 FILTER_OPERATORS = {"=", "!=", ">", ">=", "<", "<=", "in", "not in", "like", "includes"}
+NUMERIC_FIELDTYPES = {"Check", "Currency", "Float", "Int", "Long Int", "Percent"}
 
 
 class BooksDatabaseBridge:
@@ -544,7 +545,18 @@ def _target_value(meta, fieldname: str, value: Any) -> Any:
 	value = _normalize_attach_image(meta, fieldname, value)
 	if _stores_doctype_name(meta, fieldname):
 		return target_reference(value)
+	field = meta.get_field(fieldname)
+	if field and field.fieldtype in NUMERIC_FIELDTYPES:
+		return _numeric_value(field.fieldtype, value)
 	return value
+
+
+def _numeric_value(fieldtype: str, value: Any) -> Any:
+	if value is None and fieldtype != "Check":
+		return None
+	if fieldtype == "Long Int":
+		return cint(value)
+	return cast(fieldtype, value)
 
 
 def _source_value(meta, fieldname: str, value: Any) -> Any:

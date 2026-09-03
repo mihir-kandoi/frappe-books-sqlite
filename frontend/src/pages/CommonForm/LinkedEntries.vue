@@ -9,7 +9,7 @@
     >
       <div class="flex items-center justify-between w-full">
         <Button :icon="true" @click="$emit('close')">
-          <feather-icon name="x" class="w-4 h-4" />
+          <Icon name="x" class="w-4 h-4" />
         </Button>
         <p class="text-xl font-semibold text-gray-600 dark:text-gray-400">
           {{ t`Linked Entries` }}
@@ -155,6 +155,7 @@ import {
 } from 'frappe-ui';
 import { ModelNameEnum } from 'models/types';
 import Button from 'src/components/Button.vue';
+import Icon from 'src/components/Icon.vue';
 import { getLinkedEntries } from 'src/utils/doc';
 import { shortcutsKey } from 'src/utils/injectionKeys';
 import { getFormRoute, routeTo } from 'src/utils/ui';
@@ -163,7 +164,7 @@ import { PropType, defineComponent, inject } from 'vue';
 const COMPONENT_NAME = 'LinkedEntries';
 
 export default defineComponent({
-  components: { Button, FrappeBadge, FrappeButton, FrappeItemListRow },
+  components: { Button, FrappeBadge, FrappeButton, FrappeItemListRow, Icon },
   props: { doc: { type: Object as PropType<Doc>, required: true } },
   emits: ['close'],
   setup() {

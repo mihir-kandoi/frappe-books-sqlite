@@ -10,7 +10,7 @@
     <template #default>
       <Button :type="type" :icon="icon" :disabled="disabled">
         <slot>
-          <feather-icon name="more-horizontal" class="w-4 h-4" />
+          <Icon name="more-horizontal" class="w-4 h-4" />
         </slot>
       </Button>
     </template>
@@ -22,6 +22,7 @@ import { Doc } from 'fyo/model/doc';
 import { Action } from 'fyo/model/types';
 import Button from 'src/components/Button.vue';
 import Dropdown from 'src/components/Dropdown.vue';
+import Icon from 'src/components/Icon.vue';
 import { DropdownItem } from 'src/utils/types';
 import { defineComponent, PropType } from 'vue';
 
@@ -30,6 +31,7 @@ export default defineComponent({
   components: {
     Dropdown,
     Button,
+    Icon,
   },
   inject: {
     injectedDoc: {

@@ -27,7 +27,7 @@
     >
       <!-- Close Button  -->
       <Button :icon="true" @click="routeToPrevious">
-        <feather-icon name="x" class="w-4 h-4" />
+        <Icon name="x" class="w-4 h-4" />
       </Button>
 
       <!-- Save & Submit Buttons -->
@@ -90,6 +90,7 @@ import { Field, Schema } from 'schemas/types';
 import Button from 'src/components/Button.vue';
 import AttachImage from 'src/components/Controls/AttachImage.vue';
 import FormControl from 'src/components/Controls/FormControl.vue';
+import Icon from 'src/components/Icon.vue';
 import TwoColumnForm from 'src/components/TwoColumnForm.vue';
 import { fyo } from 'src/initFyo';
 import { shortcutsKey } from 'src/utils/injectionKeys';
@@ -107,6 +108,7 @@ export default defineComponent({
   components: {
     Button,
     FormControl,
+    Icon,
     TwoColumnForm,
     AttachImage,
   },

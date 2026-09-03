@@ -33,7 +33,7 @@
         :title="t`View linked entries`"
         @click="showLinks = true"
       >
-        <feather-icon name="link" class="w-4 h-4"></feather-icon>
+        <Icon name="link" class="w-4 h-4" />
       </Button>
       <Button
         v-if="canPrint"
@@ -42,13 +42,13 @@
         :title="t`Open Print View`"
         @click="routeTo(`/print/${doc.schemaName}/${doc.name}`)"
       >
-        <feather-icon name="printer" class="w-4 h-4"></feather-icon>
+        <Icon name="printer" class="w-4 h-4" />
       </Button>
       <Button :icon="true" :title="t`Toggle between form and full width`" @click="toggleWidth">
-        <feather-icon
+        <Icon
           :name="useFullWidth ? 'minimize' : 'maximize'"
           class="w-4 h-4"
-        ></feather-icon>
+        />
       </Button>
       <DropdownWithActions
         v-for="group of groupedActions"
@@ -59,7 +59,7 @@
         <p v-if="group.group">
           {{ group.group }}
         </p>
-        <feather-icon v-else name="more-horizontal" class="w-4 h-4" />
+        <Icon v-else name="more-horizontal" class="w-4 h-4" />
       </DropdownWithActions>
       <Button v-if="doc?.canSave" type="primary" @click="sync">
         {{ t`Save` }}
@@ -134,6 +134,7 @@ import ExchangeRate from 'src/components/Controls/ExchangeRate.vue';
 import DropdownWithActions from 'src/components/DropdownWithActions.vue';
 import FormContainer from 'src/components/FormContainer.vue';
 import FormHeader from 'src/components/FormHeader.vue';
+import Icon from 'src/components/Icon.vue';
 import StatusPill from 'src/components/StatusPill.vue';
 import { getErrorMessage } from 'src/utils';
 import { shortcutsKey } from 'src/utils/injectionKeys';
@@ -160,6 +161,7 @@ export default defineComponent({
   components: {
     FormContainer,
     FormHeader,
+    Icon,
     CommonFormSection,
     Button,
     DropdownWithActions,

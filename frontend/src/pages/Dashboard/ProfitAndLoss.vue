@@ -3,16 +3,16 @@
     <SectionHeader>
       <template #title>{{ t`Profit and Loss` }}</template>
     </SectionHeader>
-    <FrappeBarChart
-      v-if="hasData"
-      class="mt-4 h-72 w-full"
-      :data="data"
-      x="yearmonth"
-      y="balance"
-      :series-config="chartData.seriesConfig"
-      :x-axis="chartData.xAxis"
-      :y-axis="chartData.yAxis"
-    />
+    <div v-if="hasData" class="mt-4 h-72 w-full">
+      <FrappeBarChart
+        :data="data"
+        x="yearmonth"
+        y="balance"
+        :series-config="chartData.seriesConfig"
+        :x-axis="chartData.xAxis"
+        :y-axis="chartData.yAxis"
+      />
+    </div>
     <div v-else class="flex-1 w-full h-full flex-center my-20">
       <span class="text-base text-gray-600 dark:text-gray-500">
         {{ t`No transactions yet` }}

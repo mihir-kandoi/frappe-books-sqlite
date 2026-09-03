@@ -11,43 +11,41 @@
       <p v-if="appliedCoupons.length" class="text-xs m-2 text-gray-500">
         {{ t`Applied Coupon Codes` }}
       </p>
-      <div
+      <FrappeList
         v-if="appliedCoupons.length"
-        class="mt-2 max-h-40 overflow-y-auto custom-scroll custom-scroll-thumb2"
+        :columns="['minmax(0, 1fr)', '2rem']"
+        divider="full"
+        class="custom-scroll custom-scroll-thumb2 mt-2 max-h-40 overflow-y-auto rounded-md border border-outline-gray-1"
       >
-        <Row
-          v-for="coupon in appliedCoupons as AppliedCouponCodes[]"
-          :key="coupon.coupons"
-          :ratio="ratio"
-          :border="true"
-          class="border-b border-l border-r dark:border-gray-800 relative group h-coupon-mid hover:bg-gray-25 dark:bg-gray-890 items-center justify-center"
-        >
-          <div class="flex flex-row w-full items-center">
-            <div class="flex flex-row">
-              <FormControl
-                v-for="df in tableFields"
-                :key="df.fieldname"
-                size="large"
-                class="w-full"
-                :df="df"
-                :value="coupon[df.fieldname]"
-                :read-only="true"
-              />
-            </div>
-          </div>
-          <div class="absolute right-3">
-            <FrappeButton
-              icon="lucide-trash-2"
-              theme="red"
-              variant="ghost"
-              size="xs"
-              :tooltip="t`Remove coupon`"
-              :aria-label="t`Remove coupon`"
-              @click="removeAppliedCoupon(coupon)"
-            />
-          </div>
-        </Row>
-      </div>
+        <FrappeListRows :items="appliedCoupons as AppliedCouponCodes[]" row-key="coupons">
+          <template #default="{ item: coupon, value }">
+            <FrappeListRow :value="value" class="min-h-10 px-3 hover:bg-surface-gray-1">
+              <FrappeListCell>
+                <FormControl
+                  v-for="df in tableFields"
+                  :key="df.fieldname"
+                  size="large"
+                  class="min-w-0 flex-1"
+                  :df="df"
+                  :value="coupon[df.fieldname]"
+                  :read-only="true"
+                />
+              </FrappeListCell>
+              <FrappeListCell class="justify-center">
+                <FrappeButton
+                  icon="lucide-trash-2"
+                  theme="red"
+                  variant="ghost"
+                  size="xs"
+                  :tooltip="t`Remove coupon`"
+                  :aria-label="t`Remove coupon`"
+                  @click="removeAppliedCoupon(coupon)"
+                />
+              </FrappeListCell>
+            </FrappeListRow>
+          </template>
+        </FrappeListRows>
+      </FrappeList>
 
       <div
         v-if="coupons.fieldMap"
@@ -117,9 +115,14 @@ import { ModelNameEnum } from 'models/types';
 import { validateCouponCode } from 'models/helpers';
 import { Field } from 'schemas/types';
 import FormControl from 'src/components/Controls/FormControl.vue';
-import Row from 'src/components/Row.vue';
 import { InvoiceItem } from 'models/baseModels/InvoiceItem/InvoiceItem';
 import { Button as FrappeButton } from 'frappe-ui';
+import {
+  List as FrappeList,
+  ListCell as FrappeListCell,
+  ListRow as FrappeListRow,
+  ListRows as FrappeListRows,
+} from 'frappe-ui/list';
 
 export default defineComponent({
   name: 'CouponCodeModal',
@@ -128,8 +131,11 @@ export default defineComponent({
     Button,
     Link,
     FormControl,
-    Row,
     FrappeButton,
+    FrappeList,
+    FrappeListCell,
+    FrappeListRow,
+    FrappeListRows,
   },
   props: {
     openModal: Boolean,
@@ -151,9 +157,6 @@ export default defineComponent({
     };
   },
   computed: {
-    ratio() {
-      return [1, 0.1, 1, 0.7];
-    },
     tableFields() {
       return [
         {

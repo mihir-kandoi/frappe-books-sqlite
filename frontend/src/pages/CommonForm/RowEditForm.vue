@@ -26,7 +26,7 @@
       <div class="flex items-center justify-between px-4 h-row-largest">
         <!-- Close Button -->
         <Button :icon="true" @click="$emit('close')">
-          <feather-icon name="x" class="w-4 h-4" />
+          <Icon name="x" class="w-4 h-4" />
         </Button>
 
         <!-- Actions, Badge and Status Change Buttons -->
@@ -36,10 +36,10 @@
             :icon="true"
             @click="$emit('previous', previous)"
           >
-            <feather-icon name="chevron-left" class="w-4 h-4" />
+            <Icon name="chevron-left" class="w-4 h-4" />
           </Button>
           <Button v-if="next >= 0" :icon="true" @click="$emit('next', next)">
-            <feather-icon name="chevron-right" class="w-4 h-4" />
+            <Icon name="chevron-right" class="w-4 h-4" />
           </Button>
         </div>
       </div>
@@ -63,6 +63,7 @@ import { Doc } from 'fyo/model/doc';
 import { ValueError } from 'fyo/utils/errors';
 import Button from 'src/components/Button.vue';
 import FormHeader from 'src/components/FormHeader.vue';
+import Icon from 'src/components/Icon.vue';
 import TwoColumnForm from 'src/components/TwoColumnForm.vue';
 import { shortcutsKey } from 'src/utils/injectionKeys';
 import { computed } from 'vue';
@@ -72,7 +73,7 @@ import { defineComponent } from 'vue';
 const COMPONENT_NAME = 'RowEditForm';
 
 export default defineComponent({
-  components: { Button, TwoColumnForm, FormHeader },
+  components: { Button, TwoColumnForm, FormHeader, Icon },
   provide() {
     return {
       doc: computed(() => this.row),

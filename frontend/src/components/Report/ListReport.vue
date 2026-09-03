@@ -1,57 +1,44 @@
 <template>
   <div class="overflow-hidden flex flex-col h-full">
-    <!-- Report Outer Container -->
-    <div v-if="dataSlice.length" class="overflow-hidden">
-      <!--Title Row -->
-      <div
-        ref="titlerow"
-        class="w-full overflow-x-hidden flex items-center dark:text-gray-25 border-b dark:border-gray-800 px-4"
-        :style="{
-          height: `${hconst}px`,
-          paddingRight: 'calc(var(--w-scrollbar) + 1rem)',
-        }"
-      >
-        <div
-          v-for="(col, c) in report.columns"
-          :key="c + '-col'"
-          :style="getCellStyle(col, c)"
-          class="text-base px-3 flex-shrink-0 overflow-x-auto whitespace-nowrap no-scrollbar"
+    <FrappeList
+      v-if="dataSlice.length"
+      :columns="listColumns"
+      :row-height="hconst"
+      divider="full"
+      class="custom-scroll custom-scroll-thumb1 min-h-0 flex-1 overflow-auto px-4 list-gap-0 [--list-row-padding-x:0px]"
+    >
+      <FrappeListHeader class="sticky top-0 z-10 bg-surface-white">
+        <FrappeListHeaderCell
+          v-for="(column, index) in report.columns"
+          :key="`${index}-column`"
+          class="px-3 text-base"
+          :class="getAlignmentClass(column)"
         >
-          {{ col.label }}
-        </div>
-      </div>
+          {{ column.label }}
+        </FrappeListHeaderCell>
+      </FrappeListHeader>
 
-      <WithScroll class="w-full" style="height: calc(100% - 49px)" @scroll="scroll">
-        <!-- Report Rows -->
-        <template v-for="(row, r) in dataSlice" :key="r + '-row'">
-          <div
+      <FrappeListRows :items="dataSlice" :row-key="getRowKey">
+        <template #default="{ item: row, index, value }">
+          <FrappeListRow
             v-if="!row.folded"
-            class="flex items-center w-max px-4"
-            :style="{
-              height: `${hconst}px`,
-              minWidth: `calc(var(--w-desk) - var(--w-scrollbar))`,
-            }"
-            :class="[
-              r !== pageEnd - 1 ? 'border-b dark:border-gray-800' : '',
-              row.isGroup ? 'hover:bg-gray-50 dark:hover:bg-gray-890 cursor-pointer' : '',
-            ]"
-            @click="() => onRowClick(row, r)"
+            :value="value"
+            :on-click="row.isGroup ? () => onRowClick(row, index) : undefined"
+            :class="row.isGroup ? 'font-medium' : ''"
           >
-            <!-- Report Cell -->
-            <div
-              v-for="(cell, c) in row.cells"
-              :key="`${c}-${r}-cell`"
-              :style="getCellStyle(cell, c)"
-              class="text-base px-3 flex-shrink-0 overflow-x-auto whitespace-nowrap no-scrollbar"
-              :class="[getCellColorClass(cell)]"
+            <FrappeListCell
+              v-for="(cell, cellIndex) in row.cells"
+              :key="`${cellIndex}-${index}-cell`"
+              class="min-w-0 px-3 text-base"
+              :class="[getCellColorClass(cell), getAlignmentClass(cell)]"
+              :style="getCellStyle(cell)"
             >
-              {{ cell.value }}
-            </div>
-          </div>
+              <span class="w-full truncate">{{ cell.value }}</span>
+            </FrappeListCell>
+          </FrappeListRow>
         </template>
-      </WithScroll>
-      <!-- Report Rows Container -->
-    </div>
+      </FrappeListRows>
+    </FrappeList>
     <p v-else class="w-full text-center mt-20 text-gray-800 dark:text-gray-100 text-base">
       {{ report.loading ? t`Loading Report...` : t`No Values to be Displayed` }}
     </p>
@@ -69,15 +56,30 @@
 </template>
 <script>
 import { Report } from 'reports/Report';
+import {
+  List as FrappeList,
+  ListCell as FrappeListCell,
+  ListHeader as FrappeListHeader,
+  ListHeaderCell as FrappeListHeaderCell,
+  ListRow as FrappeListRow,
+  ListRows as FrappeListRows,
+} from 'frappe-ui/list';
 import { isNumeric } from 'src/utils';
 import { languageDirectionKey } from 'src/utils/injectionKeys';
 import { defineComponent } from 'vue';
 import Paginator from '../Paginator.vue';
-import WithScroll from '../WithScroll.vue';
 import { inject } from 'vue';
 
 export default defineComponent({
-  components: { Paginator, WithScroll },
+  components: {
+    FrappeList,
+    FrappeListCell,
+    FrappeListHeader,
+    FrappeListHeaderCell,
+    FrappeListRow,
+    FrappeListRows,
+    Paginator,
+  },
   props: {
     report: Report,
   },
@@ -102,10 +104,15 @@ export default defineComponent({
 
       return this.report.reportData;
     },
+    listColumns() {
+      return this.report.columns.map(
+        (column) => `${(column.width ?? 1) * this.wconst}rem`
+      );
+    },
   },
   methods: {
-    scroll({ scrollLeft }) {
-      this.$refs.titlerow.scrollLeft = scrollLeft;
+    getRowKey(row, index) {
+      return `${index}-${row.cells?.[0]?.value ?? ''}`;
     },
     setPageIndices({ start, end }) {
       this.pageStart = start;
@@ -127,17 +134,8 @@ export default defineComponent({
         row = this.dataSlice[r];
       }
     },
-    getCellStyle(cell, i) {
+    getCellStyle(cell) {
       const styles = {};
-      const width = cell.width ?? 1;
-
-      let align = cell.align ?? 'left';
-      if (this.languageDirection === 'rtl') {
-        align = this.languageDirection === 'rtl' ? 'right' : 'left';
-      }
-
-      styles['width'] = `${width * this.wconst}rem`;
-      styles['text-align'] = align;
 
       if (cell.bold) {
         styles['font-weight'] = 'bold';
@@ -145,26 +143,6 @@ export default defineComponent({
 
       if (cell.italics) {
         styles['font-style'] = 'oblique 15deg';
-      }
-
-      if (i === 0) {
-        if (this.languageDirection === 'rtl') {
-          styles['padding-right'] = '0px';
-        } else {
-          styles['padding-left'] = '0px';
-        }
-      }
-
-      if (!cell.align && isNumeric(cell.fieldtype)) {
-        styles['text-align'] = 'right';
-      }
-
-      if (i === this.report.columns.length - 1) {
-        if (this.languageDirection === 'rtl') {
-          styles['padding-left'] = '0px';
-        } else {
-          styles['padding-right'] = '0px';
-        }
       }
 
       if (cell.indent) {
@@ -176,6 +154,20 @@ export default defineComponent({
       }
 
       return styles;
+    },
+    getAlignmentClass(cell) {
+      if (this.languageDirection === 'rtl') {
+        return 'justify-end text-end';
+      }
+
+      const alignment = cell.align ?? (isNumeric(cell.fieldtype) ? 'right' : 'left');
+      if (alignment === 'right') {
+        return 'justify-end text-end';
+      }
+      if (alignment === 'center') {
+        return 'justify-center text-center';
+      }
+      return 'justify-start text-start';
     },
     getCellColorClass(cell) {
       if (cell.color === 'red') {

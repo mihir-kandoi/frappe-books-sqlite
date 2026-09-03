@@ -1,66 +1,43 @@
 <template>
   <div class="flex min-h-0 flex-1 flex-col">
-    <Row
-      :ratio="ratio"
-      class="
-        border
-        dark:border-gray-800
-        rounded-t
-        px-2
-        text-gray-600
-        dark:text-gray-400
-        w-full
-        flex
-        items-center
-        mt-2
-      "
+    <FrappeList
+      :columns="listColumns"
+      divider="full"
+      class="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border border-outline-gray-1 list-gap-2 [--list-row-padding-x:0px]"
     >
-      <div
-        v-if="tableFields"
-        v-for="df in tableFields"
-        :key="df.fieldname"
-        class="items-center text-lg flex px-2 py-2"
-        :class="{
-      'ms-auto': isNumeric(df as Field),
-    }"
-      >
-        {{ df.label }}
-      </div>
-    </Row>
+      <FrappeListHeader>
+        <FrappeListHeaderCell
+          v-for="df in tableFields"
+          :key="df.fieldname"
+          class="px-2"
+          :class="isNumeric(df as Field) ? 'justify-end' : ''"
+        >
+          {{ df.label }}
+        </FrappeListHeaderCell>
+      </FrappeListHeader>
 
-    <div
-      class="min-h-0 flex-1 overflow-auto custom-scroll custom-scroll-thumb1"
-    >
-      <Row
-        v-for="row in sinvDoc.items"
-        :key="row.name ?? row.idx"
-        :ratio="ratio"
-        class="
-          border
-          dark:border-gray-800
-          w-full
-          px-2
-          py-2
-          group
-          flex
-          items-center
-          justify-center
-          hover:bg-gray-25
-          dark:bg-gray-890
-        "
-      >
-        <SelectedItemRow
-          :row="(row as SalesInvoiceItem)"
-          :expanded-batch-id="expandedBatchId"
-          @set-expanded-batch-id="
-            (rowName) => $emit('setExpandedBatchId', rowName)
-          "
-          @run-sinv-formulas="runSinvFormulas"
-          @apply-pricing-rule="$emit('applyPricingRule')"
-          @selected-row="selectedItemRow"
-        />
-      </Row>
-    </div>
+      <div class="custom-scroll custom-scroll-thumb1 min-h-0 flex-1 overflow-auto">
+        <FrappeListRows :items="sinvDoc.items ?? []" :row-key="getRowKey">
+          <template #default="{ item: row, value }">
+            <FrappeListRow
+              :value="value"
+              class="group min-h-12 py-2 hover:bg-surface-gray-1"
+            >
+              <SelectedItemRow
+                :row="(row as SalesInvoiceItem)"
+                :expanded-batch-id="expandedBatchId"
+                @set-expanded-batch-id="
+                  (rowName) => $emit('setExpandedBatchId', rowName)
+                "
+                @run-sinv-formulas="runSinvFormulas"
+                @apply-pricing-rule="$emit('applyPricingRule')"
+                @selected-row="selectedItemRow"
+              />
+            </FrappeListRow>
+          </template>
+        </FrappeListRows>
+      </div>
+    </FrappeList>
   </div>
 </template>
 
@@ -68,7 +45,13 @@
 import FormContainer from 'src/components/FormContainer.vue';
 import FormControl from 'src/components/Controls/FormControl.vue';
 import Link from 'src/components/Controls/Link.vue';
-import Row from 'src/components/Row.vue';
+import {
+  List as FrappeList,
+  ListHeader as FrappeListHeader,
+  ListHeaderCell as FrappeListHeaderCell,
+  ListRow as FrappeListRow,
+  ListRows as FrappeListRows,
+} from 'frappe-ui/list';
 import RowEditForm from 'src/pages/CommonForm/RowEditForm.vue';
 import SelectedItemRow from './SelectedItemRow.vue';
 import { isNumeric } from 'src/utils';
@@ -84,7 +67,11 @@ export default defineComponent({
     FormContainer,
     FormControl,
     Link,
-    Row,
+    FrappeList,
+    FrappeListHeader,
+    FrappeListHeaderCell,
+    FrappeListRow,
+    FrappeListRows,
     RowEditForm,
     SelectedItemRow,
   },
@@ -103,6 +90,9 @@ export default defineComponent({
   computed: {
     ratio() {
       return [0.1, 0.9, 0.8, 0.8, 0.8, 0.8, 0.2];
+    },
+    listColumns(): string[] {
+      return this.ratio.map((ratio) => `minmax(0, ${ratio}fr)`);
     },
     tableFields() {
       return [
@@ -160,6 +150,9 @@ export default defineComponent({
     },
   },
   methods: {
+    getRowKey(row: SalesInvoiceItem): string {
+      return String(row.name ?? row.idx ?? row.item ?? '');
+    },
     async runSinvFormulas() {
       await this.sinvDoc.runFormulas();
     },

@@ -17,7 +17,7 @@
         :title="t`Open Report Print View`"
         @click="routeTo(`/report-print/${reportClassName}`)"
       >
-        <feather-icon name="printer" class="w-4 h-4"></feather-icon>
+        <Icon name="printer" class="w-4 h-4" />
       </Button>
     </PageHeader>
 
@@ -59,6 +59,7 @@ import { Report } from 'reports/Report';
 import Button from 'src/components/Button.vue';
 import FormControl from 'src/components/Controls/FormControl.vue';
 import DropdownWithActions from 'src/components/DropdownWithActions.vue';
+import Icon from 'src/components/Icon.vue';
 import PageHeader from 'src/components/PageHeader.vue';
 import ListReport from 'src/components/Report/ListReport.vue';
 import { fyo } from 'src/initFyo';
@@ -76,6 +77,7 @@ export default defineComponent({
     ListReport,
     DropdownWithActions,
     Button,
+    Icon,
   },
   provide() {
     return {

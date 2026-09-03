@@ -4,16 +4,16 @@
       <template #title>{{ t`Top Expenses` }}</template>
     </SectionHeader>
 
-    <FrappeDonutChart
-      v-show="hasData"
-      class="h-64 w-full"
-      :data="expenses"
-      category="account"
-      value="total"
-      :center-label="t`Total Spending`"
-      :format="(value: number) => fyo.format(value, 'Currency')"
-      :palette="expensePalette"
-    />
+    <div v-if="hasData" class="h-64 w-full">
+      <FrappeDonutChart
+        :data="expenses"
+        category="account"
+        value="total"
+        :center-label="t`Total Spending`"
+        :format="(value: number) => fyo.format(value, 'Currency')"
+        :palette="expensePalette"
+      />
+    </div>
 
     <!-- Empty Message -->
     <div v-if="expenses.length === 0" class="flex-1 w-full h-full flex-center my-20">

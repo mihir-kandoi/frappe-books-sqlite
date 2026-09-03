@@ -15,10 +15,10 @@
         :icon="true"
         @click="() => importer.addRow()"
       >
-        <feather-icon name="plus" class="w-4 h-4" />
+        <Icon name="plus" class="w-4 h-4" />
       </Button>
       <Button v-if="hasImporter" :title="t`Save Template`" :icon="true" @click="saveTemplate">
-        <feather-icon name="download" class="w-4 h-4" />
+        <Icon name="download" class="w-4 h-4" />
       </Button>
       <Button
         v-if="canImportData"
@@ -93,92 +93,94 @@
         class="overflow-auto custom-scroll custom-scroll-thumb1"
         style="max-height: calc(100vh - (2 * var(--h-row-largest)) - 2px)"
       >
-        <!-- Column Assignment Row -->
-        <div
-          class="grid sticky top-0 py-4 pe-4 bg-white dark:bg-gray-875 border-b border-e dark:border-gray-800 gap-4"
-          style="z-index: 1; width: fit-content"
-          :style="gridTemplateColumn"
-        >
-          <div class="index-cell">#</div>
-          <Select
-            v-for="index in columnIterator"
-            :key="index"
-            class="flex-shrink-0"
-            size="small"
-            :border="true"
-            :df="gridColumnTitleDf"
-            :value="importer.assignedTemplateFields[index]!"
-            @change="(value: string | null) => importer.setTemplateField(index, value)"
-          />
-        </div>
-
-        <!-- Values Grid -->
-        <div
+        <FrappeList
           v-if="importer.valueMatrix.length"
-          class="grid py-4 pe-4 bg-white dark:bg-gray-875 gap-4 border-e last:border-b dark:border-gray-800"
-          style="width: fit-content"
-          :style="gridTemplateColumn"
+          :columns="listColumns"
+          divider="full"
+          class="w-max min-w-full list-gap-4"
         >
-          <!-- Grid Value Row Cells, Allow Editing Values -->
-          <template v-for="(row, ridx) of importer.valueMatrix" :key="ridx">
-            <div class="index-cell">
-              <FrappeButton
-                icon="lucide-x"
-                size="xs"
-                variant="ghost"
-                :tooltip="t`Remove row ${ridx + 1}`"
-                :aria-label="t`Remove row ${ridx + 1}`"
-                @click="importer.removeRow(ridx)"
-              />
-            </div>
-
-            <template
-              v-for="(val, cidx) of row.slice(0, columnCount)"
-              :key="`cell-${ridx}-${cidx}`"
-            >
-              <!-- Raw Data Field if Column is Not Assigned -->
-              <Data
-                v-if="!importer.assignedTemplateFields[cidx]"
-                :title="getFieldTitle(val)"
-                :df="{
-                  fieldtype: 'Data',
-                  fieldname: 'tempField',
-                  label: t`Temporary`,
-                  placeholder: t`Select column`,
-                }"
+          <FrappeListHeader class="sticky top-0 z-10 !h-auto bg-surface-white px-4 py-3">
+            <FrappeListHeaderCell class="justify-center">#</FrappeListHeaderCell>
+            <FrappeListHeaderCell v-for="index in columnIterator" :key="index">
+              <Select
+                class="min-w-0 flex-1"
                 size="small"
                 :border="true"
-                :value="
-                  val.value != null
-                    ? String(val.value)
-                    : val.rawValue != null
-                      ? String(val.rawValue)
-                      : ''
-                "
-                :read-only="true"
+                :df="gridColumnTitleDf"
+                :value="importer.assignedTemplateFields[index]!"
+                @change="(value: string | null) => importer.setTemplateField(index, value)"
               />
+            </FrappeListHeaderCell>
+          </FrappeListHeader>
 
-              <!-- FormControl Field if Column is Assigned -->
-              <FormControl
-                v-else
-                :class="val.error ? 'border border-red-300 dark:border-red-600 rounded-md' : ''"
-                :title="getFieldTitle(val)"
-                :df="importer.templateFieldsMap.get(importer.assignedTemplateFields[cidx]!)"
-                size="small"
-                :rows="1"
-                :border="true"
-                :value="val.error ? null : val.value"
-                :read-only="false"
-                @change="
-                  (value: DocValue) => {
-                    importer.valueMatrix[ridx][cidx]!.error = false;
-                    importer.valueMatrix[ridx][cidx]!.value = value;
-                  }
-                "
-              />
+          <FrappeListRows :items="importer.valueMatrix" :row-key="getImportRowKey">
+            <template #default="{ item: row, index: ridx, value }">
+              <FrappeListRow :value="value" class="min-h-12 px-4 py-2">
+                <FrappeListCell class="justify-center">
+                  <FrappeButton
+                    icon="lucide-x"
+                    size="xs"
+                    variant="ghost"
+                    :tooltip="t`Remove row ${ridx + 1}`"
+                    :aria-label="t`Remove row ${ridx + 1}`"
+                    @click="importer.removeRow(ridx)"
+                  />
+                </FrappeListCell>
+
+                <FrappeListCell
+                  v-for="(val, cidx) of row.slice(0, columnCount)"
+                  :key="`cell-${ridx}-${cidx}`"
+                  class="min-w-0"
+                >
+                  <Data
+                    v-if="!importer.assignedTemplateFields[cidx]"
+                    class="min-w-0 flex-1"
+                    :title="getFieldTitle(val)"
+                    :df="{
+                      fieldtype: 'Data',
+                      fieldname: 'tempField',
+                      label: t`Temporary`,
+                      placeholder: t`Select column`,
+                    }"
+                    size="small"
+                    :border="true"
+                    :value="
+                      val.value != null
+                        ? String(val.value)
+                        : val.rawValue != null
+                          ? String(val.rawValue)
+                          : ''
+                    "
+                    :read-only="true"
+                  />
+
+                  <FormControl
+                    v-else
+                    class="min-w-0 flex-1"
+                    :class="
+                      val.error
+                        ? 'rounded-md border border-red-300 dark:border-red-600'
+                        : ''
+                    "
+                    :title="getFieldTitle(val)"
+                    :df="importer.templateFieldsMap.get(importer.assignedTemplateFields[cidx]!)"
+                    size="small"
+                    :rows="1"
+                    :border="true"
+                    :value="val.error ? null : val.value"
+                    :read-only="false"
+                    @change="
+                      (value: DocValue) => {
+                        importer.valueMatrix[ridx][cidx]!.error = false;
+                        importer.valueMatrix[ridx][cidx]!.value = value;
+                      }
+                    "
+                  />
+                </FrappeListCell>
+              </FrappeListRow>
             </template>
-          </template>
-        </div>
+          </FrappeListRows>
+        </FrappeList>
 
         <div
           v-else
@@ -341,6 +343,14 @@ import { DocValue } from 'fyo/core/types';
 import { Action } from 'fyo/model/types';
 import { ValidationError } from 'fyo/utils/errors';
 import { Button as FrappeButton } from 'frappe-ui';
+import {
+  List as FrappeList,
+  ListCell as FrappeListCell,
+  ListHeader as FrappeListHeader,
+  ListHeaderCell as FrappeListHeaderCell,
+  ListRow as FrappeListRow,
+  ListRows as FrappeListRows,
+} from 'frappe-ui/list';
 import { ModelNameEnum } from 'models/types';
 import { OptionField, RawValue, SelectOption } from 'schemas/types';
 import Button from 'src/components/Button.vue';
@@ -351,6 +361,7 @@ import FormControl from 'src/components/Controls/FormControl.vue';
 import Select from 'src/components/Controls/Select.vue';
 import DropdownWithActions from 'src/components/DropdownWithActions.vue';
 import FormHeader from 'src/components/FormHeader.vue';
+import Icon from 'src/components/Icon.vue';
 import Modal from 'src/components/Modal.vue';
 import PageHeader from 'src/components/PageHeader.vue';
 import { Importer, TemplateField, getColumnLabel } from 'src/importer';
@@ -388,9 +399,16 @@ export default defineComponent({
     Data,
     Modal,
     FormHeader,
+    Icon,
     Check,
     Select,
     FrappeButton,
+    FrappeList,
+    FrappeListCell,
+    FrappeListHeader,
+    FrappeListHeaderCell,
+    FrappeListRow,
+    FrappeListRows,
   },
   data() {
     return {
@@ -408,8 +426,8 @@ export default defineComponent({
     } as ImportWizardData;
   },
   computed: {
-    gridTemplateColumn(): string {
-      return `grid-template-columns: 4rem repeat(${this.columnCount}, 10rem)`;
+    listColumns(): string[] {
+      return ['4rem', ...this.columnIterator.map(() => '10rem')];
     },
     duplicates(): string[] {
       if (!this.hasImporter) {
@@ -664,6 +682,9 @@ export default defineComponent({
     this.clear();
   },
   methods: {
+    getImportRowKey(_row: unknown, index: number): number {
+      return index;
+    },
     getFieldTitle(vmi: { value?: DocValue; rawValue?: RawValue; error?: boolean }): string {
       const title: string[] = [];
       if (vmi.value != null) {

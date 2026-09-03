@@ -37,7 +37,7 @@
         :aria-label="t`Show sidebar`"
         @click="toggleSidebar"
       >
-        <feather-icon name="chevrons-right" class="h-4 w-4" />
+        <Icon name="chevrons-right" class="h-4 w-4" />
       </Button>
 
       <!-- Nav Group -->
@@ -71,10 +71,11 @@ import { showSidebar } from 'src/utils/refs';
 import { toggleSidebar } from 'src/utils/ui';
 import { defineComponent, inject, Transition } from 'vue';
 import Button from './Button.vue';
+import Icon from './Icon.vue';
 import PageHeaderNavGroup from './PageHeaderNavGroup.vue';
 
 export default defineComponent({
-  components: { Button, FrappePageHeader, Transition, PageHeaderNavGroup },
+  components: { Button, FrappePageHeader, Icon, Transition, PageHeaderNavGroup },
   props: {
     title: { type: String, default: '' },
     border: { type: Boolean, default: true },

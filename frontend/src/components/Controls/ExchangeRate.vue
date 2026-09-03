@@ -67,7 +67,7 @@
       :tooltip="t`Swap currencies`"
       @click="swap"
     >
-      <feather-icon
+      <Icon
         name="refresh-cw"
         class="w-3 h-3 text-gray-600 dark:text-gray-400"
       />
@@ -79,11 +79,12 @@ import {
   Button as FrappeButton,
   TextInput as FrappeTextInput,
 } from 'frappe-ui';
+import Icon from 'src/components/Icon.vue';
 import { safeParseFloat } from 'utils/index';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  components: { FrappeButton, FrappeTextInput },
+  components: { FrappeButton, FrappeTextInput, Icon },
   props: {
     disabled: { type: Boolean, default: false },
     fromCurrency: { type: String, default: 'USD' },

@@ -4,27 +4,21 @@
       {{ df.label }}
     </div>
 
-    <div :class="border ? 'border dark:border-gray-800 rounded-md' : ''">
-      <!-- Title Row -->
-      <Row
-        :ratio="ratio"
-        class="
-          border-b
-          dark:border-gray-800
-          px-2
-          text-gray-600
-          dark:text-gray-400
-          w-full
-          items-center
-          h-row-mid
-        "
-      >
-        <div class="flex items-center ps-2">#</div>
-        <div
+    <FrappeList
+      :columns="listColumns"
+      :row-height="48"
+      divider="full"
+      class="list-gap-2 [--list-row-padding-x:0px]"
+      :class="border ? 'overflow-hidden rounded-md border border-outline-gray-1' : ''"
+    >
+      <FrappeListHeader v-if="showHeader">
+        <FrappeListHeaderCell class="justify-center">#</FrappeListHeaderCell>
+        <FrappeListHeaderCell
           v-for="df in tableFields"
           :key="df.fieldname"
-          class="flex min-w-0 px-2 h-row-mid"
+          class="min-w-0"
           :class="[
+            cellPaddingClass,
             df.sub_label ? 'flex-col justify-center' : 'items-center',
             isNumeric(df)
               ? df.sub_label
@@ -39,8 +33,11 @@
           <p v-if="df.sub_label" class="text-xs">
             {{ df.sub_label }}
           </p>
-        </div>
-      </Row>
+        </FrappeListHeaderCell>
+        <FrappeListHeaderCell v-if="canEditRow">
+          <span class="sr-only">{{ t`Actions` }}</span>
+        </FrappeListHeaderCell>
+      </FrappeListHeader>
 
       <!-- Data Rows -->
       <div
@@ -53,11 +50,10 @@
         :style="{ 'max-height': maxHeight }"
       >
         <TableRow
-          v-for="(row, idx) of value"
+          v-for="row of value"
           ref="table-row"
           :key="row.name"
-          :class="idx < value.length - 1 ? 'border-b dark:border-gray-800' : ''"
-          v-bind="{ row, tableFields, size, ratio, isNumeric }"
+          v-bind="{ row, tableFields, size }"
           :read-only="isReadOnly"
           :can-edit-row="canEditRow"
           @remove="removeRow(row)"
@@ -66,30 +62,20 @@
       </div>
 
       <!-- Add Row and Row Count -->
-      <Row
+      <FrappeListRow
         v-if="!isReadOnly"
-        :ratio="ratio"
         class="
-          text-gray-500
-          cursor-pointer
-          px-2
-          w-full
-          h-row-mid
-          flex
-          items-center
-          focus:outline-none focus:ring-1 focus:ring-blue-500
+          border-t border-outline-gray-1 text-ink-gray-5
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3
         "
-        :class="value.length > 0 ? 'border-t dark:border-gray-800' : ''"
-        tabindex="0"
         @click="addRow"
-        @keydown.enter="addRow"
       >
-        <div class="flex items-center ps-1">
-          <feather-icon name="plus" class="w-4 h-4 text-gray-500" />
-        </div>
-        <div
-          class="flex justify-between px-2"
-          :style="`grid-column: 2 / ${ratio.length + 1}`"
+        <FrappeListCell class="justify-center">
+          <Icon name="plus" class="w-4 h-4 text-gray-500" />
+        </FrappeListCell>
+        <FrappeListCell
+          class="justify-between px-2"
+          style="grid-column: 2 / -1"
         >
           <p>
             {{ t`Add Row` }}
@@ -104,14 +90,21 @@
           >
             {{ t`${value.length} rows` }}
           </p>
-        </div>
-      </Row>
-    </div>
+        </FrappeListCell>
+      </FrappeListRow>
+    </FrappeList>
   </div>
 </template>
 
 <script>
-import Row from 'src/components/Row.vue';
+import Icon from 'src/components/Icon.vue';
+import {
+  List as FrappeList,
+  ListCell as FrappeListCell,
+  ListHeader as FrappeListHeader,
+  ListHeaderCell as FrappeListHeaderCell,
+  ListRow as FrappeListRow,
+} from 'frappe-ui/list';
 import { fyo } from 'src/initFyo';
 import { nextTick } from 'vue';
 import Base from './Base.vue';
@@ -120,7 +113,12 @@ import TableRow from './TableRow.vue';
 export default {
   name: 'Table',
   components: {
-    Row,
+    FrappeList,
+    FrappeListCell,
+    FrappeListHeader,
+    FrappeListHeaderCell,
+    FrappeListRow,
+    Icon,
     TableRow,
   },
   extends: Base,
@@ -141,11 +139,6 @@ export default {
   },
   emits: ['editrow', 'row-change'],
   computed: {
-    height() {
-      if (this.size === 'small') {
-      }
-      return 2;
-    },
     canEditRow() {
       return this.df.edit;
     },
@@ -170,6 +163,12 @@ export default {
       }
 
       return ratio;
+    },
+    listColumns() {
+      return this.ratio.map((ratio) => `minmax(0, ${ratio}fr)`);
+    },
+    cellPaddingClass() {
+      return this.size === 'small' ? 'px-2' : 'px-3';
     },
     tableFields() {
       const fields = fyo.schemaMap[this.df.target].tableFields ?? [];

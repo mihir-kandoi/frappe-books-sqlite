@@ -85,6 +85,11 @@ html.dark input[type='date']::-webkit-calendar-picker-indicator {
   justify-content: center;
 }
 
+/* Table rows belong to one continuous surface; rounded rows are for standalone lists. */
+[data-slot='list'][role='table'] [data-slot='list-row'] {
+  border-radius: 0;
+}
+
 input[type='number'] {
   appearance: textfield;
   -moz-appearance: textfield;
@@ -127,7 +132,7 @@ input[type='number']::-webkit-outer-spin-button {
 }
 
 :root {
-  --w-form: 600px;
+  --w-form: 720px;
   --w-app: 1200px;
   --w-sidebar: 14rem;
   --w-desk: calc(100vw - var(--w-sidebar));
@@ -156,7 +161,7 @@ input[type='number']::-webkit-outer-spin-button {
 }
 
 .w-form {
-  width: var(--w-form);
+  width: min(var(--w-form), calc(100% - 2rem));
 }
 
 .w-dialog {

@@ -1,141 +1,69 @@
 <template>
   <div class="flex min-h-0 flex-1 gap-2">
     <div
-      class="min-h-0 w-1/2 overflow-y-auto custom-scroll custom-scroll-thumb2"
+      v-for="(columnItems, columnIndex) in itemColumns"
+      :key="columnIndex"
+      class="min-h-0 w-1/2"
     >
-      <Row
-        :ratio="ratio"
-        class="
-          mt-2
-          px-2
-          w-full
-          flex
-          items-center
-          border
-          rounded-t-md
-          text-gray-600
-          dark:border-gray-800 dark:text-gray-400
-        "
+      <FrappeList
+        :columns="listColumns"
+        :row-height="48"
+        divider="full"
+        class="mt-2 flex h-full min-h-0 flex-col overflow-hidden rounded-md border border-outline-gray-1 list-gap-2 [--list-row-padding-x:0px]"
       >
-        <div
-          v-for="df in tableFields"
-          :key="df.fieldname"
-          class="flex items-center p-2 text-lg"
-          :class="{
-        'ms-auto': isNumeric(df as Field),
-      }"
-        >
-          {{ df.label }}
-        </div>
-      </Row>
+        <FrappeListHeader>
+          <FrappeListHeaderCell
+            v-for="df in tableFields"
+            :key="df.fieldname"
+            class="px-3"
+            :class="isNumeric(df as Field) ? 'justify-end' : ''"
+          >
+            {{ df.label }}
+          </FrappeListHeaderCell>
+        </FrappeListHeader>
 
-      <Row
-        v-for="row in firstColumnItems as POSItem[]"
-        :key="row.name"
-        :ratio="ratio"
-        :border="true"
-        class="
-          px-2
-          w-full
-          border
-          flex
-          items-center
-          justify-center
-          group
-          h-row-mid
-          cursor-pointer
-          hover:bg-gray-25
-          dark:border-gray-800 dark:bg-gray-890
-        "
-        role="button"
-        tabindex="0"
-        :aria-label="`Add ${row.name}`"
-        @click="handleChange(row)"
-        @keydown.enter.prevent="handleChange(row)"
-        @keydown.space.prevent="handleChange(row)"
-      >
-        <FormControl
-          v-for="df in tableFields"
-          :key="df.fieldname"
-          size="large"
-          class="pointer-events-none select-none"
-          :df="df"
-          :value="(row as POSItem)[df.fieldname as keyof POSItem]"
-          :readOnly="true"
-        />
-      </Row>
-    </div>
-
-    <div
-      class="min-h-0 w-1/2 overflow-y-auto custom-scroll custom-scroll-thumb2"
-    >
-      <Row
-        :ratio="ratio"
-        class="
-          mt-2
-          px-2
-          w-full
-          flex
-          items-center
-          border
-          rounded-t-md
-          text-gray-600
-          dark:border-gray-800 dark:text-gray-400
-        "
-      >
-        <div
-          v-for="df in tableFields"
-          :key="df.fieldname"
-          class="flex items-center p-2 text-lg"
-          :class="{
-        'ms-auto': isNumeric(df as Field),
-      }"
-        >
-          {{ df.label }}
+        <div class="custom-scroll custom-scroll-thumb2 min-h-0 flex-1 overflow-y-auto">
+          <FrappeListRows :items="columnItems" row-key="name">
+            <template #default="{ item: row, value }">
+              <FrappeListRow
+                :value="value"
+                class="text-ink-gray-8"
+                :aria-label="`Add ${row.name}`"
+                @click="handleChange(row)"
+              >
+                <FrappeListCell
+                  v-for="df in tableFields"
+                  :key="df.fieldname"
+                  class="min-w-0"
+                  :class="isNumeric(df as Field) ? 'justify-end text-end' : ''"
+                >
+                  <FormControl
+                    size="large"
+                    class="pointer-events-none min-w-0 flex-1 select-none"
+                    :df="df"
+                    :value="row[df.fieldname as keyof POSItem]"
+                    :readOnly="true"
+                  />
+                </FrappeListCell>
+              </FrappeListRow>
+            </template>
+          </FrappeListRows>
         </div>
-      </Row>
-      <Row
-        v-for="row in secondColumnItems as POSItem[]"
-        :key="row.name"
-        :ratio="ratio"
-        :border="true"
-        class="
-          px-2
-          w-full
-          border
-          flex
-          items-center
-          justify-center
-          group
-          h-row-mid
-          cursor-pointer
-          hover:bg-gray-25
-          dark:bg-gray-890 dark:border-gray-800
-        "
-        role="button"
-        tabindex="0"
-        :aria-label="`Add ${row.name}`"
-        @click="handleChange(row)"
-        @keydown.enter.prevent="handleChange(row)"
-        @keydown.space.prevent="handleChange(row)"
-      >
-        <FormControl
-          v-for="df in tableFields"
-          :key="df.fieldname"
-          size="large"
-          class="pointer-events-none select-none"
-          :df="df"
-          :value="(row as POSItem)[df.fieldname as keyof POSItem]"
-          :readOnly="true"
-        />
-      </Row>
+      </FrappeList>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import FormControl from 'src/components/Controls/FormControl.vue';
-import Row from 'src/components/Row.vue';
+import {
+  List as FrappeList,
+  ListCell as FrappeListCell,
+  ListHeader as FrappeListHeader,
+  ListHeaderCell as FrappeListHeaderCell,
+  ListRow as FrappeListRow,
+  ListRows as FrappeListRows,
+} from 'frappe-ui/list';
 import { isNumeric } from 'src/utils';
 import { t } from 'fyo';
 import { defineComponent } from 'vue';
@@ -144,7 +72,15 @@ import { POSItem } from '../types';
 
 export default defineComponent({
   name: 'ModernPOSItemsTable',
-  components: { FormControl, Row },
+  components: {
+    FormControl,
+    FrappeList,
+    FrappeListCell,
+    FrappeListHeader,
+    FrappeListHeaderCell,
+    FrappeListRow,
+    FrappeListRows,
+  },
   emits: ['addItem', 'updateValues'],
   props: {
     items: Array,
@@ -157,6 +93,9 @@ export default defineComponent({
   computed: {
     ratio() {
       return [1.6, 0.9, 0.8, 0.7];
+    },
+    listColumns(): string[] {
+      return this.ratio.map((ratio) => `minmax(0, ${ratio}fr)`);
     },
     tableFields() {
       const fields = [
@@ -194,11 +133,10 @@ export default defineComponent({
 
       return fields;
     },
-    firstColumnItems() {
-      return this.items?.slice(0, Math.ceil(this.items.length / 2));
-    },
-    secondColumnItems() {
-      return this.items?.slice(Math.ceil(this.items.length / 2));
+    itemColumns(): POSItem[][] {
+      const items = (this.items ?? []) as POSItem[];
+      const midpoint = Math.ceil(items.length / 2);
+      return [items.slice(0, midpoint), items.slice(midpoint)];
     },
   },
   methods: {
