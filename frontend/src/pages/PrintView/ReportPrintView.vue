@@ -1,10 +1,10 @@
 <template>
   <div class="flex flex-col w-full h-full">
     <PageHeader :title="t`Print ${title}`">
-      <Button class="text-xs" type="primary" @click="savePDF()">
+      <Button type="primary" @click="savePDF()">
         {{ t`Save as PDF` }}
       </Button>
-      <Button class="text-xs" type="primary" @click="savePDF(true)">
+      <Button type="primary" @click="savePDF(true)">
         {{ t`Print` }}
       </Button>
     </PageHeader>
@@ -15,22 +15,15 @@
       <!-- Report Print Display Area -->
       <div
         ref="previewContainer"
-        class="
-          p-4
-          bg-gray-25
-          dark:bg-gray-890
-          overflow-auto
-          custom-scroll custom-scroll-thumb1
-        "
+        class="p-4 bg-surface-gray-1 overflow-auto custom-scroll custom-scroll-thumb1"
       >
         <!-- Report Print Display Container -->
-        <ScaledContainer
-          ref="scaledContainer"
-          class="shadow-lg border bg-white mx-auto"
+        <PrintSheet
+          ref="printSheet"
+          class="shadow-lg border mx-auto"
           :scale="scale"
           :width="size.width"
           :height="size.height"
-          :show-overflow="true"
         >
           <div class="bg-white mx-auto">
             <div class="p-2">
@@ -65,12 +58,12 @@
               </p>
             </div>
           </div>
-        </ScaledContainer>
+        </PrintSheet>
       </div>
 
       <!-- Report Print Settings -->
-      <div v-if="report" class="border-l dark:border-gray-800 flex flex-col">
-        <p class="p-4 text-sm text-gray-600 dark:text-gray-400">
+      <div v-if="report" class="border-l border-outline-gray-1 flex flex-col">
+        <p class="p-4 text-sm text-ink-gray-6">
           {{
             [
               t`Hidden values will be visible on Print on.`,
@@ -79,7 +72,7 @@
           }}
         </p>
         <!-- Row Selection -->
-        <div class="p-4 border-t dark:border-gray-800">
+        <div class="p-4 border-t border-outline-gray-1">
           <Int
             :show-label="true"
             :border="true"
@@ -110,7 +103,7 @@
         </div>
 
         <!-- Size Selection -->
-        <div class="border-t dark:border-gray-800 p-4">
+        <div class="border-t border-outline-gray-1 p-4">
           <Select
             :show-label="true"
             :border="true"
@@ -133,20 +126,12 @@
         </div>
 
         <!-- Pick Columns -->
-        <div class="border-t dark:border-gray-800 p-4">
-          <h2 class="text-sm text-gray-600 dark:text-gray-400">
+        <div class="border-t border-outline-gray-1 p-4">
+          <h2 class="text-sm text-ink-gray-6">
             {{ t`Pick Columns` }}
           </h2>
           <div
-            class="
-              mt-2
-              grid grid-cols-2
-              gap-x-4 gap-y-2
-              rounded
-              border
-              p-3
-              dark:border-gray-800
-            "
+            class="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 rounded-2 border p-3 border-outline-gray-1"
           >
             <Check
               v-for="(col, i) of report?.columns"
@@ -180,10 +165,10 @@ import { getPathAndMakePDF } from 'src/utils/printTemplates';
 import { showSidebar } from 'src/utils/refs';
 import { paperSizeMap, printSizes } from 'src/utils/ui';
 import { PropType, defineComponent } from 'vue';
-import ScaledContainer from '../TemplateBuilder/ScaledContainer.vue';
+import PrintSheet from 'src/components/PrintSheet.vue';
 
 export default defineComponent({
-  components: { PageHeader, Button, Check, Int, ScaledContainer, Select },
+  components: { PageHeader, Button, Check, Int, PrintSheet, Select },
   props: {
     reportName: {
       type: String as PropType<keyof typeof reports>,
@@ -194,7 +179,7 @@ export default defineComponent({
     return {
       start: 1,
       limit: 0,
-      printSize: 'A4' as typeof printSizes[number],
+      printSize: 'A4' as (typeof printSizes)[number],
       isLandscape: false,
       scale: 0.65,
       report: null as null | Report,
@@ -309,8 +294,9 @@ export default defineComponent({
       this.scale = Math.min(containerWidth / pageWidthPx, 1);
     },
     async savePDF(shouldPrint?: boolean): Promise<void> {
-      // @ts-ignore
-      const innerHTML = this.$refs.scaledContainer.$el.children[0].innerHTML;
+      const innerHTML = (
+        this.$refs.printSheet as InstanceType<typeof PrintSheet>
+      ).getHTML();
       if (typeof innerHTML !== 'string') {
         return;
       }
@@ -323,7 +309,6 @@ export default defineComponent({
         this.size.height,
         shouldPrint
       );
-
     },
     cellClasses(cIdx: number, rIdx: number): string[] {
       const classes: string[] = [];

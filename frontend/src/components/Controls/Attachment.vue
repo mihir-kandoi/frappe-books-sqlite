@@ -82,18 +82,6 @@ export default defineComponent({
 
       return this.df?.placeholder ?? this.df?.label ?? t`Attachment`;
     },
-    inputReadOnlyClasses() {
-      if (!this.value) {
-        return 'text-gray-600';
-      } else if (this.isReadOnly) {
-        return 'text-gray-800 cursor-default';
-      }
-
-      return 'text-gray-900';
-    },
-    containerReadOnlyClasses() {
-      return '';
-    },
   },
   methods: {
     upload() {

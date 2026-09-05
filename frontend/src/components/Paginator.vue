@@ -1,13 +1,6 @@
 <template>
   <div
-    class="
-      grid grid-cols-3
-      text-gray-800
-      dark:text-gray-100
-      text-sm
-      select-none
-      items-center
-    "
+    class="grid grid-cols-3 text-ink-gray-8 text-sm select-none items-center"
     style="height: 50px"
   >
     <!-- Length Display -->
@@ -30,9 +23,10 @@
           <span class="lucide-chevron-left size-4 rtl-rotate-180" />
         </template>
       </FrappeButton>
-      <div class="flex items-center gap-1 rounded bg-surface-gray-2">
+      <div class="flex items-center gap-1 rounded-2 bg-surface-gray-2">
         <FrappeTextInput
           type="number"
+          aria-label="Page number"
           class="w-12 [&_input]:text-end"
           variant="ghost"
           size="sm"
@@ -42,7 +36,7 @@
           @change="(e) => setPageNo(e.target.value)"
           @input="(e) => setPageNo(e.target.value)"
         />
-        <p class="text-gray-600">/</p>
+        <p class="text-ink-gray-5">/</p>
         <p class="w-7">
           {{ maxPages }}
         </p>
@@ -63,17 +57,11 @@
     <!-- Count Selector -->
     <div
       v-if="filteredCounts.length"
-      class="
-        border border-gray-100
-        dark:border-gray-800
-        rounded
-        flex
-        justify-self-end
-      "
+      class="border border-outline-gray-1 rounded-2 flex justify-self-end"
     >
       <template v-for="c in filteredCounts" :key="c + '-count'">
         <FrappeButton
-          class="w-9"
+          class="min-w-10"
           :variant="
             count === c || (count === itemCount && c === -1)
               ? 'subtle'

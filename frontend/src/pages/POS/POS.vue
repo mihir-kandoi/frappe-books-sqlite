@@ -3,10 +3,11 @@
     <PageHeader :title="t`Point of Sale`">
       <slot>
         <Button
-          class="bg-red-500 dark:bg-red-700"
+          theme="red"
+          type="primary"
           @click="toggleModal('ShiftClose')"
         >
-          <span class="font-medium text-white">{{ t`Close POS Shift ` }}</span>
+          <span>{{ t`Close POS Shift ` }}</span>
         </Button>
       </slot>
     </PageHeader>
@@ -16,7 +17,7 @@
         (!posProfile?.posUI && fyo.singles.POSSettings?.posUI === 'Classic')
       "
       :table-view="tableView"
-      :profile="(posProfile as POSProfile)"
+      :profile="posProfile as POSProfile"
       :total-quantity="totalQuantity"
       :item-quantity-map="itemQtyMap"
       :loyalty-points="loyaltyPoints"
@@ -26,14 +27,14 @@
       :item-search-term="itemSearchTerm"
       :selected-item-group="selectedItemGroup"
       :is-pos-shift-open="isPosShiftOpen"
-      :items="(filteredItems as [] as POSItem[])"
-      :search-items="(items as [] as POSItem[])"
+      :items="filteredItems as [] as POSItem[]"
+      :search-items="items as [] as POSItem[]"
       :item-visibility="itemVisibility"
-      :sinv-doc="(sinvDoc as SalesInvoice)"
+      :sinv-doc="sinvDoc as SalesInvoice"
       :disable-pay-button="disablePayButton"
       :open-payment-modal="openPaymentModal"
-      :item-discounts="(itemDiscounts as Money)"
-      :coupons="(coupons as AppliedCouponCodes)"
+      :item-discounts="itemDiscounts as Money"
+      :coupons="coupons as AppliedCouponCodes"
       :open-price-list-modal="openPriceListModal"
       :open-item-enquiry-modal="openItemEnquiryModal"
       :applied-coupons-count="appliedCouponsCount"
@@ -76,7 +77,7 @@
     <ModernPOS
       v-else
       :table-view="tableView"
-      :profile="(posProfile as POSProfile)"
+      :profile="posProfile as POSProfile"
       :total-quantity="totalQuantity"
       :item-quantity-map="itemQtyMap"
       :loyalty-points="loyaltyPoints"
@@ -86,15 +87,15 @@
       :item-search-term="itemSearchTerm"
       :selected-item-group="selectedItemGroup"
       :is-pos-shift-open="isPosShiftOpen"
-      :items="(filteredItems as [] as POSItem[])"
-      :search-items="(items as [] as POSItem[])"
+      :items="filteredItems as [] as POSItem[]"
+      :search-items="items as [] as POSItem[]"
       :item-visibility="itemVisibility"
-      :sinv-doc="(sinvDoc as SalesInvoice)"
+      :sinv-doc="sinvDoc as SalesInvoice"
       :disable-pay-button="disablePayButton"
       :open-payment-modal="openPaymentModal"
       :open-keyboard-modal="openKeyboardModal"
-      :item-discounts="(itemDiscounts as Money)"
-      :coupons="(coupons as AppliedCouponCodes)"
+      :item-discounts="itemDiscounts as Money"
+      :coupons="coupons as AppliedCouponCodes"
       :open-price-list-modal="openPriceListModal"
       :open-item-enquiry-modal="openItemEnquiryModal"
       :applied-coupons-count="appliedCouponsCount"
@@ -1310,10 +1311,7 @@ export default defineComponent({
       }
 
       if (requirements.requiresClearanceDate) {
-        await this.paymentDoc.set(
-          'clearanceDate',
-          this.transferClearanceDate
-        );
+        await this.paymentDoc.set('clearanceDate', this.transferClearanceDate);
       }
 
       if (requirements.isCash) {

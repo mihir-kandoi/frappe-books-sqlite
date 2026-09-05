@@ -2,7 +2,7 @@
   <div>
     <!-- Export Wizard Header -->
     <FormHeader :form-title="label" :form-sub-title="t`Export Wizard`" />
-    <hr class="dark:border-gray-800" />
+    <hr class="border-outline-gray-1" />
 
     <!-- Export Config -->
     <div class="flex flex-wrap items-end gap-4 p-4">
@@ -37,13 +37,13 @@
         @change="(value: number) => (limit = value)"
       />
     </div>
-    <hr class="dark:border-gray-800" />
+    <hr class="border-outline-gray-1" />
 
     <!-- Fields Selection -->
     <div class="max-h-80 overflow-auto custom-scroll custom-scroll-thumb2">
       <!-- Main Fields -->
       <div class="p-4">
-        <h2 class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+        <h2 class="text-sm font-semibold text-ink-gray-8">
           {{ fyo.schemaMap[schemaName]?.label ?? schemaName }}
         </h2>
         <div
@@ -51,10 +51,10 @@
             mt-2
             grid grid-cols-3
             gap-x-6 gap-y-2
-            rounded
+            rounded-2
             border
             p-3
-            dark:border-gray-800
+            border-outline-gray-1
           "
         >
           <Check
@@ -63,8 +63,8 @@
             class="min-w-0"
             :label-class="
               ef.fieldtype === 'Table'
-                ? 'text-sm text-gray-600 dark:text-gray-300 font-semibold'
-                : 'text-sm text-gray-600 dark:text-gray-400'
+                ? 'text-sm text-ink-gray-6 font-semibold'
+                : 'text-sm text-ink-gray-6'
             "
             :df="getField(ef)"
             :show-label="true"
@@ -76,7 +76,7 @@
 
       <!-- Table Fields -->
       <div v-for="efs of filteredTableFields" :key="efs.fieldname" class="p-4">
-        <h2 class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+        <h2 class="text-sm font-semibold text-ink-gray-8">
           {{ fyo.schemaMap[efs.target]?.label ?? schemaName }}
         </h2>
         <div
@@ -84,17 +84,17 @@
             mt-2
             grid grid-cols-3
             gap-x-6 gap-y-2
-            rounded
+            rounded-2
             border
             p-3
-            dark:border-gray-800
+            border-outline-gray-1
           "
         >
           <Check
             v-for="ef of efs.fields"
             :key="ef.fieldname"
             class="min-w-0"
-            label-class="text-gray-600 dark:text-gray-300"
+            label-class="text-ink-gray-6"
             :df="getField(ef)"
             :show-label="true"
             :value="ef.export"
@@ -105,9 +105,9 @@
     </div>
 
     <!-- Export Button -->
-    <hr class="dark:border-gray-800" />
+    <hr class="border-outline-gray-1" />
     <div class="p-4 flex justify-between items-center">
-      <p class="text-sm text-gray-600 dark:text-gray-400">
+      <p class="text-sm text-ink-gray-6">
         {{ t`${numSelected} fields selected` }}
       </p>
       <Button type="primary" @click="exportData">{{ t`Export` }}</Button>

@@ -17,6 +17,23 @@ class IntegrationTestUiBridge(IntegrationTestCase):
 	def setUp(self):
 		self.bridge = BooksDatabaseBridge()
 
+	def test_account_crud_keeps_frappe_tree_indices(self):
+		name = unique_name("UI Tree Account")
+		self.bridge.insert(
+			"Account",
+			{"name": name, "rootType": "Asset", "isGroup": False, "lft": 0, "rgt": 0},
+		)
+		account = frappe.get_doc("Books Account", name)
+		self.assertGreater(account.lft, 0)
+		self.assertGreater(account.rgt, account.lft)
+		indices = (account.lft, account.rgt)
+
+		self.bridge.update("Account", {"name": name, "lft": -1, "rgt": -1})
+		account.reload()
+		self.assertEqual((account.lft, account.rgt), indices)
+		self.bridge.delete("Account", name)
+		self.assertFalse(frappe.db.exists("Books Account", name))
+
 	def test_single_read_omits_unstored_frappe_defaults(self):
 		frappe.db.sql("delete from tabSingles where doctype = %s", "Books Pos Settings")
 

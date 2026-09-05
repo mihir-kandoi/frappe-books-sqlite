@@ -14,7 +14,7 @@
       />
     </div>
     <div v-else class="flex-1 w-full h-full flex-center my-20">
-      <span class="text-base text-gray-600 dark:text-gray-500">
+      <span class="text-base text-ink-gray-6">
         {{ t`No transactions yet` }}
       </span>
     </div>

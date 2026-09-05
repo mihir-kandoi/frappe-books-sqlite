@@ -1,27 +1,36 @@
 <template>
   <div
-    class="relative bg-white dark:bg-gray-900 border dark:border-gray-800 flex-center overflow-hidden group"
+    class="relative bg-surface-base border border-outline-gray-1 flex-center overflow-hidden group"
     :class="{
-      rounded: size === 'form',
+      'rounded-2': size === 'form',
       'w-20 h-20 rounded-full': size !== 'small' && size !== 'form',
       'w-12 h-12 rounded-full': size === 'small',
     }"
     :title="df?.label"
     :style="imageSizeStyle"
   >
-    <img v-if="value" :src="value" />
+    <img
+      v-if="value"
+      :src="value"
+      :alt="df?.label ?? ''"
+      class="h-full w-full object-contain"
+    />
     <div v-else :class="[!isReadOnly ? 'group-hover:opacity-90' : '']">
       <div
         v-if="letterPlaceholder"
-        class="flex h-full items-center justify-center text-gray-400 dark:text-gray-600 font-semibold w-full text-4xl select-none"
+        class="flex h-full items-center justify-center text-ink-gray-4 font-semibold w-full text-4xl select-none"
       >
         {{ letterPlaceholder }}
       </div>
-      <span v-else class="lucide-image size-6 text-ink-gray-4" aria-hidden="true" />
+      <span
+        v-else
+        class="lucide-image size-6 text-ink-gray-4"
+        aria-hidden="true"
+      />
     </div>
     <div
-      class="hidden w-full h-full absolute justify-center items-end"
-      :class="[!isReadOnly ? 'group-hover:flex' : '']"
+      v-if="!isReadOnly"
+      class="flex w-full h-full absolute justify-center items-end opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
       style="background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(2px)"
     >
       <FrappeButton
@@ -32,7 +41,10 @@
         @click="handleClick"
       >
         <template #icon>
-          <span :class="shouldClear ? 'lucide-x' : 'lucide-upload'" class="size-4" />
+          <span
+            :class="shouldClear ? 'lucide-x' : 'lucide-upload'"
+            class="size-4"
+          />
         </template>
       </FrappeButton>
     </div>

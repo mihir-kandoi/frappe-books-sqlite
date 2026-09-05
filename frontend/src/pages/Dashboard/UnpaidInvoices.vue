@@ -11,28 +11,28 @@
       <div class="flex justify-between">
         <!-- Paid -->
         <FrappeButton
-          class="text-sm font-medium dark:text-gray-25"
+          class="text-sm font-medium text-ink-gray-8"
           variant="ghost"
           :disabled="paidCount === 0"
           :tooltip="paidCount > 0 ? t`View Paid Invoices` : undefined"
           @click="routeToInvoices('paid')"
         >
           {{ fyo.format(paid, 'Currency') }}
-          <span :class="{ 'text-gray-900 dark:text-gray-200 font-normal': count }">{{
+          <span :class="{ 'text-ink-gray-9 font-normal': count }">{{
             t`Paid`
           }}</span>
         </FrappeButton>
 
         <!-- Unpaid -->
         <FrappeButton
-          class="text-sm font-medium dark:text-gray-25"
+          class="text-sm font-medium text-ink-gray-8"
           variant="ghost"
           :disabled="unpaidCount === 0"
           :tooltip="unpaidCount > 0 ? t`View Unpaid Invoices` : undefined"
           @click="routeToInvoices('unpaid')"
         >
           {{ fyo.format(unpaid, 'Currency') }}
-          <span :class="{ 'text-gray-900 dark:text-gray-200 font-normal': count }">{{
+          <span :class="{ 'text-ink-gray-9 font-normal': count }">{{
             t`Unpaid`
           }}</span>
         </FrappeButton>
@@ -40,7 +40,7 @@
 
       <!-- Widget Bar -->
       <FrappeTooltip :disabled="!hasData" :hover-delay="0" side="top">
-        <div class="relative mt-2 overflow-hidden rounded">
+        <div class="relative mt-2 overflow-hidden rounded-2">
           <div class="h-4 w-full" :class="unpaidColor"></div>
           <div
             class="absolute inset-0 h-4"

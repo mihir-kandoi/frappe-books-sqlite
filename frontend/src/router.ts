@@ -10,7 +10,7 @@ import QuickEditForm from 'src/pages/QuickEditForm.vue';
 import Report from 'src/pages/Report.vue';
 import Settings from 'src/pages/Settings/Settings.vue';
 import TemplateBuilder from 'src/pages/TemplateBuilder/TemplateBuilder.vue';
-import CustomizeForm from 'src/pages/CustomizeForm/CustomizeForm.vue';
+import { t } from 'fyo';
 import POS from 'src/pages/POS/POS.vue';
 import type { HistoryState } from 'vue-router';
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
@@ -28,6 +28,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: `/edit/:schemaName/:name`,
     name: `CommonForm`,
+    meta: { sidebarPath: '/list/:schemaName' },
     components: {
       default: CommonForm,
       edit: QuickEditForm,
@@ -70,12 +71,14 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/print/:schemaName/:name',
     name: 'PrintView',
+    meta: { sidebarPath: '/list/:schemaName' },
     component: PrintView,
     props: true,
   },
   {
     path: '/report-print/:reportName',
     name: 'ReportPrintView',
+    meta: { sidebarPath: '/report/:reportName' },
     component: ReportPrintView,
     props: true,
   },
@@ -105,13 +108,17 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/template-builder/:name',
     name: 'Template Builder',
+    meta: { sidebarPath: '/list/PrintTemplate' },
     component: TemplateBuilder,
     props: true,
   },
   {
     path: '/customize-form',
     name: 'Customize Form',
-    component: CustomizeForm,
+    redirect: () => ({
+      name: 'ListView',
+      params: { schemaName: 'CustomForm', pageTitle: t`Customize Form` },
+    }),
   },
   {
     path: '/settings',

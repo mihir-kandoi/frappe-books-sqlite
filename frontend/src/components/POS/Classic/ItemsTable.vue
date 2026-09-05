@@ -4,12 +4,12 @@
       :columns="listColumns"
       :row-height="48"
       divider="full"
-      class="mt-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border border-outline-gray-1 list-gap-2 [--list-row-padding-x:0px]"
+      class="mt-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-4 border border-outline-gray-1 list-gap-2 [--list-row-padding-x:0px]"
     >
       <FrappeListHeader>
         <FrappeListHeaderCell
-        v-for="df in tableFields"
-        :key="df.fieldname"
+          v-for="df in tableFields"
+          :key="df.fieldname"
           class="px-3"
           :class="isNumeric(df as Field) ? 'justify-end' : ''"
         >
@@ -17,7 +17,9 @@
         </FrappeListHeaderCell>
       </FrappeListHeader>
 
-      <div class="custom-scroll custom-scroll-thumb2 min-h-0 flex-1 overflow-y-auto">
+      <div
+        class="custom-scroll custom-scroll-thumb2 min-h-0 flex-1 overflow-y-auto"
+      >
         <FrappeListRows v-if="items" :items="items as POSItem[]" row-key="name">
           <template #default="{ item: row, value }">
             <FrappeListRow
@@ -29,16 +31,15 @@
               <FrappeListCell
                 v-for="df in tableFields"
                 :key="df.fieldname"
-                class="min-w-0"
+                class="min-w-0 px-3"
                 :class="isNumeric(df as Field) ? 'justify-end text-end' : ''"
               >
-                <FormControl
-                  size="large"
-                  class="pointer-events-none min-w-0 flex-1 select-none"
-                  :df="df"
-                  :value="(row as POSItem)[df.fieldname as keyof POSItem]"
-                  :readOnly="true"
-                />
+                <span
+                  class="truncate"
+                  :title="fyo.format(row[df.fieldname as keyof POSItem], df)"
+                >
+                  {{ fyo.format(row[df.fieldname as keyof POSItem], df) }}
+                </span>
               </FrappeListCell>
             </FrappeListRow>
           </template>
@@ -49,7 +50,6 @@
 </template>
 
 <script lang="ts">
-import FormControl from 'src/components/Controls/FormControl.vue';
 import {
   List as FrappeList,
   ListCell as FrappeListCell,
@@ -66,7 +66,6 @@ import { POSItem } from '../types';
 export default defineComponent({
   name: 'ItemsTable',
   components: {
-    FormControl,
     FrappeList,
     FrappeListCell,
     FrappeListHeader,

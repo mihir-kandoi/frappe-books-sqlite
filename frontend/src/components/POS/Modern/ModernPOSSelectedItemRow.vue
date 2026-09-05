@@ -25,8 +25,7 @@
     />
     <p
       v-if="row.isFreeItem"
-      class="absolute flex top-0 font-medium text-xs ml-2 text-green-800"
-      style="font-size: 0.6rem"
+      class="absolute flex top-0 font-medium text-xs ml-2 text-ink-green-3"
     >
       {{ row.pricingRule }}
     </p>
@@ -83,7 +82,7 @@
   <div></div>
 
   <template v-if="isExapanded">
-    <div class="col-span-full my-3 grid w-full grid-cols-4 rounded-md">
+    <div class="col-span-full my-3 grid w-full grid-cols-4 rounded-4">
       <div class="px-4 col-span-2">
         <Float
           :df="{

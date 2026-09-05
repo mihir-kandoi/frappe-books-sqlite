@@ -1,10 +1,9 @@
 <template>
-  <ScaledContainer
-    ref="scaledContainer"
+  <PrintSheet
+    ref="printSheet"
     :scale="Math.max(scale, 0.1)"
     :width="width"
     :height="height"
-    :show-overflow="true"
     class="mx-auto shadow-lg border"
   >
     <ErrorBoundary
@@ -15,7 +14,7 @@
       <!-- Template -->
       <component
         :is="templateComponent"
-        class="flex-1 bg-white"
+        class="flex-1"
         :doc="values.doc"
         :print="values.print"
       />
@@ -24,38 +23,19 @@
     <!-- Compilation Error -->
     <div
       v-else
-      class="
-        h-full
-        bg-red-100
-        dark:bg-red-900 dark:bg-opacity-50
-        w-full
-        text-2xl text-gray-900
-        dark:text-gray-25
-        flex flex-col
-        gap-4
-      "
+      class="h-full bg-red-100 dark:bg-red-900 dark:bg-opacity-50 w-full text-2xl text-ink-gray-9 flex flex-col gap-4"
     >
       <h1
-        class="
-          text-4xl
-          font-bold
-          text-red-500
-          dark:text-red-200
-          p-4
-          border-b border-red-200
-          dark:border-red-900
-        "
+        class="text-4xl font-bold text-red-500 dark:text-red-200 p-4 border-b border-red-200 dark:border-red-900"
       >
         {{ error.name }}
       </h1>
       <p class="px-4 font-semibold">{{ error.message }}</p>
-      <pre
-        v-if="error.detail"
-        class="px-4 text-xl text-gray-700 dark:text-gray-400"
-        >{{ error.detail }}</pre
-      >
+      <pre v-if="error.detail" class="px-4 text-xl text-ink-gray-7">{{
+        error.detail
+      }}</pre>
     </div>
-  </ScaledContainer>
+  </PrintSheet>
 </template>
 <script lang="ts">
 import {
@@ -68,7 +48,7 @@ import ErrorBoundary from 'src/components/ErrorBoundary.vue';
 import { getPathAndMakePDF } from 'src/utils/printTemplates';
 import { PrintValues } from 'src/utils/types';
 import { defineComponent, PropType } from 'vue';
-import ScaledContainer from './ScaledContainer.vue';
+import PrintSheet from 'src/components/PrintSheet.vue';
 
 export const baseSafeTemplate = `<main class="h-full w-full bg-white">
   <p class="p-4 text-red-500">
@@ -78,7 +58,7 @@ export const baseSafeTemplate = `<main class="h-full w-full bg-white">
 `;
 
 export default defineComponent({
-  components: { ScaledContainer, ErrorBoundary },
+  components: { PrintSheet, ErrorBoundary },
   props: {
     template: { type: String, required: true },
     printSchemaName: { type: String, required: true },
@@ -177,14 +157,9 @@ export default defineComponent({
       return generateCodeFrame(this.template, loc.start.offset, loc.end.offset);
     },
     async savePDF(name?: string, shouldPrint?: boolean) {
-      /* eslint-disable */
-
-      /**
-       * To be called through ref by the parent component.
-       */
-
-      // @ts-ignore
-      const innerHTML = this.$refs.scaledContainer.$el.children[0].innerHTML;
+      const innerHTML = (
+        this.$refs.printSheet as InstanceType<typeof PrintSheet>
+      ).getHTML();
       if (typeof innerHTML !== 'string') {
         return;
       }
@@ -196,7 +171,6 @@ export default defineComponent({
         this.height,
         shouldPrint
       );
-
     },
   },
 });

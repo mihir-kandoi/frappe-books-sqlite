@@ -38,6 +38,10 @@ export class CustomField extends Doc {
   formulas: FormulaMap = {
     fieldname: {
       formula: () => {
+        if (this.fieldname) {
+          return this.fieldname;
+        }
+
         if (!this.label?.length) {
           return;
         }
@@ -63,7 +67,7 @@ export class CustomField extends Doc {
         return;
       }
 
-      const fieldname = camelCase(value);
+      const fieldname = this.fieldname || camelCase(value);
       (this.validations.fieldname as (value: DocValue) => void)(fieldname);
     },
     fieldname: (value) => {
@@ -74,13 +78,14 @@ export class CustomField extends Doc {
       const field = this.parentFields?.[value];
       if (field && !field.isCustom) {
         throw new ValueError(
-          this.fyo.t`Fieldname ${value} already exists for ${this.parentdoc!
-            .name!}`
+          this.fyo.t`Fieldname ${value} already exists for ${
+            this.parentdoc!.name!
+          }`
         );
       }
 
       const cf = this.parentdoc?.customFields?.find(
-        (cf) => cf.fieldname === value
+        (cf) => cf.name !== this.name && cf.fieldname === value
       );
       if (cf) {
         throw new ValueError(

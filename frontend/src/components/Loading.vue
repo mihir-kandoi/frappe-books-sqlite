@@ -8,7 +8,7 @@
       class="
         z-10
         w-96
-        rounded-lg
+        rounded-6
         border border-outline-gray-1
         bg-surface-elevation-1
         px-3

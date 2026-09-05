@@ -21,7 +21,7 @@
       class="
         relative
         z-10
-        rounded-md
+        rounded-4
         border border-outline-gray-1
         bg-surface-elevation-2
         shadow-lg

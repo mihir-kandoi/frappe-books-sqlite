@@ -2,15 +2,7 @@
   <FrappeSidebar
     :disable-collapse="true"
     width="var(--w-sidebar)"
-    class="
-      py-2
-      h-full
-      min-h-0
-      flex flex-col
-      overflow-hidden
-      bg-gray-25
-      dark:bg-gray-900
-    "
+    class="py-2 h-full min-h-0 flex flex-col overflow-hidden bg-surface-sidebar"
     :class="{
       'window-drag': platform !== 'Windows',
     }"
@@ -27,14 +19,7 @@
       >
         <h6
           data-testid="company-name"
-          class="
-            font-semibold
-            dark:text-gray-200
-            whitespace-nowrap
-            overflow-auto
-            no-scrollbar
-            select-none
-          "
+          class="font-semibold text-ink-gray-8 whitespace-nowrap overflow-auto no-scrollbar select-none"
         >
           {{ companyName }}
         </h6>
@@ -45,7 +30,7 @@
         <FrappeSidebarItem
           :label="group.label"
           :active="Boolean(isGroupActive(group) && !group.items)"
-          class="mx-2 mb-1 !h-10 [&_[data-slot='sidebar-item-suffix']]:hidden"
+          class="mx-2 mb-1 [&_[data-slot='sidebar-item-suffix']]:hidden"
           @click="routeToSidebarItem(group)"
         >
           <template #prefix>
@@ -58,9 +43,6 @@
               :darkMode="darkMode"
             />
           </template>
-          <span class="text-lg">
-            {{ group.label }}
-          </span>
         </FrappeSidebarItem>
 
         <!-- Expanded Group -->
@@ -70,11 +52,10 @@
             :key="item.label"
             :label="item.label"
             :active="Boolean(isItemActive(item))"
-            class="mx-2 mb-1 !h-10 ps-7"
+            class="mx-2 mb-1 ps-7"
             @click="routeToSidebarItem(item)"
           >
             <template #prefix><span class="w-0" /></template>
-            <span class="text-base">{{ item.label }}</span>
           </FrappeSidebarItem>
         </div>
       </div>
@@ -131,16 +112,7 @@
           :padding="false"
           :title="t`Hide sidebar`"
           :aria-label="t`Hide sidebar`"
-          class="
-            flex-shrink-0
-            text-gray-600
-            dark:text-gray-500
-            hover:bg-gray-100
-            dark:hover:bg-gray-875
-            rounded
-            p-1
-            rtl-rotate-180
-          "
+          class="flex-shrink-0 rtl-rotate-180"
           @click="() => toggleSidebar()"
         >
           <Icon name="chevrons-left" class="w-4 h-4" />
@@ -167,6 +139,10 @@ import { fyo } from 'src/initFyo';
 import { languageDirectionKey, shortcutsKey } from 'src/utils/injectionKeys';
 import { docsPathRef } from 'src/utils/refs';
 import { getSidebarConfig } from 'src/utils/sidebarConfig';
+import {
+  getSidebarPath,
+  matchesSidebarPath,
+} from 'src/utils/sidebarNavigation';
 import { SidebarConfig, SidebarItem, SidebarRoot } from 'src/utils/types';
 import { routeTo, toggleSidebar } from 'src/utils/ui';
 import { defineComponent, inject } from 'vue';
@@ -242,21 +218,22 @@ export default defineComponent({
       );
     },
     setActiveGroup() {
-      const { fullPath } = this.$router.currentRoute.value;
+      const { path } = this.$route;
       const fallBackGroup = this.activeGroup;
       this.activeGroup =
         this.groups.find((g) => {
-          if (fullPath.startsWith(g.route) && g.route !== '/') {
+          if (path.startsWith(g.route + '/') && g.route !== '/') {
             return true;
           }
 
-          if (g.route === fullPath) {
+          if (g.route === path) {
             return true;
           }
 
           if (g.items) {
             let activeItem = g.items.filter(
-              ({ route }) => route === fullPath || fullPath.startsWith(route)
+              ({ route }) =>
+                route === decodeURI(path) || path.startsWith(route + '/')
             );
 
             if (activeItem.length) {
@@ -264,22 +241,16 @@ export default defineComponent({
             }
           }
         }) ??
+        (fallBackGroup?.items?.some(this.isItemActive)
+          ? fallBackGroup
+          : this.groups.find((group) =>
+              group.items?.some(this.isItemActive)
+            )) ??
         fallBackGroup ??
         this.groups[0];
     },
     isItemActive(item: SidebarItem) {
-      const { path: currentRoute, params } = this.$route;
-      const routeMatch = currentRoute === item.route;
-
-      const schemaNameMatch =
-        item.schemaName && params.schemaName === item.schemaName;
-
-      const isMatch = routeMatch || schemaNameMatch;
-      if (params.name && item.schemaName && !isMatch) {
-        return currentRoute.includes(`${item.schemaName}/${params.name}`);
-      }
-
-      return isMatch;
+      return matchesSidebarPath(getSidebarPath(this.$route), item.route);
     },
     isGroupActive(group: SidebarRoot) {
       return this.activeGroup && group.label === this.activeGroup.label;

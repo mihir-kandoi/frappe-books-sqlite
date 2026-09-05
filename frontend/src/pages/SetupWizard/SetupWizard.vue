@@ -10,10 +10,9 @@
         class="
           sticky
           top-0
-          bg-white
-          dark:bg-gray-890
+          bg-surface-base
           border-b
-          dark:border-gray-800
+          border-outline-gray-1
         "
       >
       </FormHeader>
@@ -30,7 +29,7 @@
           class="p-4"
           :class="
             idx !== 0 && activeGroup.size > 1
-              ? 'border-t dark:border-gray-800'
+              ? 'border-t border-outline-gray-1'
               : ''
           "
           :show-title="activeGroup.size > 1 && name !== t`Default`"
@@ -52,26 +51,25 @@
           items-center
           justify-between
           border-t
-          dark:border-gray-800
+          border-outline-gray-1
           flex-shrink-0
           sticky
           bottom-0
-          bg-white
-          dark:bg-gray-890
+          bg-surface-base
         "
       >
-        <p v-if="loading" class="text-base text-gray-600 dark:text-gray-400">
+        <p v-if="loading" class="text-base text-ink-gray-6">
           {{ t`Loading instance...` }}
         </p>
         <Button
           v-if="!loading"
-          class="w-24 border dark:border-gray-800"
+          class="w-24 border border-outline-gray-1"
           @click="cancel"
           >{{ t`Cancel` }}</Button
         >
         <Button
           v-if="fyo.store.isDevelopment && !loading"
-          class="w-24 ml-auto mr-4 border dark:border-gray-800"
+          class="w-24 ml-auto mr-4 border border-outline-gray-1"
           :disabled="loading"
           @click="fill"
           >{{ t`Fill` }}</Button

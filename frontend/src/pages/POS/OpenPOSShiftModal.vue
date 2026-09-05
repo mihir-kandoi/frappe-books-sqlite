@@ -5,13 +5,13 @@
     class="w-full p-4"
     @closemodal="handleDismiss"
   >
-    <h1 class="text-xl font-semibold text-center dark:text-gray-100 pb-4">
+    <h1 class="text-xl font-semibold text-center text-ink-gray-8 pb-4">
       {{ t`Open POS Shift` }}
     </h1>
 
-    <div class="grid grid-cols-12 gap-6">
-      <div class="col-span-6">
-        <h2 class="text-lg font-medium dark:text-gray-100">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div class="min-w-0">
+        <h2 class="text-lg font-medium text-ink-gray-8">
           {{ t`Cash In Denominations` }}
         </h2>
 
@@ -26,8 +26,8 @@
         />
       </div>
 
-      <div class="col-span-6">
-        <h2 class="text-lg font-medium dark:text-gray-100">
+      <div class="min-w-0">
+        <h2 class="text-lg font-medium text-ink-gray-8">
           {{ t`Opening Amount` }}
         </h2>
 
@@ -39,30 +39,33 @@
           :border="true"
           :max-rows-before-overflow="4"
           :value="posShiftDoc?.openingAmounts"
-          :read-only="true"
+          :read-only="false"
+          :allow-add-remove-rows="false"
           @row-change="handleChange"
         />
 
         <div class="mt-4 grid grid-cols-2 gap-4 items-end">
           <Button
-            class="w-full py-5 bg-red-500 dark:bg-red-700"
+            size="lg"
+            theme="red"
+            type="primary"
+            class="w-full"
             @click="handleDismiss"
           >
             <slot>
-              <p class="uppercase text-lg text-white font-semibold">
-                {{ t`Back` }}
-              </p>
+              <span>{{ t`Back` }}</span>
             </slot>
           </Button>
 
           <Button
-            class="w-full py-5 bg-green-500 dark:bg-green-700"
+            size="lg"
+            theme="green"
+            type="primary"
+            class="w-full"
             @click="handleSubmit"
           >
             <slot>
-              <p class="uppercase text-lg text-white font-semibold">
-                {{ t`Submit` }}
-              </p>
+              <span>{{ t`Submit` }}</span>
             </slot>
           </Button>
         </div>

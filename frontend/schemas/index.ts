@@ -344,7 +344,7 @@ function getFieldMapFromRawCustomFields(
         (field as DynamicLinkField).references = references;
       }
 
-      if (field.required && defaultValue != null) {
+      if (defaultValue != null) {
         field.default = defaultValue;
       }
 

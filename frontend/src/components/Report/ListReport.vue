@@ -7,7 +7,7 @@
       divider="full"
       class="custom-scroll custom-scroll-thumb1 min-h-0 flex-1 overflow-auto px-4 list-gap-0 [--list-row-padding-x:0px]"
     >
-      <FrappeListHeader class="sticky top-0 z-10 bg-surface-white">
+      <FrappeListHeader class="sticky top-0 z-10 bg-surface-base">
         <FrappeListHeaderCell
           v-for="(column, index) in report.columns"
           :key="`${index}-column`"
@@ -39,7 +39,7 @@
         </template>
       </FrappeListRows>
     </FrappeList>
-    <p v-else class="w-full text-center mt-20 text-gray-800 dark:text-gray-100 text-base">
+    <p v-else class="w-full text-center mt-20 text-ink-gray-8 text-base">
       {{ report.loading ? t`Loading Report...` : t`No Values to be Displayed` }}
     </p>
 
@@ -177,23 +177,23 @@ export default defineComponent({
       }
 
       if (!cell.rawValue) {
-        return 'text-gray-600 dark:text-gray-400';
+        return 'text-ink-gray-6';
       }
 
       if (typeof cell.rawValue !== 'number') {
-        return 'text-gray-900 dark:text-gray-100';
+        return 'text-ink-gray-9';
       }
 
       if (cell.rawValue === 0) {
-        return 'text-gray-600 dark:text-gray-400';
+        return 'text-ink-gray-6';
       }
 
       const prec = this.fyo?.singles?.displayPrecision ?? 2;
       if (Number(cell.rawValue.toFixed(prec)) === 0) {
-        return 'text-gray-600 dark:text-gray-500';
+        return 'text-ink-gray-6';
       }
 
-      return 'text-gray-900 dark:text-gray-300';
+      return 'text-ink-gray-9';
     },
   },
 });

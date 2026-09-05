@@ -44,7 +44,7 @@
       <PageHeaderNavGroup />
       <h1
         v-if="title"
-        class="text-xl font-semibold select-none truncate dark:text-white"
+        class="text-xl font-semibold select-none truncate text-ink-gray-9"
       >
         {{ title }}
       </h1>

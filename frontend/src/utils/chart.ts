@@ -46,16 +46,14 @@ function getVal(minOrMaxVal: number): number {
 }
 
 export function getYMax(points: number[][]): number {
-  const maxVal = Math.max(...points.flat());
-  if (maxVal === 0) {
-    return 0;
-  }
-
+  const maxVal = Math.max(0, ...points.flat().filter(Number.isFinite));
+  // A zero-width axis makes chart tick formatters receive NaN.
+  if (maxVal === 0) return 1;
   return getVal(maxVal);
 }
 
 export function getYMin(points: number[][]): number {
-  const minVal = Math.min(...points.flat());
+  const minVal = Math.min(0, ...points.flat().filter(Number.isFinite));
   if (minVal === 0) {
     return minVal;
   }

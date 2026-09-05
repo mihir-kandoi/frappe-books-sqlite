@@ -1,17 +1,17 @@
 <template>
   <div
-    class="w-quick-edit bg-white dark:bg-gray-850 border-l dark:border-gray-800 overflow-y-auto custom-scroll custom-scroll-thumb2"
+    class="w-quick-edit bg-surface-base border-l border-outline-gray-1 overflow-y-auto custom-scroll custom-scroll-thumb2"
   >
     <!-- Page Header -->
     <div
-      class="flex items-center justify-between px-4 h-row-largest sticky top-0 bg-white dark:bg-gray-850"
+      class="flex items-center justify-between px-4 h-row-largest sticky top-0 bg-surface-base"
       style="z-index: 1"
     >
       <div class="flex items-center justify-between w-full">
         <Button :icon="true" @click="$emit('close')">
           <Icon name="x" class="w-4 h-4" />
         </Button>
-        <p class="text-xl font-semibold text-gray-600 dark:text-gray-400">
+        <p class="text-xl font-semibold text-ink-gray-6">
           {{ t`Linked Entries` }}
         </p>
       </div>
@@ -20,12 +20,12 @@
     <!-- Linked Entry List -->
     <div
       v-if="sequence.length"
-      class="w-full overflow-y-auto custom-scroll custom-scroll-thumb2 border-t dark:border-gray-800"
+      class="w-full overflow-y-auto custom-scroll custom-scroll-thumb2 border-t border-outline-gray-1"
     >
       <div
         v-for="sn of sequence"
         :key="sn"
-        class="border-b dark:border-gray-800 p-4 overflow-auto"
+        class="border-b border-outline-gray-1 p-4 overflow-auto"
       >
         <!-- Header with count and schema label -->
         <FrappeButton
@@ -36,7 +36,7 @@
           :aria-expanded="!entries[sn].collapsed"
           @click="entries[sn].collapsed = !entries[sn].collapsed"
         >
-          <h2 class="text-base text-gray-600 dark:text-gray-400 font-semibold select-none">
+          <h2 class="text-base text-ink-gray-6 font-semibold select-none">
             {{ fyo.schemaMap[sn]?.label ?? sn
             }}<span class="font-normal">{{ ` – ${entries[sn].details.length}` }}</span>
           </h2>
@@ -45,7 +45,7 @@
         <!-- Entry list -->
         <div
           v-show="!entries[sn].collapsed"
-          class="entry-container rounded-md border dark:border-gray-800 overflow-hidden"
+          class="entry-container rounded-4 border border-outline-gray-1 overflow-hidden"
         >
           <!-- Entry -->
           <FrappeItemListRow
@@ -54,17 +54,17 @@
             as="button"
             type="button"
             size="md"
-            class="!rounded-none text-start border-b last:border-0 dark:border-gray-800 hover:bg-surface-gray-2"
+            class="!rounded-none text-start border-b last:border-0 border-outline-gray-1 hover:bg-surface-gray-2"
             @click="routeTo(sn, String(e.name))"
           >
             <div class="flex justify-between">
               <!-- Name -->
-              <p class="font-semibold dark:text-gray-25">
+              <p class="font-semibold text-ink-gray-8">
                 {{ e.name }}
               </p>
 
               <!-- Date -->
-              <p v-if="e.date" class="text-xs text-gray-600 dark:text-gray-400">
+              <p v-if="e.date" class="text-xs text-ink-gray-6">
                 {{ fyo.format(e.date, 'Date') }}
               </p>
             </div>
@@ -140,7 +140,7 @@
         </div>
       </div>
     </div>
-    <p v-else class="p-4 text-sm text-gray-600 dark:text-gray-400">
+    <p v-else class="p-4 text-sm text-ink-gray-6">
       {{ t`No linked entries found` }}
     </p>
   </div>

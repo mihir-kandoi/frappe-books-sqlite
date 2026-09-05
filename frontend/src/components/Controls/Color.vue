@@ -13,7 +13,7 @@
   >
     <template v-if="value" #trailing>
       <span
-        class="ms-2 size-3 shrink-0 rounded"
+        class="ms-2 size-3 shrink-0 rounded-2"
         :style="{ backgroundColor: normalizedColor }"
         aria-hidden="true"
       />
@@ -26,20 +26,21 @@
     <Popover placement="bottom-end">
       <template #target>
         <FrappeButton
-          variant="outline"
-          class="!h-auto w-full !justify-start !p-0"
-          :class="[inputClasses, containerClasses]"
+          :variant="frappeVariant"
+          :size="frappeSize"
+          :aria-label="df.label"
+          class="w-full !justify-start text-base"
         >
           <div class="flex items-center">
             <div
               v-if="value"
-              class="w-3 h-3 rounded me-1"
-              :style="{ backgroundColor: value }"
+              class="w-3 h-3 rounded-2 me-1"
+              :style="{ backgroundColor: normalizedColor }"
             ></div>
             <span v-if="value">
               {{ selectedColorLabel }}
             </span>
-            <span v-else class="text-gray-400 dark:text-gray-600">
+            <span v-else class="text-ink-gray-4">
               {{ inputPlaceholder }}
             </span>
           </div>
@@ -67,7 +68,7 @@
           </div>
 
           <div
-            class="mt-3 flex items-center gap-2 rounded-md border border-gray-200 bg-gray-25 p-1.5 dark:border-gray-700 dark:bg-gray-875"
+            class="mt-3 flex items-center gap-2 rounded-4 border border-outline-gray-2 bg-surface-gray-1 p-1.5"
           >
             <input
               type="color"
@@ -92,7 +93,10 @@
 </template>
 
 <script>
-import { Button as FrappeButton, TextInput as FrappeTextInput } from 'frappe-ui';
+import {
+  Button as FrappeButton,
+  TextInput as FrappeTextInput,
+} from 'frappe-ui';
 import Popover from 'src/components/Popover.vue';
 import Base from './Base.vue';
 import ReadOnlyValue from './ReadOnlyValue.vue';
@@ -109,7 +113,9 @@ export default {
   computed: {
     colors() {
       if (Array.isArray(this.df.options) && this.df.options.length) {
-        return this.df.options.filter((color) => color && typeof color.value === 'string');
+        return this.df.options.filter(
+          (color) => color && typeof color.value === 'string'
+        );
       }
 
       return defaultColors;
@@ -124,7 +130,8 @@ export default {
     },
     selectedColorLabel() {
       const color = this.colors.find(
-        (candidate) => candidate.value.toLowerCase() === this.normalizedColor.toLowerCase(),
+        (candidate) =>
+          candidate.value.toLowerCase() === this.normalizedColor.toLowerCase()
       );
       return color ? color.label : this.value;
     },

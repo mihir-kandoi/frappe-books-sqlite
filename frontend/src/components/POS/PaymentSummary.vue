@@ -1,6 +1,6 @@
 <template>
 	<section
-		class="rounded-lg border border-outline-gray-1 bg-surface-gray-1 p-4"
+		class="rounded-6 border border-outline-gray-1 bg-surface-gray-1 p-4"
 		aria-labelledby="payment-summary-title"
 	>
 		<div class="flex items-start justify-between gap-3">
@@ -32,7 +32,7 @@
 			</div>
 		</dl>
 
-		<FrappeDivider class="my-4" />
+		<FrappeDivider class="my-4" flex-item />
 
 		<dl class="space-y-3">
 			<div class="flex items-baseline justify-between gap-4">

@@ -5,11 +5,11 @@
     class="flex h-[calc(100vh-6rem)] max-h-[40rem] w-full flex-col p-5"
     @closemodal="closeModal"
   >
-    <p class="text-center font-semibold dark:text-gray-400">
+    <p class="text-center font-semibold text-ink-gray-5">
       {{ t`Invoices` }}
     </p>
 
-    <hr class="mt-2 dark:border-gray-800" />
+    <hr class="mt-2 border-outline-gray-1" />
 
     <div class="mt-4">
       <FrappeTextInput
@@ -23,7 +23,7 @@
       />
     </div>
 
-    <hr class="mt-2 dark:border-gray-800" />
+    <hr class="mt-2 border-outline-gray-1" />
 
     <InvoiceSelectionTable
       v-model="selectedInvoiceName"

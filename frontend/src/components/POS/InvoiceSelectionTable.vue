@@ -3,7 +3,7 @@
 		:columns="listColumns"
 		:row-height="48"
 		divider="full"
-		class="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border border-outline-gray-1 list-gap-2 [--list-row-padding-x:0px]"
+		class="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-4 border border-outline-gray-1 list-gap-2 [--list-row-padding-x:0px]"
 		:aria-label="t`Invoices`"
 	>
 		<FrappeListHeader>
@@ -29,7 +29,7 @@
 					<FrappeListRow
 						:value="value"
 						class="transition-colors"
-						:class="isSelected(row) ? 'bg-surface-gray-2' : 'bg-surface-white'"
+						:class="isSelected(row) ? 'bg-surface-gray-2' : 'bg-surface-base'"
 						:aria-selected="isSelected(row)"
 					>
 						<FrappeListCell class="justify-center">
@@ -56,7 +56,7 @@
 
 		<div
 			v-else
-			class="flex min-h-0 flex-1 items-center justify-center text-sm text-gray-600 dark:text-gray-400"
+			class="flex min-h-0 flex-1 items-center justify-center text-sm text-ink-gray-6"
 		>
 			{{ emptyText }}
 		</div>

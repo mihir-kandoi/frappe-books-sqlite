@@ -2,7 +2,7 @@
   <div>
     <!-- Title and Period Selector -->
     <div class="flex items-center justify-between">
-      <div class="font-semibold text-base dark:text-white">
+      <div class="font-semibold text-base text-ink-gray-9">
         {{ t`Cashflow` }}
       </div>
     </div>

@@ -11,9 +11,9 @@
       flex-shrink-0
     "
   >
-    <h1 v-if="formTitle" class="dark:text-gray-25">{{ formTitle }}</h1>
+    <h1 v-if="formTitle" class="text-ink-gray-8">{{ formTitle }}</h1>
     <slot />
-    <p v-if="formSubTitle" class="text-gray-600 dark:text-gray-400">
+    <p v-if="formSubTitle" class="text-ink-gray-6">
       {{ formSubTitle }}
     </p>
   </div>

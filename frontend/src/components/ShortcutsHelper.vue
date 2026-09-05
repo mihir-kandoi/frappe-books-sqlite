@@ -1,9 +1,9 @@
 <template>
   <div class="min-w-0">
     <FormHeader :form-title="t`Shortcuts`" />
-    <hr class="dark:border-gray-800" />
+    <hr class="border-outline-gray-1" />
     <div
-      class="max-h-[min(34rem,calc(100vh-10rem))] overflow-y-auto custom-scroll custom-scroll-thumb2 text-gray-900 dark:text-gray-100"
+      class="max-h-[min(34rem,calc(100vh-10rem))] overflow-y-auto custom-scroll custom-scroll-thumb2 text-ink-gray-9"
     >
       <template v-for="g in groups" :key="g.label">
         <div class="p-4 w-full">
@@ -36,13 +36,13 @@
             </div>
           </div>
           <!-- Shortcut count if collapsed -->
-          <div v-else class="text-base text-gray-600 dark:text-gray-400">
+          <div v-else class="text-base text-ink-gray-6">
             {{ t`${g.shortcuts.length} shortcuts` }}
           </div>
         </div>
-        <hr class="dark:border-gray-800" />
+        <hr class="border-outline-gray-1" />
       </template>
-      <div class="p-4 text-base text-gray-600 dark:text-gray-400">
+      <div class="p-4 text-base text-ink-gray-6">
         {{ t`More shortcuts will be added soon.` }}
       </div>
     </div>

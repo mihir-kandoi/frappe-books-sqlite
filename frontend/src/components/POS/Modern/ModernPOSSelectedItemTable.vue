@@ -3,7 +3,7 @@
     <FrappeList
       :columns="listColumns"
       divider="full"
-      class="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border border-outline-gray-1 list-gap-2 [--list-row-padding-x:0px]"
+      class="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-4 border border-outline-gray-1 list-gap-2 [--list-row-padding-x:0px]"
     >
       <FrappeListHeader>
         <FrappeListHeaderCell
@@ -95,7 +95,7 @@ export default defineComponent({
   ],
   computed: {
     ratio() {
-      return [0.1, 0.8, 0.4, 0.8, 0.8, 0.3];
+      return [0.25, 1, 0.65, 0.8, 0.8, 0.3];
     },
     listColumns(): string[] {
       return this.ratio.map((ratio) => `minmax(0, ${ratio}fr)`);
@@ -117,7 +117,7 @@ export default defineComponent({
         },
         {
           fieldname: 'quantity',
-          label: t`Quantity`,
+          label: t`Qty`,
           placeholder: 'Quantity',
           fieldtype: 'Float',
           required: true,

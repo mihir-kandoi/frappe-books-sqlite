@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col flex-1 bg-gray-25 dark:bg-gray-875">
+  <div class="flex flex-col flex-1 bg-surface-gray-1">
     <PageHeader :border="true" :title="t`Print View`">
       <SelectControl
         v-if="templateList.length"
@@ -16,10 +16,10 @@
         @change="onTemplateNameChange"
       />
       <DropdownWithActions :actions="actions" :title="t`More`" />
-      <Button class="text-xs" type="primary" @click="savePDF()">
+      <Button type="primary" @click="savePDF()">
         {{ t`Save as PDF` }}
       </Button>
-      <Button class="text-xs" type="primary" @click="savePDF(true)">
+      <Button type="primary" @click="savePDF(true)">
         {{ t`Print` }}
       </Button>
     </PageHeader>
@@ -29,7 +29,7 @@
       <!-- Display Hints -->
       <div
         v-if="helperMessage"
-        class="text-sm text-gray-700 dark:text-gray-300"
+        class="text-sm text-ink-gray-7"
       >
         {{ helperMessage }}
       </div>

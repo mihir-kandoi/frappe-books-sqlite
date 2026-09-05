@@ -100,7 +100,7 @@ export default defineComponent({
         classes.push('[&_input]:text-end');
       }
       if (this.showMandatory) {
-        classes.push('[&_input]:border-red-400');
+        classes.push('[&_[data-slot=control]]:border-outline-red-3');
       }
       return classes;
     },
@@ -118,79 +118,7 @@ export default defineComponent({
       return 'text';
     },
     labelClasses(): string {
-      return 'text-gray-600 dark:text-gray-500 text-sm mb-1';
-    },
-    inputClasses(): string[] {
-      /**
-       * These classes will be used by components that extend Base
-       */
-
-      const classes: string[] = [];
-
-      classes.push(...this.baseInputClasses);
-      if (this.textRight ?? isNumeric(this.df)) {
-        classes.push('text-end');
-      }
-
-      classes.push(this.sizeClasses);
-      classes.push(this.inputReadOnlyClasses);
-
-      return this.getInputClassesFromProp(classes).filter(Boolean);
-    },
-    baseInputClasses(): string[] {
-      return [
-        'text-base',
-        'focus:outline-none',
-        'w-full',
-        'placeholder-gray-500',
-      ];
-    },
-    sizeClasses(): string {
-      if (this.size === 'small') {
-        return 'px-2 py-1';
-      }
-      return 'px-3 py-2';
-    },
-    inputReadOnlyClasses(): string {
-      if (this.isReadOnly) {
-        return 'text-gray-800 dark:text-gray-300 cursor-default';
-      }
-
-      return 'text-gray-900 dark:text-gray-100';
-    },
-    containerClasses(): string[] {
-      /**
-       * Used to accomodate extending compoents where the input is contained in
-       * a div eg AutoComplete
-       */
-      const classes: string[] = [];
-      classes.push(...this.baseContainerClasses);
-      classes.push(this.containerReadOnlyClasses);
-      classes.push(this.borderClasses);
-      return classes.filter(Boolean);
-    },
-    baseContainerClasses(): string[] {
-      return ['rounded'];
-    },
-    containerReadOnlyClasses(): string {
-      if (!this.isReadOnly) {
-        return 'focus-within:bg-gray-100 dark:focus-within:bg-gray-850';
-      }
-
-      return '';
-    },
-    borderClasses(): string {
-      if (!this.border) {
-        return '';
-      }
-
-      const border = 'border border-gray-200 dark:border-gray-800';
-      let background = 'bg-gray-25 dark:bg-gray-875';
-      if (this.isReadOnly) {
-        background = 'bg-gray-50 dark:bg-gray-850';
-      }
-
-      return border + ' ' + background;
+      return 'text-base text-ink-gray-5 mb-1.5';
     },
     inputPlaceholder(): string {
       return this.placeholder || this.df.placeholder || this.df.label;
@@ -250,20 +178,6 @@ export default defineComponent({
       if (!this.isReadOnly) {
         this.$emit('input', e);
       }
-    },
-    getInputClassesFromProp(classes: string[]) {
-      if (!this.inputClass) {
-        return classes;
-      }
-
-      let inputClass = this.inputClass;
-      if (typeof inputClass === 'string') {
-        inputClass = [inputClass];
-      }
-
-      inputClass = inputClass.filter((i) => typeof i === 'string');
-
-      return [classes, inputClass].flat();
     },
     focus(): void {
       this.getInputElement()?.focus();

@@ -1,98 +1,102 @@
 <template>
-  <div v-if="tableFields?.length">
-    <div v-if="showLabel" class="text-gray-600 dark:text-gray-400 text-sm mb-1">
+  <div v-if="tableFields?.length" class="min-w-0">
+    <div v-if="showLabel" class="text-ink-gray-6 text-sm mb-1">
       {{ df.label }}
     </div>
 
-    <FrappeList
-      :columns="listColumns"
-      :row-height="48"
-      divider="full"
-      class="list-gap-2 [--list-row-padding-x:0px]"
-      :class="border ? 'overflow-hidden rounded-md border border-outline-gray-1' : ''"
+    <div
+      class="max-w-full overflow-x-auto custom-scroll custom-scroll-thumb1"
+      :class="border ? 'rounded-4 border border-outline-gray-1' : ''"
     >
-      <FrappeListHeader v-if="showHeader">
-        <FrappeListHeaderCell class="justify-center">#</FrappeListHeaderCell>
-        <FrappeListHeaderCell
-          v-for="df in tableFields"
-          :key="df.fieldname"
-          class="min-w-0"
-          :class="[
-            cellPaddingClass,
-            df.sub_label ? 'flex-col justify-center' : 'items-center',
-            isNumeric(df)
-              ? df.sub_label
-                ? 'items-end text-end'
-                : 'justify-end text-end'
-              : df.sub_label
-              ? 'items-center text-center'
-              : '',
-          ]"
-        >
-          <span>{{ df.label }}</span>
-          <p v-if="df.sub_label" class="text-xs">
-            {{ df.sub_label }}
-          </p>
-        </FrappeListHeaderCell>
-        <FrappeListHeaderCell v-if="canEditRow">
-          <span class="sr-only">{{ t`Actions` }}</span>
-        </FrappeListHeaderCell>
-      </FrappeListHeader>
-
-      <!-- Data Rows -->
-      <div
-        v-if="value"
-        :class="{
-          'overflow-x-hidden overflow-y-auto custom-scroll custom-scroll-thumb1':
-            rowsOverflow,
-          'overscroll-contain': rowsOverflow,
-        }"
-        :style="{ 'max-height': maxHeight }"
+      <FrappeList
+        :columns="listColumns"
+        :row-height="rowHeight"
+        divider="full"
+        class="list-gap-2 [--list-row-padding-x:0px]"
+        :style="{ minWidth: minimumWidth }"
       >
-        <TableRow
-          v-for="row of value"
-          ref="table-row"
-          :key="row.name"
-          v-bind="{ row, tableFields, size }"
-          :read-only="isReadOnly"
-          :can-edit-row="canEditRow"
-          @remove="removeRow(row)"
-          @change="(field, value) => $emit('row-change', field, value, df)"
-        />
-      </div>
-
-      <!-- Add Row and Row Count -->
-      <FrappeListRow
-        v-if="!isReadOnly"
-        class="
-          border-t border-outline-gray-1 text-ink-gray-5
-          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3
-        "
-        @click="addRow"
-      >
-        <FrappeListCell class="justify-center">
-          <Icon name="plus" class="w-4 h-4 text-gray-500" />
-        </FrappeListCell>
-        <FrappeListCell
-          class="justify-between px-2"
-          style="grid-column: 2 / -1"
-        >
-          <p>
-            {{ t`Add Row` }}
-          </p>
-          <p
-            v-if="
-              value &&
-              maxRowsBeforeOverflow &&
-              value.length > maxRowsBeforeOverflow
-            "
-            class="text-end px-2"
+        <FrappeListHeader v-if="showHeader" class="!h-auto min-h-8 py-1">
+          <FrappeListHeaderCell class="justify-center">#</FrappeListHeaderCell>
+          <FrappeListHeaderCell
+            v-for="df in tableFields"
+            :key="df.fieldname"
+            class="min-w-0 [&>span]:whitespace-normal [&>span]:break-words"
+            :class="[
+              cellPaddingClass,
+              df.sub_label ? 'flex-col justify-center' : 'items-center',
+              isNumeric(df)
+                ? df.sub_label
+                  ? 'items-end text-end'
+                  : 'justify-end text-end'
+                : df.sub_label
+                  ? 'items-center text-center'
+                  : '',
+            ]"
           >
-            {{ t`${value.length} rows` }}
-          </p>
-        </FrappeListCell>
-      </FrappeListRow>
-    </FrappeList>
+            <span>{{ df.label }}</span>
+            <p v-if="df.sub_label" class="text-xs">
+              {{ df.sub_label }}
+            </p>
+          </FrappeListHeaderCell>
+          <FrappeListHeaderCell v-if="canEditRow">
+            <span class="sr-only">{{ t`Actions` }}</span>
+          </FrappeListHeaderCell>
+        </FrappeListHeader>
+
+        <!-- Data Rows -->
+        <div
+          v-if="value"
+          :class="{
+            'overflow-x-hidden overflow-y-auto custom-scroll custom-scroll-thumb1':
+              rowsOverflow,
+            'overscroll-contain': rowsOverflow,
+          }"
+          :style="{ 'max-height': maxHeight }"
+        >
+          <TableRow
+            v-for="row of value"
+            ref="table-row"
+            :key="row.name"
+            v-bind="{ row, tableFields, size }"
+            :read-only="isReadOnly"
+            :can-remove-row="canAddRemoveRows"
+            :can-edit-row="canEditRow"
+            @remove="removeRow(row)"
+            @editrow="(row) => $emit('editrow', row)"
+            @change="(field, value) => $emit('row-change', field, value, df)"
+          />
+        </div>
+
+        <!-- Add Row and Row Count -->
+        <FrappeListRow
+          v-if="canAddRemoveRows"
+          class="border-t border-outline-gray-1 text-ink-gray-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+          @click="addRow"
+        >
+          <FrappeListCell class="justify-center">
+            <Icon name="plus" class="w-4 h-4 text-ink-gray-5" />
+          </FrappeListCell>
+          <FrappeListCell
+            class="justify-between px-2"
+            style="grid-column: 2 / -1"
+          >
+            <p>
+              {{ t`Add Row` }}
+            </p>
+            <p
+              v-if="
+                value &&
+                maxRowsBeforeOverflow &&
+                value.length > maxRowsBeforeOverflow
+              "
+              class="text-end px-2"
+            >
+              {{ t`${value.length} rows` }}
+            </p>
+          </FrappeListCell>
+        </FrappeListRow>
+      </FrappeList>
+    </div>
   </div>
 </template>
 
@@ -136,9 +140,19 @@ export default {
       type: Boolean,
       default: false,
     },
+    allowAddRemoveRows: {
+      type: Boolean,
+      default: true,
+    },
   },
   emits: ['editrow', 'row-change'],
   computed: {
+    rowHeight() {
+      return 48;
+    },
+    canAddRemoveRows() {
+      return !this.isReadOnly && this.allowAddRemoveRows;
+    },
     canEditRow() {
       return this.df.edit;
     },
@@ -153,19 +167,21 @@ export default {
         return '';
       }
 
-      return `calc(var(--h-row-mid) * ${this.maxRowsBeforeOverflow})`;
-    },
-    ratio() {
-      const ratio = [0.3].concat(this.tableFields.map(() => 1));
-
-      if (this.canEditRow) {
-        return ratio.concat(0.3);
-      }
-
-      return ratio;
+      return `${this.rowHeight * this.maxRowsBeforeOverflow}px`;
     },
     listColumns() {
-      return this.ratio.map((ratio) => `minmax(0, ${ratio}fr)`);
+      return [
+        '2rem',
+        ...this.tableFields.map(() => 'minmax(0, 1fr)'),
+        ...(this.canEditRow ? ['2rem'] : []),
+      ];
+    },
+    minimumWidth() {
+      // Keep fields usable in narrow forms; the shared viewport scrolls them.
+      const fields = this.tableFields.length * 8;
+      const actions = this.canEditRow ? 4 : 2;
+      const gaps = (this.listColumns.length - 1) * 0.5;
+      return `${fields + actions + gaps}rem`;
     },
     cellPaddingClass() {
       return this.size === 'small' ? 'px-2' : 'px-3';

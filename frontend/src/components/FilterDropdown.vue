@@ -10,7 +10,7 @@
     <template #target>
       <Button>
         <span class="flex items-center">
-          <Icon name="filter" size="12" class="stroke-current text-gray-700 dark:text-gray-400" />
+          <Icon name="filter" size="12" class="stroke-current text-ink-gray-7" />
           <span class="ms-1">
             <template v-if="activeFilterCount > 0">
               {{ filterAppliedMessage }}
@@ -30,7 +30,7 @@
               <div
                 v-for="(filter, i) in explicitFilters"
                 :key="filter.id"
-                class="flex items-center justify-between text-base gap-2"
+                class="flex flex-wrap items-center justify-between text-base gap-2"
               >
                 <FrappeButton
                   icon="lucide-x"
@@ -43,7 +43,7 @@
                 <Select
                   :border="true"
                   size="small"
-                  class="w-24"
+                  class="w-32"
                   :df="{
                     label: t`Field`,
                     placeholder: t`field`,
@@ -61,7 +61,7 @@
                 <Select
                   :border="true"
                   size="small"
-                  class="w-24"
+                  class="w-32"
                   :df="{
                     label: t`Condition`,
                     placeholder: t`Condition`,
@@ -80,7 +80,7 @@
                 <Data
                   :border="true"
                   size="small"
-                  class="w-24"
+                  class="w-40"
                   :df="{
                     label: t`Value`,
                     placeholder: t`Value`,
@@ -99,12 +99,12 @@
             </div>
           </template>
           <template v-else>
-            <span class="text-base text-gray-600 dark:text-gray-500">{{
+            <span class="text-base text-ink-gray-6">{{
               t`No filters selected`
             }}</span>
           </template>
         </div>
-        <div class="flex justify-between border-t dark:border-gray-800">
+        <div class="flex justify-between border-t border-outline-gray-1">
           <FrappeButton icon-left="lucide-plus" variant="ghost" @click.stop="addNewFilter">
             {{ t`Add a filter` }}
           </FrappeButton>

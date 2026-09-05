@@ -376,8 +376,26 @@ export class Doc extends Observable<DocValue | Doc[]> {
     return true;
   }
 
-  _setDefaults() {
-    for (const field of this.schema.fields) {
+  refreshSchema(schemaName: string) {
+    if (this.schemaName === schemaName) {
+      const previousFields = this.fieldMap;
+      this.schema = this.fyo.schemaMap[schemaName] ?? this.schema;
+      this.fieldMap = getMapFromList(this.schema.fields, 'fieldname');
+      // Preserve entered values when a customization changes the definition.
+      this._setDefaults(
+        this.schema.fields.filter((field) => !previousFields[field.fieldname])
+      );
+    }
+
+    for (const field of this.tableFields) {
+      for (const row of (this[field.fieldname] as Doc[] | undefined) ?? []) {
+        row.refreshSchema(schemaName);
+      }
+    }
+  }
+
+  _setDefaults(fields = this.schema.fields) {
+    for (const field of fields) {
       let defaultValue: DocValue | Doc[] = getPreDefaultValues(
         field.fieldtype,
         this.fyo
@@ -887,10 +905,12 @@ export class Doc extends Observable<DocValue | Doc[]> {
   async _update() {
     const expectedModified = this.modified;
     await this._validateDbNotModified();
-    this._updateModifiedMetaValues();
     await this._preSync();
 
     let data = this.getValidDict(false, true);
+    // Keep the saved timestamp until the database accepts the update.
+    data.modifiedBy = this.fyo.user || DEFAULT_USER;
+    data.modified = new Date();
     try {
       data = await this.fyo.db.update(
         this.schemaName,
@@ -906,19 +926,16 @@ export class Doc extends Observable<DocValue | Doc[]> {
   }
   async sync(): Promise<Doc> {
     this._syncing = true;
-    await this.trigger('beforeSync');
-    let doc;
-    if (this.notInserted) {
-      doc = await this._insert();
-    } else {
-      doc = await this._update();
+    try {
+      await this.trigger('beforeSync');
+      const doc = this.notInserted ? await this._insert() : await this._update();
+      this._notInserted = false;
+      await this.trigger('afterSync');
+      this.fyo.doc.observer.trigger(`sync:${this.schemaName}`, this.name);
+      return doc;
+    } finally {
+      this._syncing = false;
     }
-    this._notInserted = false;
-    await this.trigger('afterSync');
-    this.fyo.doc.observer.trigger(`sync:${this.schemaName}`, this.name);
-
-    this._syncing = false;
-    return doc;
   }
 
   async delete() {

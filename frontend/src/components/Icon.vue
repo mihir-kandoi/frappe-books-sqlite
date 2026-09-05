@@ -112,10 +112,10 @@ export default defineComponent({
           : sizeClasses[String(this.size)] ?? 'size-4',
         this.name === 'green-check' ? 'text-ink-green-5' : undefined,
         this.active === true
-          ? 'text-ink-gray-8 dark:text-ink-gray-2'
+          ? 'text-ink-gray-8'
           : undefined,
         this.active === false
-          ? 'text-ink-gray-6 dark:text-ink-gray-5'
+          ? 'text-ink-gray-6'
           : undefined,
         'shrink-0',
       ];

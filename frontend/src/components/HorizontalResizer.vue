@@ -3,9 +3,18 @@
     <template #trigger>
       <div
         ref="hr"
-        class="h-full bg-gray-300 transition-opacity hover:opacity-100 dark:bg-gray-700"
+        class="h-full bg-surface-gray-4 transition-opacity hover:opacity-100 focus-visible:opacity-100"
         :class="resizing ? 'opacity-100' : 'opacity-0'"
         style="width: 3px; cursor: col-resize; margin-left: -3px"
+        role="separator"
+        tabindex="0"
+        aria-orientation="vertical"
+        :aria-label="t`Resize editor panel`"
+        :aria-valuenow="initialX"
+        :aria-valuemin="minX"
+        :aria-valuemax="maxX"
+        @keydown.left.prevent="resizeWithKeyboard(8)"
+        @keydown.right.prevent="resizeWithKeyboard(-8)"
         @mousedown="onMouseDown"
       />
     </template>
@@ -63,7 +72,18 @@ export default defineComponent({
       return this.maxX - this.initialX;
     },
   },
+  beforeUnmount() {
+    this.removeListeners();
+    if (this.resizing) document.body.style.cursor = '';
+  },
   methods: {
+    resizeWithKeyboard(delta: number) {
+      const value = Math.min(
+        this.maxX ?? Infinity,
+        Math.max(this.minX ?? 0, this.initialX + delta)
+      );
+      this.$emit('resize', value);
+    },
     onMouseDown(e: MouseEvent) {
       e.preventDefault();
 

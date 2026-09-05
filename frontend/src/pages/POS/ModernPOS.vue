@@ -70,14 +70,16 @@
 
     <ReturnSalesInvoiceModal
       :open-modal="openReturnSalesInvoiceModal"
-      @selected-return-invoice="(value:any) => emitEvent('selectedReturnInvoice', value)"
+      @selected-return-invoice="
+        (value: any) => emitEvent('selectedReturnInvoice', value)
+      "
       @toggle-modal="emitEvent('toggleModal', 'ReturnSalesInvoice', false)"
     />
 
     <AlertModal
       :open-modal="openAlertModal"
       @toggle-modal="emitEvent('toggleModal', 'Alert', false)"
-      @save-and-continue="(value:any)=>emitEvent('saveAndContinue',value)"
+      @save-and-continue="(value: any) => emitEvent('saveAndContinue', value)"
     />
 
     <KeyboardModal
@@ -85,40 +87,20 @@
       :open-modal="openKeyboardModal"
       :modal-status="openKeyboardModal"
       :selected-item-field="selectedItemField"
-      :selected-item-row="(selectedItemRow as SalesInvoiceItem)"
+      :selected-item-row="selectedItemRow as SalesInvoiceItem"
       :apply-pricing-rule-action="applyPricingRuleAction"
       @toggle-modal="emitEvent('toggleModal', 'Keyboard', false)"
     />
 
     <div
-      class="
-        h-[calc(100vh-var(--h-row-largest))]
-        min-h-0
-        overflow-y-auto
-        lg:overflow-hidden
-        bg-gray-25
-        dark:bg-gray-875
-        grid grid-cols-1
-        lg:grid-cols-9
-        gap-3
-        p-4
-      "
+      class="h-[calc(100vh-var(--h-row-largest))] min-h-0 overflow-y-auto lg:overflow-hidden bg-surface-gray-1 grid grid-cols-1 lg:grid-cols-9 gap-3 p-4"
     >
       <div
         class="col-span-1 flex min-h-[40rem] w-full lg:col-span-3 lg:min-h-0"
       >
         <div class="grid min-h-0 grid-rows-5 w-full gap-3">
           <div
-            class="
-              p-4
-              min-h-0
-              flex flex-col
-              row-span-5
-              bg-white
-              border
-              rounded-md
-              dark:bg-gray-850 dark:border-gray-800
-            "
+            class="p-4 min-h-0 flex flex-col row-span-5 bg-surface-base border rounded-4 border-outline-gray-1"
           >
             <!-- Customer Search -->
             <div class="flex-none">
@@ -129,7 +111,7 @@
                 :value="sinvDoc?.party"
                 :df="sinvDoc?.fieldMap.party"
                 :show-clear-button="true"
-                @change="(value:string) => $emit('setCustomer',value)"
+                @change="(value: string) => $emit('setCustomer', value)"
               />
             </div>
 
@@ -145,14 +127,7 @@
           </div>
 
           <div
-            class="
-              h-full
-              p-2
-              bg-white
-              border
-              rounded-md
-              dark:bg-gray-850 dark:border-gray-800
-            "
+            class="h-full p-2 bg-surface-base border rounded-4 border-outline-gray-1"
           >
             <div class="grid grid-cols-2 gap-2">
               <FloatingLabelFloatInput
@@ -180,7 +155,7 @@
                 :value="additionalDiscounts"
                 :read-only="true"
                 :text-right="true"
-                @change="(amount:Money)=> additionalDiscounts = amount"
+                @change="(amount: Money) => (additionalDiscounts = amount)"
               />
             </div>
 
@@ -210,58 +185,53 @@
             <div class="flex w-full gap-2">
               <div class="w-full">
                 <Button
-                  class="mt-2 w-full py-5"
+                  size="lg"
+                  class="mt-2 w-full"
                   :style="{
                     backgroundColor:
                       profile?.saveButtonColour ||
                       fyo.singles.Defaults?.saveButtonColour,
                   }"
-                  :class="`${isReturnInvoiceEnabledReturn ? 'py-5' : 'py-6'}`"
                   @click="$emit('saveInvoiceAction')"
                 >
                   <slot>
-                    <p class="uppercase text-lg text-white font-semibold">
-                      {{ t`Save` }}
-                    </p>
+                    <span>{{ t`Save` }}</span>
                   </slot>
                 </Button>
                 <Button
-                  class="w-full mt-2 py-5"
+                  size="lg"
+                  class="w-full mt-2"
                   :style="{
                     backgroundColor:
                       profile?.heldButtonColour ||
                       fyo.singles.Defaults?.heldButtonColour,
                   }"
-                  :class="`${isReturnInvoiceEnabledReturn ? 'py-5' : 'py-6'}`"
                   @click="emitEvent('toggleModal', 'SavedInvoice', true)"
                 >
                   <slot>
-                    <p class="uppercase text-lg text-white font-semibold">
-                      {{ t`Held` }}
-                    </p>
+                    <span>{{ t`Held` }}</span>
                   </slot>
                 </Button>
               </div>
               <div class="w-full">
                 <Button
-                  class="mt-2 w-full py-5"
+                  size="lg"
+                  class="mt-2 w-full"
                   :style="{
                     backgroundColor:
                       profile?.cancelButtonColour ||
                       fyo.singles.Defaults?.cancelButtonColour,
                   }"
-                  :class="`${isReturnInvoiceEnabledReturn ? 'py-5' : 'py-6'}`"
                   @click="() => $emit('clearValues')"
                 >
                   <slot>
-                    <p class="uppercase text-lg text-white font-semibold">
-                      {{ t`Cancel` }}
-                    </p>
+                    <span>{{ t`Cancel` }}</span>
                   </slot>
                 </Button>
                 <Button
+                  size="lg"
                   v-if="isReturnInvoiceEnabledReturn"
-                  class="mt-2 w-full py-5"
+                  class="mt-2 w-full"
                   :style="{
                     backgroundColor:
                       profile?.returnButtonColour ||
@@ -270,14 +240,13 @@
                   @click="emitEvent('toggleModal', 'ReturnSalesInvoice', true)"
                 >
                   <slot>
-                    <p class="uppercase text-lg text-white font-semibold">
-                      {{ t`Return` }}
-                    </p>
+                    <span>{{ t`Return` }}</span>
                   </slot>
                 </Button>
                 <Button
+                  size="lg"
                   v-else
-                  class="mt-2 w-full py-5"
+                  class="mt-2 w-full"
                   :style="{
                     backgroundColor:
                       profile?.payButtonColour ||
@@ -286,16 +255,15 @@
                   @click="emitEvent('handlePaymentAction')"
                 >
                   <slot>
-                    <p class="uppercase text-lg text-white font-semibold">
-                      {{ t`Pay` }}
-                    </p>
+                    <span>{{ t`Pay` }}</span>
                   </slot>
                 </Button>
               </div>
             </div>
             <Button
+              size="lg"
               v-if="isReturnInvoiceEnabledReturn"
-              class="mt-2 w-full py-5"
+              class="mt-2 w-full"
               :style="{
                 backgroundColor:
                   profile?.payButtonColour ||
@@ -304,9 +272,7 @@
               @click="emitEvent('handlePaymentAction')"
             >
               <slot>
-                <p class="uppercase text-lg text-white font-semibold">
-                  {{ t`Pay` }}
-                </p>
+                <span>{{ t`Pay` }}</span>
               </slot>
             </Button>
           </div>
@@ -314,21 +280,10 @@
       </div>
 
       <div
-        class="
-          bg-white
-          border
-          rounded-md
-          col-span-1
-          lg:col-span-6
-          relative
-          min-h-[32rem]
-          lg:min-h-0
-          flex flex-col
-          dark:bg-gray-850 dark:border-gray-800
-        "
+        class="bg-surface-base border rounded-4 col-span-1 lg:col-span-6 relative min-h-[32rem] lg:min-h-0 flex flex-col border-outline-gray-1"
       >
         <div
-          class="flex h-full min-h-0 flex-col rounded-md p-4 pb-14 col-span-5"
+          class="flex h-full min-h-0 flex-col rounded-4 p-4 pb-14 col-span-5"
         >
           <div class="flex gap-x-2">
             <!-- Item Search -->
@@ -347,7 +302,9 @@
               :value="itemSearchTerm"
               :show-clear-button="true"
               :close-on-enter="true"
-              @enter="(value: string) => emitEvent('handleItemSearch', value, true)"
+              @enter="
+                (value: string) => emitEvent('handleItemSearch', value, true)
+              "
               @change="(item: string) => emitEvent('handleItemSearch', item)"
             />
 
@@ -362,27 +319,18 @@
               :border="true"
               :show-clear-button="true"
               :value="selectedItemGroup"
-              @change="(group: string) => emitEvent('setItemGroup',group)"
+              @change="(group: string) => emitEvent('setItemGroup', group)"
             />
           </div>
 
           <div
             v-if="!items.length"
-            class="
-              flex
-              min-h-0
-              flex-1 flex-col
-              items-center
-              justify-center
-              gap-1
-              px-4
-              text-center
-            "
+            class="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 px-4 text-center"
           >
-            <p class="text-lg font-medium text-gray-700 dark:text-gray-200">
+            <p class="text-lg font-medium text-ink-gray-7">
               {{ t`No items found` }}
             </p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
+            <p class="text-sm text-ink-gray-5">
               {{ t`Try another item visibility or filter.` }}
             </p>
           </div>
@@ -392,15 +340,13 @@
             :items="items"
             :item-qty-map="itemQuantityMap as ItemQtyMap"
             :item-visibility="itemVisibility"
-            @add-item="(item:string) => emitEvent('addItem', item)"
+            @add-item="(item: string) => emitEvent('addItem', item)"
           />
 
-          <ModernPOSItemsGrid
+          <ItemsGrid
             v-else
             :items="items"
-            :item-qty-map="itemQuantityMap as ItemQtyMap"
-            :item-visibility="itemVisibility"
-            @add-item="(item:string) => emitEvent('addItem', item)"
+            @add-item="(item: POSItem) => emitEvent('addItem', item)"
           />
 
           <div class="absolute bottom-4 left-4 flex gap-x-3 p-1">
@@ -447,7 +393,7 @@ import { POSProfile } from 'models/baseModels/POSProfile/PosProfile';
 import MultiLabelLink from 'src/components/Controls/MultiLabelLink.vue';
 import { POSItem, PosEmits, ItemQtyMap } from 'src/components/POS/types';
 import { SalesInvoice } from 'models/baseModels/SalesInvoice/SalesInvoice';
-import ModernPOSItemsGrid from 'src/components/POS/Modern/ModernPOSItemsGrid.vue';
+import ItemsGrid from 'src/components/POS/ItemsGrid.vue';
 import ModernPOSItemsTable from 'src/components/POS/Modern/ModernPOSItemsTable.vue';
 import FloatingLabelFloatInput from 'src/components/POS/FloatingLabelFloatInput.vue';
 import { SalesInvoiceItem } from 'models/baseModels/SalesInvoiceItem/SalesInvoiceItem';
@@ -471,7 +417,7 @@ export default defineComponent({
     CouponCodeModal,
     OpenPOSShiftModal,
     SavedInvoiceModal,
-    ModernPOSItemsGrid,
+    ItemsGrid,
     ClosePOSShiftModal,
     LoyaltyProgramModal,
     ModernPOSItemsTable,
@@ -613,7 +559,7 @@ export default defineComponent({
   methods: {
     emitEvent(
       eventName: PosEmits,
-      ...args: (string | boolean | Item | number | Money)[]
+      ...args: (string | boolean | Item | POSItem | number | Money)[]
     ) {
       this.$emit(eventName, ...args);
     },

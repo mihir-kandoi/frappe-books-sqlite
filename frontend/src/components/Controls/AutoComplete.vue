@@ -38,7 +38,7 @@
     :required="isRequired"
     :size="frappeSize"
     :variant="frappeVariant"
-    class="w-full min-w-0"
+    class="min-w-0"
     :class="controlClasses"
     :style="containerStyles"
     @focus="onComboboxFocus"
@@ -54,7 +54,7 @@
           v-if="value && showClearButton"
           variant="ghost"
           size="xs"
-          class="!size-5 !rounded"
+          class="!size-5 !rounded-2"
           :aria-label="t`Clear value`"
           @pointerdown.prevent
           @click.stop="clearSelection(clear, setOpen)"
@@ -72,7 +72,7 @@
         <FrappeButton
           variant="ghost"
           size="xs"
-          class="!size-5 !rounded"
+          class="!size-5 !rounded-2"
           :aria-label="open ? t`Close options` : t`Open options`"
           @pointerdown.prevent
           @click.stop="setOpen(!open)"

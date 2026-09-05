@@ -2,12 +2,11 @@
   <div
     class="
       border-s
-      dark:border-gray-800
+      border-outline-gray-1
       h-full
       overflow-auto
       w-quick-edit
-      bg-white
-      dark:bg-gray-890
+      bg-surface-base
       custom-scroll custom-scroll-thumb2
     "
   >
@@ -17,15 +16,18 @@
         sticky
         top-0
         border-b
-        dark:border-gray-800
-        bg-white
-        dark:bg-gray-890
+        border-outline-gray-1
+        bg-surface-base
       "
       style="z-index: 1"
     >
       <div class="flex items-center justify-between px-4 h-row-largest">
         <!-- Close Button -->
-        <Button :icon="true" @click="$emit('close')">
+        <Button
+          :icon="true"
+          :aria-label="t`Close row editor`"
+          @click="$emit('close')"
+        >
           <Icon name="x" class="w-4 h-4" />
         </Button>
 
@@ -34,17 +36,23 @@
           <Button
             v-if="previous >= 0"
             :icon="true"
+            :aria-label="t`Previous row`"
             @click="$emit('previous', previous)"
           >
             <Icon name="chevron-left" class="w-4 h-4" />
           </Button>
-          <Button v-if="next >= 0" :icon="true" @click="$emit('next', next)">
+          <Button
+            v-if="next >= 0"
+            :icon="true"
+            :aria-label="t`Next row`"
+            @click="$emit('next', next)"
+          >
             <Icon name="chevron-right" class="w-4 h-4" />
           </Button>
         </div>
       </div>
       <FormHeader
-        class="border-t dark:border-gray-800"
+        class="border-t border-outline-gray-1"
         :form-title="t`Row ${index + 1}`"
         :form-sub-title="fieldlabel"
       />

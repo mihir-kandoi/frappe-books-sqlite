@@ -9,7 +9,7 @@
       <FormHeader
         :form-title="tabLabels[activeTab] ?? ''"
         :form-sub-title="t`Settings`"
-        class="sticky top-0 bg-white dark:bg-gray-890 border-b dark:border-gray-800"
+        class="sticky top-0 bg-surface-base border-b border-outline-gray-1"
       >
       </FormHeader>
 
@@ -20,7 +20,7 @@
           :key="name + idx"
           ref="section"
           class="p-4"
-          :class="idx !== 0 && activeGroup.size > 1 ? 'border-t dark:border-gray-800' : ''"
+          :class="idx !== 0 && activeGroup.size > 1 ? 'border-t border-outline-gray-1' : ''"
           :show-title="activeGroup.size > 1 && name !== t`Default`"
           :title="name"
           :fields="fields"
@@ -33,7 +33,7 @@
       <!-- Tab Bar -->
       <div
         v-if="groupedFields && groupedFields.size > 1"
-        class="sticky bottom-0 mt-auto flex-shrink-0 border-t bg-white p-4 dark:border-gray-800 dark:bg-gray-890"
+        class="sticky bottom-0 mt-auto flex-shrink-0 border-t bg-surface-base p-4 border-outline-gray-1"
       >
         <FrappeTabButtons v-model="activeTab" :options="tabOptions" variant="underline" />
       </div>

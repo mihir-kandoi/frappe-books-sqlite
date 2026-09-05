@@ -43,7 +43,7 @@
     <div class="flex text-base w-full flex-col">
       <!-- Select Import Type -->
       <div
-        class="h-row-largest flex flex-row justify-start items-center w-full gap-2 border-b dark:border-gray-800 p-4"
+        class="h-row-largest flex flex-row justify-start items-center w-full gap-2 border-b border-outline-gray-1 p-4"
       >
         <AutoComplete
           :df="{
@@ -55,7 +55,7 @@
               label: fyo.schemaMap[value]?.label ?? value,
             })),
           }"
-          class="w-40"
+          class="w-40 shrink-0"
           :border="true"
           :value="importType"
           size="small"
@@ -70,8 +70,8 @@
           class="text-base ms-2"
           :class="
             fileName
-              ? 'text-gray-900 dark:text-gray-25 font-semibold'
-              : 'text-gray-700 dark:text-gray-200'
+              ? 'text-ink-gray-9 font-semibold'
+              : 'text-ink-gray-7'
           "
         >
           <span v-if="fileName" class="font-normal">{{ t`Selected` }} </span>
@@ -80,7 +80,7 @@
           >{{ ' ' }}<span v-if="fileName">{{ t`Import Data.` }}</span>
           <span v-if="hasImporter && importer.valueMatrix.length > 0" class="font-normal">{{
             ' ' +
-            (importer.valueMatrix.length === 2
+            (importer.valueMatrix.length === 1
               ? t`${importer.valueMatrix.length} row added.`
               : t`${importer.valueMatrix.length} rows added.`)
           }}</span>
@@ -99,7 +99,7 @@
           divider="full"
           class="w-max min-w-full list-gap-4"
         >
-          <FrappeListHeader class="sticky top-0 z-10 !h-auto bg-surface-white px-4 py-3">
+          <FrappeListHeader class="sticky top-0 z-10 !h-auto bg-surface-base px-4 py-3">
             <FrappeListHeaderCell class="justify-center">#</FrappeListHeaderCell>
             <FrappeListHeaderCell v-for="index in columnIterator" :key="index">
               <Select
@@ -159,7 +159,7 @@
                     class="min-w-0 flex-1"
                     :class="
                       val.error
-                        ? 'rounded-md border border-red-300 dark:border-red-600'
+                        ? 'rounded-4 border border-outline-red-2'
                         : ''
                     "
                     :title="getFieldTitle(val)"
@@ -184,7 +184,7 @@
 
         <div
           v-else
-          class="ps-4 text-gray-700 dark:text-gray-300 sticky left-0 flex items-center"
+          class="ps-4 text-ink-gray-7 sticky left-0 flex items-center"
           style="height: 62.5px"
         >
           {{ t`No rows added. Select a file or add rows.` }}
@@ -205,7 +205,7 @@
       <div class="w-full">
         <!-- Pick Column Header -->
         <FormHeader :form-title="t`Pick Import Columns`" />
-        <hr class="dark:border-gray-800" />
+        <hr class="border-outline-gray-1" />
 
         <!-- Pick Column Checkboxes -->
         <div
@@ -213,11 +213,11 @@
           :key="key"
           class="p-4 max-h-80 overflow-auto custom-scroll custom-scroll-thumb1"
         >
-          <h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+          <h2 class="text-sm font-semibold text-ink-gray-8">
             {{ key }}
           </h2>
           <div
-            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 border dark:border-gray-800 rounded mt-1 p-3"
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 border border-outline-gray-1 rounded-2 mt-1 p-3"
           >
             <div v-for="tf of value" :key="tf.fieldKey" class="min-w-0">
               <Check
@@ -237,9 +237,9 @@
         </div>
 
         <!-- Pick Column Footer -->
-        <hr class="dark:border-gray-800" />
+        <hr class="border-outline-gray-1" />
         <div class="p-4 flex justify-between items-center">
-          <p class="text-sm text-gray-600 dark:text-gray-400">
+          <p class="text-sm text-ink-gray-6">
             {{ t`${numColumnsPicked} fields selected` }}
           </p>
           <Button type="primary" @click="showColumnPicker = false">{{ t`Done` }}</Button>
@@ -252,15 +252,15 @@
       <div class="w-full min-w-0">
         <!-- Import Completed Header -->
         <FormHeader :form-title="t`Import Complete`" />
-        <hr class="dark:border-gray-800" />
+        <hr class="border-outline-gray-1" />
         <!-- Success -->
         <div v-if="success.length > 0">
           <!-- Success Section Header -->
           <div class="flex items-center justify-between gap-4 px-4 pt-4 pb-2">
-            <p class="text-base font-semibold dark:text-gray-200">
+            <p class="text-base font-semibold text-ink-gray-8">
               {{ t`Success` }}
             </p>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
+            <p class="text-sm text-ink-gray-6">
               {{
                 success.length === 1
                   ? t`${success.length} entry imported`
@@ -269,7 +269,7 @@
             </p>
           </div>
           <!-- Success Body -->
-          <div class="max-h-40 overflow-y-auto text-gray-900 dark:text-gray-50">
+          <div class="max-h-40 overflow-y-auto text-ink-gray-9">
             <div
               v-for="(name, i) of success"
               :key="name"
@@ -281,7 +281,7 @@
               </p>
             </div>
           </div>
-          <hr class="dark:border-gray-800" />
+          <hr class="border-outline-gray-1" />
         </div>
 
         <!-- Failed -->
@@ -289,7 +289,7 @@
           <!-- Failed Section Header -->
           <div class="flex items-center justify-between gap-4 px-4 pt-4 pb-2">
             <p class="text-base font-semibold">{{ t`Failed` }}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
+            <p class="text-sm text-ink-gray-6">
               {{
                 failed.length === 1
                   ? t`${failed.length} entry failed`
@@ -298,7 +298,7 @@
             </p>
           </div>
           <!-- Failed Body -->
-          <div class="max-h-40 overflow-y-auto text-gray-900 dark:text-gray-50">
+          <div class="max-h-40 overflow-y-auto text-ink-gray-9">
             <div
               v-for="(f, i) of failed"
               :key="f.name"
@@ -308,7 +308,7 @@
               <p class="min-w-0 break-words">
                 {{ f.name }}
               </p>
-              <p class="min-w-0 break-words text-gray-600 dark:text-gray-400">
+              <p class="min-w-0 break-words text-ink-gray-6">
                 {{ f.error.message }}
               </p>
             </div>
@@ -319,7 +319,7 @@
         <!-- Fallback Div -->
         <div
           v-if="failed.length === 0 && success.length === 0"
-          class="p-4 text-base dark:text-gray-200"
+          class="p-4 text-base text-ink-gray-8"
         >
           {{ t`No entries were imported.` }}
         </div>
@@ -920,6 +920,6 @@ export default defineComponent({
 </script>
 <style scoped>
 .index-cell {
-  @apply flex pe-4 justify-end items-center border-e last:border-b dark:border-gray-800 bg-white dark:bg-gray-875 sticky left-0 -my-4 text-gray-600 dark:text-gray-400;
+  @apply flex pe-4 justify-end items-center border-e last:border-b border-outline-gray-1 bg-surface-base sticky left-0 -my-4 text-ink-gray-6;
 }
 </style>

@@ -7,7 +7,7 @@
   >
     <p class="text-center font-semibold py-3">{{ t`Apply Price List` }}</p>
     <div class="px-10">
-      <hr class="dark:border-gray-800" />
+      <hr class="border-outline-gray-1" />
       <div class="flex justify-center pt-10">
         <div class="flex justify-between w-full mb-20">
           <div class="w-full">
@@ -22,9 +22,12 @@
             />
           </div>
           <div class="w-10 flex justify-end items-center">
-            <Icon
-              name="trash"
-              class="size-5 text-ink-red-5"
+            <FrappeButton
+              icon="lucide-trash-2"
+              theme="red"
+              variant="ghost"
+              :tooltip="t`Remove price list`"
+              :aria-label="t`Remove price list`"
               @click="removePriceList"
             />
           </div>
@@ -34,14 +37,14 @@
       <div class="row-start-6 grid grid-cols-2 gap-4 mt-auto mb-2">
         <div class="col-span-2">
           <Button
-            class="w-full bg-green-500 dark:bg-green-700"
-            style="padding: 1.35rem"
+            size="lg"
+            theme="green"
+            type="primary"
+            class="w-full"
             @click="setPriceList"
           >
             <slot>
-              <p class="uppercase text-lg text-white font-semibold">
-                {{ t`Save` }}
-              </p>
+              <span>{{ t`Save` }}</span>
             </slot>
           </Button>
         </div>
@@ -50,14 +53,14 @@
       <div class="row-start-6 grid grid-cols-2 gap-4 mt-auto mb-8">
         <div class="col-span-2">
           <Button
-            class="w-full bg-red-500 dark:bg-red-700"
-            style="padding: 1.35rem"
+            size="lg"
+            theme="red"
+            type="primary"
+            class="w-full"
             @click="cancelPriceList"
           >
             <slot>
-              <p class="uppercase text-lg text-white font-semibold">
-                {{ t`Cancel` }}
-              </p>
+              <span>{{ t`Cancel` }}</span>
             </slot>
           </Button>
         </div>
@@ -73,7 +76,7 @@ import { defineComponent, inject } from 'vue';
 import Button from 'src/components/Button.vue';
 import { showToast } from 'src/utils/interactive';
 import Link from 'src/components/Controls/Link.vue';
-import Icon from 'src/components/Icon.vue';
+import { Button as FrappeButton } from 'frappe-ui';
 import { SalesInvoice } from 'models/baseModels/SalesInvoice/SalesInvoice';
 
 export default defineComponent({
@@ -82,7 +85,7 @@ export default defineComponent({
     Link,
     Modal,
     Button,
-    Icon,
+    FrappeButton,
   },
   props: {
     openModal: Boolean,

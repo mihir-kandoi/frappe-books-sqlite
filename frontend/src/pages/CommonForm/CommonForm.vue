@@ -21,7 +21,7 @@
       />
       <p
         v-if="schema.label && !(canShowBarcode || canShowExchangeRate)"
-        class="text-xl font-semibold items-center text-gray-600"
+        class="text-xl font-semibold items-center text-ink-gray-6"
       >
         {{ schema.label }}
       </p>
@@ -69,7 +69,7 @@
     <template #body>
       <FormHeader
         :form-title="title"
-        class="sticky top-0 bg-white dark:bg-gray-890 border-b dark:border-gray-800"
+        class="sticky top-0 bg-surface-base border-b border-outline-gray-1"
       >
         <StatusPill v-if="hasDoc" :doc="doc" />
       </FormHeader>
@@ -81,7 +81,7 @@
           :key="n + idx"
           ref="section"
           class="p-4"
-          :class="idx !== 0 && activeGroup.size > 1 ? 'border-t dark:border-gray-800' : ''"
+          :class="idx !== 0 && activeGroup.size > 1 ? 'border-t border-outline-gray-1' : ''"
           :show-title="activeGroup.size > 1 && n !== t`Default`"
           :title="n"
           :fields="fields"
@@ -96,7 +96,7 @@
       <!-- Tab Bar -->
       <div
         v-if="groupedFields && groupedFields.size > 1"
-        class="sticky bottom-0 mt-auto flex-shrink-0 border-t bg-white p-4 dark:border-gray-800 dark:bg-gray-875"
+        class="sticky bottom-0 mt-auto flex-shrink-0 border-t bg-surface-base p-4 border-outline-gray-1"
       >
         <FrappeTabButtons v-model="activeTab" :options="tabOptions" variant="underline" />
       </div>
@@ -301,7 +301,7 @@ export default defineComponent({
       return this.docOrNull?.name || this.t`New Entry`;
     },
     schema(): Schema {
-      const schema = this.fyo.schemaMap[this.schemaName];
+      const schema = this.docOrNull?.schema ?? this.fyo.schemaMap[this.schemaName];
       if (!schema) {
         throw new ValidationError(`no schema found with ${this.schemaName}`);
       }
@@ -334,6 +334,9 @@ export default defineComponent({
 
       return getGroupedActionsForDoc(this.doc);
     },
+  },
+  watch: {
+    'docOrNull.schema': 'updateGroupedFields',
   },
   beforeMount() {
     this.useFullWidth = !!this.fyo.singles.Misc?.useFullWidth;
@@ -388,6 +391,9 @@ export default defineComponent({
       }
 
       this.groupedFields = getFieldsGroupedByTabAndSection(this.schema, this.doc);
+      if (!this.groupedFields.has(this.activeTab)) {
+        this.activeTab = [...this.groupedFields.keys()][0] ?? this.t`Default`;
+      }
     },
     async sync(useDialog?: boolean) {
       if (await commonDocSync(this.doc, useDialog)) {

@@ -23,8 +23,7 @@
     />
     <p
       v-if="row.isFreeItem"
-      class="absolute flex top-0 font-medium text-xs ml-2 text-green-800"
-      style="font-size: 0.6rem"
+      class="absolute flex top-0 font-medium text-xs ml-2 text-ink-green-3"
     >
       {{ row.pricingRule }}
     </p>

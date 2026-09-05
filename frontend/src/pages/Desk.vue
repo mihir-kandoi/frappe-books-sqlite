@@ -10,7 +10,7 @@ import { showSidebar } from 'src/utils/refs';
         class="
           flex-shrink-0
           border-e
-          dark:border-gray-800
+          border-outline-gray-1
           whitespace-nowrap
           w-sidebar
         "
@@ -25,8 +25,7 @@ import { showSidebar } from 'src/utils/refs';
         min-w-0
         overflow-y-hidden
         custom-scroll custom-scroll-thumb1
-        bg-white
-        dark:bg-gray-875
+        bg-surface-base
       "
     >
       <router-view v-slot="{ Component }">

@@ -7,19 +7,25 @@
   >
     <p class="text-center font-semibold py-3">Apply Coupon Code</p>
     <div class="px-10">
-      <hr class="dark:border-gray-800" />
-      <p v-if="appliedCoupons.length" class="text-xs m-2 text-gray-500">
+      <hr class="border-outline-gray-1" />
+      <p v-if="appliedCoupons.length" class="text-xs m-2 text-ink-gray-5">
         {{ t`Applied Coupon Codes` }}
       </p>
       <FrappeList
         v-if="appliedCoupons.length"
         :columns="['minmax(0, 1fr)', '2rem']"
         divider="full"
-        class="custom-scroll custom-scroll-thumb2 mt-2 max-h-40 overflow-y-auto rounded-md border border-outline-gray-1"
+        class="custom-scroll custom-scroll-thumb2 mt-2 max-h-40 overflow-y-auto rounded-4 border border-outline-gray-1"
       >
-        <FrappeListRows :items="appliedCoupons as AppliedCouponCodes[]" row-key="coupons">
+        <FrappeListRows
+          :items="appliedCoupons as AppliedCouponCodes[]"
+          row-key="coupons"
+        >
           <template #default="{ item: coupon, value }">
-            <FrappeListRow :value="value" class="min-h-10 px-3 hover:bg-surface-gray-1">
+            <FrappeListRow
+              :value="value"
+              class="min-h-10 px-3 hover:bg-surface-gray-1"
+            >
               <FrappeListCell>
                 <FormControl
                   v-for="df in tableFields"
@@ -69,15 +75,15 @@
       <div class="row-start-6 grid grid-cols-2 gap-4 mt-auto mb-2">
         <div class="col-span-2">
           <Button
-            class="w-full bg-green-500 dark:bg-green-700"
-            style="padding: 1.35rem"
+            size="lg"
+            theme="green"
+            type="primary"
+            class="w-full"
             :disabled="validationError"
             @click="setCouponCode()"
           >
             <slot>
-              <p class="uppercase text-lg text-white font-semibold">
-                {{ t`Save` }}
-              </p>
+              <span>{{ t`Save` }}</span>
             </slot>
           </Button>
         </div>
@@ -86,14 +92,14 @@
       <div class="row-start-6 grid grid-cols-2 gap-4 mt-auto mb-8">
         <div class="col-span-2">
           <Button
-            class="w-full bg-red-500 dark:bg-red-700"
-            style="padding: 1.35rem"
+            size="lg"
+            theme="red"
+            type="primary"
+            class="w-full"
             @click="cancelApplyCouponCode()"
           >
             <slot>
-              <p class="uppercase text-lg text-white font-semibold">
-                {{ t`Cancel` }}
-              </p>
+              <span>{{ t`Cancel` }}</span>
             </slot>
           </Button>
         </div>
@@ -176,7 +182,8 @@ export default defineComponent({
 
       this.couponCode = '';
       this.validationError = false;
-      this.initialCouponCodes = this.sinvDoc.coupons?.map((coupon) => coupon.coupons ?? '') ?? [];
+      this.initialCouponCodes =
+        this.sinvDoc.coupons?.map((coupon) => coupon.coupons ?? '') ?? [];
     },
   },
   methods: {
@@ -192,12 +199,14 @@ export default defineComponent({
         }
 
         this.couponCode = value as string;
-        const appliedCouponCodes = this.fyo.doc.getNewDoc(ModelNameEnum.AppliedCouponCodes);
+        const appliedCouponCodes = this.fyo.doc.getNewDoc(
+          ModelNameEnum.AppliedCouponCodes
+        );
 
         await validateCouponCode(
           appliedCouponCodes as AppliedCouponCodes,
           this.couponCode,
-          this.sinvDoc,
+          this.sinvDoc
         );
 
         await this.sinvDoc.append('coupons', { coupons: this.couponCode });

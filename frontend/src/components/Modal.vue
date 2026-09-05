@@ -7,18 +7,7 @@
     @close="$emit('closemodal')"
   >
     <div
-      class="
-        books-modal
-        min-w-0
-        max-h-[calc(100vh-2rem)]
-        overflow-hidden
-        rounded-lg
-        border border-outline-gray-1
-        bg-surface-elevation-1
-        text-gray-900
-        dark:text-gray-100
-        shadow-2xl
-      "
+      class="books-modal min-w-0 max-h-[calc(100vh-2rem)] overflow-x-hidden overflow-y-auto rounded-7 bg-surface-elevation-1 text-ink-gray-9 shadow-xl"
       v-bind="$attrs"
     >
       <slot></slot>
@@ -60,9 +49,3 @@ export default defineComponent({
   emits: ['closemodal'],
 });
 </script>
-
-<style scoped>
-.books-modal :deep(label) {
-  @apply text-gray-600 dark:text-gray-300;
-}
-</style>

@@ -5,14 +5,14 @@
     class="h-96 w-full"
     @closemodal="cancelLoyaltyProgram"
   >
-    <p class="text-center py-4 dark:text-gray-100">Redeem Loyalty Points</p>
+    <p class="text-center py-4 text-ink-gray-8">Redeem Loyalty Points</p>
 
-    <hr class="dark:border-gray-800" />
+    <hr class="border-outline-gray-1" />
 
     <div class="flex gap-2 p-3 justify-end pt-10">
       <Icon name="coins" class="size-5 text-ink-amber-5" />
 
-      <p class="dark:text-gray-100 pr-6">
+      <p class="text-ink-gray-8 pr-6">
         {{ loyaltyPoints }} - ({{ loyaltyProgram }})
       </p>
     </div>
@@ -32,14 +32,14 @@
     <div class="row-start-6 grid grid-cols-2 gap-4 mt-auto mb-2 px-10">
       <div class="col-span-2">
         <Button
-          class="w-full bg-green-500 dark:bg-green-700"
-          style="padding: 1.35rem"
+          size="lg"
+          theme="green"
+          type="primary"
+          class="w-full"
           @click="saveLoyaltyPoints"
         >
           <slot>
-            <p class="uppercase text-lg text-white font-semibold">
-              {{ t`Save` }}
-            </p>
+            <span>{{ t`Save` }}</span>
           </slot>
         </Button>
       </div>
@@ -48,14 +48,14 @@
     <div class="row-start-6 grid grid-cols-2 gap-4 mt-auto px-10">
       <div class="col-span-2">
         <Button
-          class="w-full bg-red-500 dark:bg-red-700"
-          style="padding: 1.35rem"
+          size="lg"
+          theme="red"
+          type="primary"
+          class="w-full"
           @click="cancelLoyaltyProgram"
         >
           <slot>
-            <p class="uppercase text-lg text-white font-semibold">
-              {{ t`Cancel` }}
-            </p>
+            <span>{{ t`Cancel` }}</span>
           </slot>
         </Button>
       </div>
@@ -160,9 +160,7 @@ export default defineComponent({
 
         if (this.loyaltyPoints < newValue) {
           throw new Error(
-            `${this.sinvDoc.party as string} only has ${
-              this.loyaltyPoints
-            } points`
+            `${this.sinvDoc.party as string} only has ${this.loyaltyPoints} points`
           );
         }
 

@@ -1,5 +1,5 @@
 <template>
-  <div :class="level > 0 ? 'ms-2 ps-2 border-l dark:border-gray-800' : ''">
+  <div :class="level > 0 ? 'ms-2 ps-2 border-l border-outline-gray-1' : ''">
     <template v-for="r of rows" :key="r.key">
       <FrappeButton
         v-if="r.isCollapsible"

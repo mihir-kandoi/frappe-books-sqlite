@@ -6,8 +6,7 @@
       min-h-0
       min-w-0
       w-full
-      bg-gray-25
-      dark:bg-gray-875
+      bg-surface-gray-1
       overflow-x-auto
       custom-scroll custom-scroll-thumb1
     "
@@ -34,13 +33,12 @@
           flex-1
           min-h-0
           overflow-auto
-          bg-white
-          dark:bg-gray-890
+          bg-surface-base
         "
         :class="
           useFullWidth
-            ? 'w-full border-t dark:border-gray-800'
-            : 'w-form border dark:border-gray-800 rounded-lg shadow-lg m-4'
+            ? 'w-full border-t border-outline-gray-1'
+            : 'w-form border border-outline-gray-1 rounded-6 shadow-lg m-4'
         "
       >
         <slot name="body" />

@@ -1,27 +1,15 @@
 <template>
   <div
-    class="
-      flex
-      items-center
-      bg-gray-50
-      dark:bg-gray-890 dark:border-gray-800
-      rounded-md
-      text-sm
-      p-1
-      border
-    "
+    class="flex items-center bg-surface-gray-1 border-outline-gray-1 rounded-4 text-sm p-1 border"
   >
     <div
-      class="rate-container gap-2"
-      :class="
-        disabled
-          ? 'bg-gray-100 dark:bg-gray-850'
-          : 'bg-gray-25 dark:bg-gray-890'
-      "
+      class="flex items-center gap-2 rounded-4 px-1 text-sm text-ink-gray-9"
+      :class="disabled ? 'bg-surface-gray-2' : 'bg-surface-gray-1'"
     >
       <FrappeTextInput
         :model-value="fromValue"
         type="number"
+        :aria-label="left"
         :disabled="disabled"
         :min="0"
         size="sm"
@@ -30,21 +18,18 @@
         @update:model-value="setFromValue"
       />
 
-      <span class="dark:text-gray-400">{{ left }}</span>
+      <span class="text-ink-gray-5">{{ left }}</span>
     </div>
 
-    <p class="mx-1 text-gray-600 dark:text-gray-400">=</p>
+    <p class="mx-1 text-ink-gray-6">=</p>
 
     <div
-      class="rate-container gap-2"
-      :class="
-        disabled
-          ? 'bg-gray-100 dark:bg-gray-850'
-          : 'bg-gray-25 dark:bg-gray-890'
-      "
+      class="flex items-center gap-2 rounded-4 px-1 text-sm text-ink-gray-9"
+      :class="disabled ? 'bg-surface-gray-2' : 'bg-surface-gray-1'"
     >
       <FrappeTextInput
         type="number"
+        :aria-label="right"
         :model-value="
           isSwapped ? fromValue / exchangeRate : exchangeRate * fromValue
         "
@@ -55,7 +40,7 @@
         class="w-16 [&_input]:text-end"
         @change="rightChange"
       />
-      <span class="dark:text-gray-400">{{ right }}</span>
+      <span class="text-ink-gray-5">{{ right }}</span>
     </div>
 
     <FrappeButton
@@ -65,12 +50,10 @@
       size="xs"
       class="ms-1"
       :tooltip="t`Swap currencies`"
+      :aria-label="t`Swap currencies`"
       @click="swap"
     >
-      <Icon
-        name="refresh-cw"
-        class="w-3 h-3 text-gray-600 dark:text-gray-400"
-      />
+      <Icon name="refresh-cw" class="w-3 h-3 text-ink-gray-6" />
     </FrappeButton>
   </div>
 </template>
@@ -136,12 +119,3 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped>
-.rate-container {
-  @apply flex items-center rounded-md  border-gray-100 text-gray-900 text-sm  px-1  focus-within:border-gray-200 bg-transparent;
-}
-
-.rate-container > p {
-  @apply text-xs text-gray-600;
-}
-</style>

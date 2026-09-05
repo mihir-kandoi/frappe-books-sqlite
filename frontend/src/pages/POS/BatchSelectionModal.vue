@@ -5,7 +5,7 @@
     class="h-auto w-full"
     @closemodal="closeModal"
   >
-    <p class="text-center font-semibold py-3 text-gray-800 dark:text-gray-200">
+    <p class="text-center font-semibold py-3 text-ink-gray-8">
       {{ t`Select the Batch` }}
     </p>
 
@@ -23,29 +23,29 @@
         :value="selectedBatch"
         :border="true"
         :show-label="true"
-        @change="(value: string) => selectedBatch = value"
+        @change="(value: string) => (selectedBatch = value)"
       />
 
       <div class="mt-8 mb-6 grid grid-cols-2 gap-4">
         <Button
-          class="w-full bg-green-500 dark:bg-green-700"
-          style="padding: 1.35rem"
+          size="lg"
+          theme="green"
+          type="primary"
+          class="w-full"
           :disabled="!selectedBatch"
           @click="submitSelection"
         >
-          <p class="uppercase text-lg text-white font-semibold">
-            {{ t`Select` }}
-          </p>
+          <span>{{ t`Select` }}</span>
         </Button>
 
         <Button
-          class="w-full bg-red-500 dark:bg-red-700"
-          style="padding: 1.35rem"
+          size="lg"
+          theme="red"
+          type="primary"
+          class="w-full"
           @click="closeModal"
         >
-          <p class="uppercase text-lg text-white font-semibold">
-            {{ t`Cancel` }}
-          </p>
+          <span>{{ t`Cancel` }}</span>
         </Button>
       </div>
     </div>

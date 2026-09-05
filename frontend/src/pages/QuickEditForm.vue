@@ -2,12 +2,11 @@
   <div
     class="
       border-s
-      dark:border-gray-800
+      border-outline-gray-1
       h-full
       overflow-auto
       w-quick-edit
-      bg-white
-      dark:bg-gray-850
+      bg-surface-base
     "
   >
     <!-- Quick edit Tool bar -->
@@ -20,13 +19,12 @@
         h-row-largest
         sticky
         top-0
-        bg-white
-        dark:bg-gray-850
+        bg-surface-base
       "
       style="z-index: 1"
     >
       <!-- Close Button  -->
-      <Button :icon="true" @click="routeToPrevious">
+      <Button :icon="true" :title="t`Close quick edit`" @click="routeToPrevious">
         <Icon name="x" class="w-4 h-4" />
       </Button>
 
@@ -42,7 +40,7 @@
     <!-- Name and image -->
     <div
       v-if="doc && (titleField || imageField)"
-      class="items-center border-b border-t dark:border-gray-800"
+      class="items-center border-b border-t border-outline-gray-1"
       :class="imageField ? 'grid' : 'flex justify-center'"
       :style="{
         height: `calc(var(--h-row-mid) * ${!!imageField ? '2 + 1px' : '1'})`,

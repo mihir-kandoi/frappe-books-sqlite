@@ -1,8 +1,5 @@
 <template>
-  <div
-    ref="container"
-    class="bg-white dark:bg-gray-875 text-gray-900 dark:text-gray-100"
-  ></div>
+  <div ref="container" class="bg-surface-base text-ink-gray-9"></div>
 </template>
 <script lang="ts">
 import { autocompletion, CompletionContext } from '@codemirror/autocomplete';
@@ -16,7 +13,6 @@ import { Compartment, EditorState } from '@codemirror/state';
 import { EditorView, ViewUpdate } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { basicSetup } from 'codemirror';
-import { uicolors } from 'src/utils/colors';
 import { defineComponent, markRaw } from 'vue';
 
 export default defineComponent({
@@ -58,20 +54,23 @@ export default defineComponent({
       window.te = this;
     }
   },
+  beforeUnmount() {
+    this.view?.destroy();
+  },
   methods: {
     init() {
       const readOnly = new Compartment();
       const editable = new Compartment();
 
       const highlightStyle = HighlightStyle.define([
-        { tag: tags.typeName, color: uicolors.pink[600] },
-        { tag: tags.angleBracket, color: uicolors.pink[600] },
-        { tag: tags.attributeName, color: uicolors.gray[500] },
-        { tag: tags.attributeValue, color: uicolors.blue[500] },
-        { tag: tags.comment, color: uicolors.gray[500], fontStyle: 'italic' },
-        { tag: tags.keyword, color: uicolors.orange[600] },
-        { tag: tags.variableName, color: uicolors.teal[600] },
-        { tag: tags.string, color: uicolors.blue[700] },
+        { tag: tags.typeName, color: 'var(--ink-pink-7)' },
+        { tag: tags.angleBracket, color: 'var(--ink-pink-7)' },
+        { tag: tags.attributeName, color: 'var(--ink-gray-5)' },
+        { tag: tags.attributeValue, color: 'var(--ink-blue-7)' },
+        { tag: tags.comment, color: 'var(--ink-gray-5)', fontStyle: 'italic' },
+        { tag: tags.keyword, color: 'var(--ink-orange-7)' },
+        { tag: tags.variableName, color: 'var(--ink-teal-7)' },
+        { tag: tags.string, color: 'var(--ink-blue-7)' },
       ]);
       const completions = getCompletionsFromHints(this.hints ?? {});
 
@@ -203,56 +202,76 @@ function getCompletionOption(
   return null;
 }
 </script>
-<style>
-.cm-line {
-  font-weight: 600;
+<style scoped>
+:deep(.cm-editor) {
+  @apply text-sm text-ink-gray-8;
 }
 
-.cm-gutter {
-  @apply bg-gray-50 dark:bg-gray-850;
+:deep(.cm-content) {
+  line-height: 1.5;
 }
 
-.cm-gutters {
-  border: none black !important;
-  border-right: 1px solid theme('colors.gray.200') !important;
+:deep(.cm-gutter) {
+  @apply bg-surface-gray-1 text-ink-gray-5;
 }
 
-.dark .cm-gutters {
-  border: none white !important;
-  border-right: 1px solid theme('colors.gray.800') !important;
-}
-
-.cm-activeLine,
-.cm-activeLineGutter {
-  background-color: #72839216 !important;
-}
-
-.cm-tooltip-autocomplete {
-  background-color: white !important;
-  border: 1px solid theme('colors.gray.200') !important;
-  @apply rounded shadow-lg overflow-hidden text-gray-900;
-}
-
-.dark .cm-tooltip-autocomplete {
-  background-color: black !important;
-  border: 1px solid theme('colors.gray.800') !important;
-  @apply rounded shadow-lg overflow-hidden text-gray-100;
-}
-
-.cm-panels {
-  border-top: 1px solid theme('colors.gray.200') !important;
-  background-color: theme('colors.gray.50') !important;
-  color: theme('colors.gray.800') !important;
-}
-
-.cm-button {
-  background-image: none !important;
-  background-color: theme('colors.gray.200') !important;
-  color: theme('colors.gray.700') !important;
+:deep(.cm-gutters) {
   border: none !important;
+  border-right: 1px solid var(--outline-gray-1) !important;
 }
 
-.cm-textfield {
-  border: 1px solid theme('colors.gray.200') !important;
+:deep(.cm-activeLine),
+:deep(.cm-activeLineGutter) {
+  background-color: var(--surface-gray-2) !important;
+}
+
+:deep(.cm-tooltip-autocomplete) {
+  background-color: var(--surface-elevation-2) !important;
+  border: 1px solid var(--outline-gray-2) !important;
+  @apply rounded-6 shadow-2xl overflow-hidden text-ink-gray-8;
+}
+
+:deep(.cm-tooltip-autocomplete ul li[aria-selected]) {
+  background-color: var(--surface-gray-3) !important;
+  color: var(--ink-gray-8) !important;
+}
+
+:deep(.cm-panels) {
+  border-top: 1px solid var(--outline-gray-1) !important;
+  background-color: var(--surface-gray-1) !important;
+  color: var(--ink-gray-8) !important;
+}
+
+:deep(.cm-editor .cm-panel.cm-search) {
+  @apply flex flex-wrap items-center gap-1 p-2 pe-8 text-sm;
+  line-height: 1.5;
+}
+
+:deep(.cm-editor .cm-search label) {
+  @apply inline-flex items-center gap-1 text-sm;
+}
+
+:deep(.cm-editor .cm-search input[type='checkbox']) {
+  @apply size-3.5 rounded-2;
+  appearance: auto;
+  accent-color: var(--ink-gray-9);
+}
+
+:deep(.cm-editor .cm-button) {
+  background-image: none !important;
+  background-color: var(--surface-gray-2) !important;
+  color: var(--ink-gray-8) !important;
+  border: none !important;
+  @apply h-7 rounded-4 text-sm px-2 py-1;
+}
+
+:deep(.cm-editor .cm-button:hover) {
+  background-color: var(--surface-gray-3) !important;
+}
+
+:deep(.cm-editor .cm-textfield) {
+  background-color: var(--surface-base) !important;
+  border: 1px solid var(--outline-gray-2) !important;
+  @apply h-7 rounded-4 text-sm text-ink-gray-8;
 }
 </style>

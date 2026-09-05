@@ -332,7 +332,6 @@ function getCompleteSidebar(): SidebarConfig {
         {
           label: t`Customize Form`,
           name: 'customize-form',
-          // route: `/customize-form`,
           route: `/list/CustomForm/${t`Customize Form`}`,
           hidden: () =>
             !fyo.singles.AccountingSettings?.enableFormCustomization,

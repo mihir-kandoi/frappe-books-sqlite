@@ -31,6 +31,7 @@
 
 <script lang="ts">
 import { Button as FrappeButton } from 'frappe-ui';
+import { getButtonTextColor } from 'src/utils/button';
 import { defineComponent, PropType } from 'vue';
 
 type ButtonTheme = 'gray' | 'blue' | 'green' | 'red';
@@ -87,9 +88,25 @@ export default defineComponent({
     buttonAttrs(): Record<string, unknown> {
       const attrs = { ...this.$attrs };
       delete attrs.style;
+      if (typeof attrs.title === 'string') {
+        attrs.tooltip ??= attrs.title;
+        if (this.isIconOnly) attrs['aria-label'] ??= attrs.title;
+        delete attrs.title;
+      }
       return attrs;
     },
     buttonStyle(): unknown {
+      if (this.customBackground) {
+        return [
+          removeBackgroundStyle(this.$attrs.style),
+          {
+            '--books-button-background': this.customBackground,
+            '--books-button-foreground': getButtonTextColor(
+              this.customBackground
+            ),
+          },
+        ];
+      }
       if (!this.legacyInlineTheme) {
         return this.$attrs.style;
       }
@@ -130,7 +147,8 @@ export default defineComponent({
       return 'button';
     },
     buttonClasses(): string[] {
-      const classes = ['rounded-md'];
+      const classes: string[] = [];
+      if (this.customBackground) classes.push('books-custom-button');
 
       if (!this.isIconOnly && !this.padding && !this.hasCustomPadding) {
         classes.push('!px-0');
@@ -153,6 +171,12 @@ export default defineComponent({
       const background = getBackgroundStyle(this.$attrs.style);
       return background
         ? legacyInlineThemeMap[normalizeColor(background)]
+        : undefined;
+    },
+    customBackground(): string | undefined {
+      const background = getBackgroundStyle(this.$attrs.style);
+      return !this.legacyInlineTheme && /^#[0-9a-f]{6}$/i.test(background ?? '')
+        ? background
         : undefined;
     },
   },
@@ -265,3 +289,26 @@ function normalizeClasses(classes: unknown): string {
   return '';
 }
 </script>
+
+<style scoped>
+.books-custom-button:not(:disabled) {
+  background-color: var(--books-button-background);
+  color: var(--books-button-foreground);
+}
+
+.books-custom-button:not(:disabled):hover {
+  background-color: color-mix(
+    in srgb,
+    var(--books-button-background),
+    black 8%
+  );
+}
+
+.books-custom-button:not(:disabled):active {
+  background-color: color-mix(
+    in srgb,
+    var(--books-button-background),
+    black 14%
+  );
+}
+</style>

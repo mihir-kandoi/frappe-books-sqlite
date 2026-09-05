@@ -70,46 +70,26 @@
 
     <ReturnSalesInvoiceModal
       :open-modal="openReturnSalesInvoiceModal"
-      @selected-return-invoice="(value:any) => emitEvent('selectedReturnInvoice', value)"
+      @selected-return-invoice="
+        (value: any) => emitEvent('selectedReturnInvoice', value)
+      "
       @toggle-modal="emitEvent('toggleModal', 'ReturnSalesInvoice', false)"
     />
 
     <AlertModal
       :open-modal="openAlertModal"
       @toggle-modal="emitEvent('toggleModal', 'Alert', false)"
-      @save-and-continue="(value:any)=>emitEvent('saveAndContinue',value)"
+      @save-and-continue="(value: any) => emitEvent('saveAndContinue', value)"
     />
 
     <div
-      class="
-        h-[calc(100vh-var(--h-row-largest))]
-        min-h-0
-        overflow-y-auto
-        xl:overflow-hidden
-        bg-gray-25
-        dark:bg-gray-875
-        grid grid-cols-1
-        xl:grid-cols-12
-        gap-2
-        p-4
-      "
+      class="h-[calc(100vh-var(--h-row-largest))] min-h-0 overflow-y-auto xl:overflow-hidden bg-surface-gray-1 grid grid-cols-1 xl:grid-cols-12 gap-2 p-4"
     >
       <div
-        class="
-          relative
-          col-span-1
-          xl:col-span-5
-          min-h-[32rem]
-          xl:min-h-0
-          overflow-hidden
-          bg-white
-          border
-          rounded-md
-          dark:border-gray-800 dark:bg-gray-850
-        "
+        class="relative col-span-1 xl:col-span-5 min-h-[32rem] xl:min-h-0 overflow-hidden bg-surface-base border rounded-4 border-outline-gray-1"
       >
         <div
-          class="flex h-full min-h-0 flex-col rounded-md p-4 pb-14 col-span-5"
+          class="flex h-full min-h-0 flex-col rounded-4 p-4 pb-14 col-span-5"
         >
           <div class="flex gap-x-2">
             <!-- Item Search -->
@@ -128,7 +108,9 @@
               :value="itemSearchTerm"
               :show-clear-button="true"
               :close-on-enter="true"
-              @enter="(value: string) => emitEvent('handleItemSearch', value, true)"
+              @enter="
+                (value: string) => emitEvent('handleItemSearch', value, true)
+              "
               @change="(item: string) => emitEvent('handleItemSearch', item)"
             />
 
@@ -143,27 +125,18 @@
               :border="true"
               :show-clear-button="true"
               :value="selectedItemGroup"
-              @change="(group: string) => emitEvent('setItemGroup',group)"
+              @change="(group: string) => emitEvent('setItemGroup', group)"
             />
           </div>
 
           <div
             v-if="!items.length"
-            class="
-              flex
-              min-h-0
-              flex-1 flex-col
-              items-center
-              justify-center
-              gap-1
-              px-4
-              text-center
-            "
+            class="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 px-4 text-center"
           >
-            <p class="text-lg font-medium text-gray-700 dark:text-gray-200">
+            <p class="text-lg font-medium text-ink-gray-7">
               {{ t`No items found` }}
             </p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
+            <p class="text-sm text-ink-gray-5">
               {{ t`Try another item visibility or filter.` }}
             </p>
           </div>
@@ -179,8 +152,6 @@
           <ItemsGrid
             v-else
             :items="items"
-            :item-qty-map="itemQuantityMap as ItemQtyMap"
-            :item-visibility="itemVisibility"
             @add-item="(item) => emitEvent('addItem', item)"
           />
 
@@ -203,15 +174,7 @@
       <div class="col-span-1 min-h-[40rem] xl:col-span-7 xl:min-h-0">
         <div class="flex h-full min-h-0 flex-col gap-3">
           <div
-            class="
-              p-4
-              bg-white
-              border
-              rounded-md
-              min-h-0
-              flex-1 flex flex-col
-              dark:border-gray-800 dark:bg-gray-850
-            "
+            class="p-4 bg-surface-base border rounded-4 min-h-0 flex-1 flex flex-col border-outline-gray-1"
           >
             <!-- Customer Search -->
             <div class="flex-none">
@@ -222,7 +185,7 @@
                 :value="sinvDoc?.party"
                 :df="sinvDoc?.fieldMap.party"
                 :show-clear-button="true"
-                @change="(value:string) => $emit('setCustomer',value)"
+                @change="(value: string) => $emit('setCustomer', value)"
               />
             </div>
 
@@ -237,13 +200,7 @@
           </div>
 
           <div
-            class="
-              p-3
-              bg-white
-              border
-              rounded-md
-              dark:border-gray-800 dark:bg-gray-850
-            "
+            class="p-3 bg-surface-base border rounded-4 border-outline-gray-1"
           >
             <div class="w-full grid grid-cols-2 gap-y-2 gap-x-3">
               <div class="flex flex-col justify-end">
@@ -273,7 +230,7 @@
                     :value="additionalDiscounts"
                     :read-only="true"
                     :text-right="true"
-                    @change="(amount:Money)=> additionalDiscounts= amount"
+                    @change="(amount: Money) => (additionalDiscounts = amount)"
                   />
                 </div>
 
@@ -303,35 +260,31 @@
               <div class="w-full">
                 <div class="grid w-full min-w-0 grid-cols-2 gap-2">
                   <Button
+                    size="lg"
                     class="w-full min-w-0"
                     :style="{
                       backgroundColor:
                         profile?.saveButtonColour ||
                         fyo.singles.Defaults?.saveButtonColour,
                     }"
-                    :class="`${isReturnInvoiceEnabledReturn ? 'py-5' : 'py-6'}`"
                     @click="$emit('saveInvoiceAction')"
                   >
                     <slot>
-                      <p class="uppercase text-lg text-white font-semibold">
-                        {{ t`Save` }}
-                      </p>
+                      <span>{{ t`Save` }}</span>
                     </slot>
                   </Button>
                   <Button
+                    size="lg"
                     class="w-full min-w-0"
                     :style="{
                       backgroundColor:
                         profile?.cancelButtonColour ||
                         fyo.singles.Defaults?.cancelButtonColour,
                     }"
-                    :class="`${isReturnInvoiceEnabledReturn ? 'py-5' : 'py-6'}`"
                     @click="() => $emit('clearValues')"
                   >
                     <slot>
-                      <p class="uppercase text-lg text-white font-semibold">
-                        {{ t`Cancel` }}
-                      </p>
+                      <span>{{ t`Cancel` }}</span>
                     </slot>
                   </Button>
                 </div>
@@ -340,25 +293,24 @@
                   :class="`${isReturnInvoiceEnabledReturn ? 'mt-2' : 'mt-4'}`"
                 >
                   <Button
+                    size="lg"
                     class="w-full min-w-0"
                     :style="{
                       backgroundColor:
                         profile?.heldButtonColour ||
                         fyo.singles.Defaults?.heldButtonColour,
                     }"
-                    :class="`${isReturnInvoiceEnabledReturn ? 'py-5' : 'py-6'}`"
                     @click="emitEvent('toggleModal', 'SavedInvoice', true)"
                   >
                     <slot>
-                      <p class="uppercase text-lg text-white font-semibold">
-                        {{ t`held` }}
-                      </p>
+                      <span>{{ t`held` }}</span>
                     </slot>
                   </Button>
 
                   <Button
+                    size="lg"
                     v-if="isReturnInvoiceEnabledReturn"
-                    class="w-full min-w-0 py-5"
+                    class="w-full min-w-0"
                     :style="{
                       backgroundColor:
                         profile?.returnButtonColour ||
@@ -369,12 +321,11 @@
                     "
                   >
                     <slot>
-                      <p class="uppercase text-lg text-white font-semibold">
-                        {{ t`Return` }}
-                      </p>
+                      <span>{{ t`Return` }}</span>
                     </slot>
                   </Button>
                   <Button
+                    size="lg"
                     v-else
                     class="w-full min-w-0"
                     :style="{
@@ -382,19 +333,17 @@
                         profile?.payButtonColour ||
                         fyo.singles.Defaults?.payButtonColour,
                     }"
-                    :class="`${isReturnInvoiceEnabledReturn ? 'py-5' : 'py-6'}`"
                     @click="emitEvent('handlePaymentAction')"
                   >
                     <slot>
-                      <p class="uppercase text-lg text-white font-semibold">
-                        {{ t`Pay` }}
-                      </p>
+                      <span>{{ t`Pay` }}</span>
                     </slot>
                   </Button>
                 </div>
                 <Button
+                  size="lg"
                   v-if="isReturnInvoiceEnabledReturn"
-                  class="w-full mt-2 py-5"
+                  class="w-full mt-2"
                   :style="{
                     backgroundColor:
                       profile?.payButtonColour ||
@@ -403,9 +352,7 @@
                   @click="emitEvent('handlePaymentAction')"
                 >
                   <slot>
-                    <p class="uppercase text-lg text-white font-semibold">
-                      {{ t`Pay` }}
-                    </p>
+                    <span>{{ t`Pay` }}</span>
                   </slot>
                 </Button>
               </div>
@@ -437,7 +384,7 @@ import OpenPOSShiftModal from './OpenPOSShiftModal.vue';
 import ClosePOSShiftModal from './ClosePOSShiftModal.vue';
 import LoyaltyProgramModal from './LoyaltyProgramModal.vue';
 import { POSItem, ItemQtyMap } from 'src/components/POS/types';
-import ItemsGrid from 'src/components/POS/Classic/ItemsGrid.vue';
+import ItemsGrid from 'src/components/POS/ItemsGrid.vue';
 import ItemsTable from 'src/components/POS/Classic/ItemsTable.vue';
 import ReturnSalesInvoiceModal from './ReturnSalesInvoiceModal.vue';
 import { POSProfile } from 'models/baseModels/POSProfile/PosProfile';
@@ -596,7 +543,7 @@ export default defineComponent({
   methods: {
     emitEvent(
       eventName: PosEmits,
-      ...args: (string | boolean | Item | number | Money)[]
+      ...args: (string | boolean | Item | POSItem | number | Money)[]
     ) {
       this.$emit(eventName, ...args);
     },

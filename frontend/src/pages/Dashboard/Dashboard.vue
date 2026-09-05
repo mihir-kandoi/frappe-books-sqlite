@@ -9,18 +9,18 @@
     </PageHeader>
 
     <div
-      class="no-scrollbar overflow-auto dark:bg-gray-875"
+      class="no-scrollbar overflow-auto bg-surface-base"
       style="height: calc(100vh - var(--h-row-largest) - 1px)"
     >
-      <div style="min-width: var(--w-desk-fixed)" class="overflow-auto">
+      <div class="min-w-0">
         <Cashflow class="p-4" :common-period="period" :dark-mode="darkMode" />
-        <hr class="dark:border-gray-800" />
-        <div class="flex w-full">
+        <hr class="border-outline-gray-1" />
+        <div class="grid grid-cols-1 md:grid-cols-2">
           <UnpaidInvoices
             :schema-name="'SalesInvoice'"
             :common-period="period"
             :dark-mode="darkMode"
-            class="border-e dark:border-gray-800"
+            class="min-w-0 border-e border-outline-gray-1"
           />
           <UnpaidInvoices
             :schema-name="'PurchaseInvoice'"
@@ -28,20 +28,20 @@
             :dark-mode="darkMode"
           />
         </div>
-        <hr class="dark:border-gray-800" />
-        <div class="flex">
+        <hr class="border-outline-gray-1" />
+        <div class="grid grid-cols-1 xl:grid-cols-2">
           <ProfitAndLoss
-            class="w-full p-4 border-e dark:border-gray-800"
+            class="min-w-0 w-full p-4 border-e border-outline-gray-1"
             :common-period="period"
             :dark-mode="darkMode"
           />
           <Expenses
-            class="w-full p-4"
+            class="min-w-0 w-full p-4"
             :common-period="period"
             :dark-mode="darkMode"
           />
         </div>
-        <hr class="dark:border-gray-800" />
+        <hr class="border-outline-gray-1" />
       </div>
     </div>
   </div>

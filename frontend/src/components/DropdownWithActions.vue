@@ -8,7 +8,12 @@
     right
   >
     <template #default>
-      <Button :type="type" :icon="icon" :disabled="disabled">
+      <Button
+        :type="type"
+        :icon="icon"
+        :disabled="disabled"
+        :title="$attrs.title || t`Actions`"
+      >
         <slot>
           <Icon name="more-horizontal" class="w-4 h-4" />
         </slot>

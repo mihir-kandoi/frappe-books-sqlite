@@ -68,12 +68,11 @@ export class CustomForm extends Doc {
   hidden: HiddenMap = { customFields: () => !this.name };
 
   override async afterSync(): Promise<void> {
-    if (!this.name) {
-      return;
-    }
+    await this.refreshParentSchema();
+  }
 
-    await this.fyo.db.refreshSchemaMap();
-    this.fyo.doc.removeSchemaFromCache(this.name);
+  override async afterDelete(): Promise<void> {
+    await this.refreshParentSchema();
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -99,5 +98,14 @@ export class CustomForm extends Doc {
     throw new ValidationError(
       `At least two options need to be set for the selected fieldtype`
     );
+  }
+
+  private async refreshParentSchema(): Promise<void> {
+    if (!this.name) {
+      return;
+    }
+
+    await this.fyo.db.refreshSchemaMap();
+    this.fyo.doc.refreshSchema(this.name);
   }
 }

@@ -1,0 +1,258 @@
+import assert from 'node:assert/strict';
+import { after, test } from 'node:test';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+import { build } from 'esbuild';
+
+const directory = await mkdtemp(path.join(tmpdir(), 'books-custom-form-'));
+after(() => rm(directory, { recursive: true, force: true }));
+const output = path.join(directory, 'models.cjs');
+const frontend = fileURLToPath(new URL('..', import.meta.url));
+await build({
+  absWorkingDir: frontend,
+  stdin: {
+    contents:
+      "export { Fyo } from './fyo'; export { getSchemas } from './schemas';",
+    resolveDir: frontend,
+  },
+  bundle: true,
+  platform: 'node',
+  format: 'cjs',
+  outfile: output,
+});
+const { Fyo, getSchemas } = createRequire(import.meta.url)(output);
+
+async function makeFixture(storedForm) {
+  let definitions = [];
+  let stored = structuredClone(storedForm);
+  let updateError;
+  let updateCount = 0;
+  class DefinitionStore {
+    getSchemaMap() {
+      return getSchemas('-', definitions);
+    }
+    call(method, schemaName, value) {
+      if (stored && schemaName === 'CustomForm') {
+        if (method === 'get' && value === stored.name) {
+          return structuredClone(stored);
+        }
+        if (method === 'update') {
+          updateCount++;
+          assert.equal(value.__expectedModified, stored.modified);
+          if (updateError) {
+            const error = updateError;
+            updateError = undefined;
+            throw error;
+          }
+          stored = structuredClone(value);
+          delete stored.__expectedModified;
+          return structuredClone(stored);
+        }
+      }
+      throw new Error(`Unexpected database call: ${method}`);
+    }
+  }
+  const fyo = new Fyo({ DatabaseDemux: DefinitionStore });
+  await fyo.db.init();
+  fyo.doc.registerModels({});
+  const form = stored
+    ? await fyo.doc.getDoc('CustomForm', stored.name)
+    : fyo.doc.getNewDoc('CustomForm', { name: 'Color' });
+  if (!stored) {
+    await form.append('customFields', {
+      label: 'My Note',
+      fieldname: 'myNote',
+    });
+  }
+  return {
+    fyo,
+    form,
+    row: form.customFields[0],
+    setDefinitions: (values) => {
+      definitions = values;
+    },
+    rejectNextUpdate: (error) => {
+      updateError = error;
+    },
+    setStoredModified: (value) => {
+      stored.modified = value;
+    },
+    getUpdateCount: () => updateCount,
+  };
+}
+
+test('editing a custom field label preserves its key and does not match itself', async () => {
+  const { row } = await makeFixture();
+  await row.set('label', 'Renamed Note');
+  await row._validateFields();
+  assert.equal(row.fieldname, 'myNote');
+  assert.equal(row.label, 'Renamed Note');
+});
+
+test('custom field names still reject another row and built-in fields', async () => {
+  const { form, row } = await makeFixture();
+  await assert.rejects(row.set('fieldname', 'hexvalue'), /already exists/);
+  await form.append('customFields', {
+    label: 'Other Note',
+    fieldname: 'otherNote',
+  });
+  await assert.rejects(
+    form.customFields[1].set('fieldname', 'myNote'),
+    /already used/
+  );
+});
+
+test('select fields require at least two options before save', async () => {
+  const { form, row } = await makeFixture();
+  await row.set('fieldtype', 'Select');
+  await row.set('options', 'One');
+  await assert.rejects(form.validate(), /At least two options/);
+  await row.set('options', 'One\nTwo');
+  await form.validate();
+});
+
+test('optional custom fields retain their configured defaults', async () => {
+  const { fyo, form, setDefinitions } = await makeFixture();
+  setDefinitions([
+    {
+      parent: 'Color',
+      label: 'My Note',
+      fieldname: 'myNote',
+      fieldtype: 'Data',
+      isRequired: false,
+      default: 'Optional default',
+    },
+  ]);
+  await form.afterSync();
+  const color = fyo.doc.getNewDoc('Color');
+  assert.equal(color.myNote, 'Optional default');
+  assert.equal(color.fieldMap.myNote.required, false);
+});
+
+test('saving and deleting customizations refresh cached documents without losing edits', async () => {
+  const { fyo, form, setDefinitions } = await makeFixture();
+  const color = fyo.doc.getNewDoc('Color', {
+    name: 'Test Color',
+    hexvalue: '#123456',
+  });
+  const field = {
+    parent: 'Color',
+    label: 'My Note',
+    fieldname: 'myNote',
+    fieldtype: 'Data',
+    isRequired: true,
+    default: 'Initial note',
+    tab: 'Custom',
+  };
+  setDefinitions([field]);
+  await form.afterSync();
+  assert.ok(color.fieldMap.myNote);
+  assert.equal(color.myNote, 'Initial note');
+  await color.set('myNote', 'Unsaved note');
+
+  setDefinitions([{ ...field, label: 'Updated label' }]);
+  await form.afterSync();
+  assert.equal(color.fieldMap.myNote.label, 'Updated label');
+  assert.equal(color.myNote, 'Unsaved note');
+  assert.equal(color.hexvalue, '#123456');
+  assert.equal(fyo.docs.get('Color')['Test Color'], color);
+
+  setDefinitions([]);
+  await form.afterDelete();
+  assert.equal(color.fieldMap.myNote, undefined);
+  assert.equal(
+    fyo.schemaMap.Color.fields.some((field) => field.fieldname === 'myNote'),
+    false
+  );
+  assert.equal(color.getValidDict().myNote, undefined);
+  assert.equal(color.hexvalue, '#123456');
+});
+
+test('customizing a child schema refreshes rows inside cached parent documents', async () => {
+  const { fyo, form, setDefinitions } = await makeFixture();
+  const invoice = fyo.doc.getNewDoc('SalesInvoice');
+  await invoice.append('items', { item: 'Test Item', quantity: 2 });
+  const row = invoice.items[0];
+  form.name = 'SalesInvoiceItem';
+  setDefinitions([
+    {
+      parent: 'SalesInvoiceItem',
+      label: 'Packing Note',
+      fieldname: 'packingNote',
+      fieldtype: 'Data',
+      tab: 'Custom',
+    },
+  ]);
+  await form.afterSync();
+  assert.ok(row.fieldMap.packingNote);
+  assert.equal(row.item, 'Test Item');
+  assert.equal(row.quantity, 2);
+});
+
+test('a failed validation can be corrected and saved without a false conflict', async () => {
+  const { form, row, getUpdateCount } = await makeFixture(savedForm());
+  const modified = form.modified;
+  const modifiedBy = form.modifiedBy;
+  await row.set('fieldtype', 'Select');
+  await row.set('options', 'One');
+  await assert.rejects(form.sync(), /At least two options/);
+  assert.equal(form.modified, modified);
+  assert.equal(form.modifiedBy, modifiedBy);
+  assert.equal(form.isSyncing, false);
+  assert.equal(getUpdateCount(), 0);
+
+  await row.set('options', 'One\nTwo');
+  await form.sync();
+  assert.equal(getUpdateCount(), 1);
+  assert.ok(form.modified > modified);
+  assert.equal(form.customFields[0].options, 'One\nTwo');
+  assert.equal(form.isSyncing, false);
+});
+
+test('a rejected database update preserves the saved timestamp for retry', async () => {
+  const { form, row, rejectNextUpdate, getUpdateCount } =
+    await makeFixture(savedForm());
+  const modified = form.modified;
+  await row.set('label', 'Updated Note');
+  rejectNextUpdate(new Error('Database validation failed'));
+  await assert.rejects(form.sync(), /Database validation failed/);
+  assert.equal(form.modified, modified);
+  assert.equal(form.isSyncing, false);
+
+  await form.sync();
+  assert.equal(getUpdateCount(), 2);
+  assert.equal(form.customFields[0].label, 'Updated Note');
+});
+
+test('a real concurrent edit still prevents overwriting the database', async () => {
+  const { form, row, setStoredModified, getUpdateCount } =
+    await makeFixture(savedForm());
+  const modified = form.modified;
+  await row.set('label', 'Updated Note');
+  setStoredModified('2026-09-05T02:00:00.000Z');
+  await assert.rejects(form.sync(), /modified after loading/);
+  assert.equal(getUpdateCount(), 0);
+  assert.equal(form.modified, modified);
+  assert.equal(form.isSyncing, false);
+});
+
+function savedForm() {
+  return {
+    name: 'Color',
+    created: '2026-09-05T01:00:00.000Z',
+    createdBy: 'Original Editor',
+    modified: '2026-09-05T01:00:00.000Z',
+    modifiedBy: 'Original Editor',
+    customFields: [
+      {
+        name: 'saved-custom-field',
+        label: 'My Note',
+        fieldname: 'myNote',
+        fieldtype: 'Data',
+      },
+    ],
+  };
+}

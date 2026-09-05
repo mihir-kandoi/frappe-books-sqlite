@@ -1,15 +1,15 @@
 <template>
   <Modal
     :open-modal="openModal && isValuesSeeded"
-    size="2xl"
+    size="4xl"
     class="w-full p-4"
     @closemodal="$emit('toggleModal', 'ShiftClose', false)"
   >
-    <h1 class="text-xl font-semibold text-center dark:text-gray-100 pb-4">
+    <h1 class="text-xl font-semibold text-center text-ink-gray-8 pb-4">
       {{ t`Close POS Shift` }}
     </h1>
 
-    <h2 class="mt-4 mb-2 text-lg font-medium dark:text-gray-100">
+    <h2 class="mt-4 mb-2 text-lg font-medium text-ink-gray-8">
       {{ t`Closing Cash` }}
     </h2>
     <Table
@@ -23,7 +23,7 @@
       @row-change="updateClosingAmounts"
     />
 
-    <h2 class="mt-6 mb-2 text-lg dark:text-gray-100 font-medium">
+    <h2 class="mt-6 mb-2 text-lg text-ink-gray-8 font-medium">
       Closing Amounts
     </h2>
     <Table
@@ -33,30 +33,33 @@
       :show-header="true"
       :border="true"
       :value="posClosingShiftDoc?.closingAmounts"
-      :read-only="true"
+      :read-only="false"
+      :allow-add-remove-rows="false"
       @row-change="updateClosingAmounts"
     />
 
     <div class="mt-4 grid grid-cols-2 gap-4 items-end">
       <Button
-        class="w-full py-5 bg-red-500 dark:bg-red-700"
+        size="lg"
+        theme="red"
+        type="primary"
+        class="w-full"
         @click="$emit('toggleModal', 'ShiftClose', false)"
       >
         <slot>
-          <p class="uppercase text-lg text-white font-semibold">
-            {{ t`Cancel` }}
-          </p>
+          <span>{{ t`Cancel` }}</span>
         </slot>
       </Button>
 
       <Button
-        class="w-full py-5 bg-green-500 dark:bg-green-700"
+        size="lg"
+        theme="green"
+        type="primary"
+        class="w-full"
         @click="handleSubmit"
       >
         <slot>
-          <p class="uppercase text-lg text-white font-semibold">
-            {{ t`Submit` }}
-          </p>
+          <span>{{ t`Submit` }}</span>
         </slot>
       </Button>
     </div>

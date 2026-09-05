@@ -1,15 +1,12 @@
 <template>
-  <FrappeListRow
-    class="group min-h-12 w-full"
-    :class="readOnly ? '' : 'hover:bg-gray-25 dark:hover:bg-gray-900'"
-  >
+  <FrappeListRow class="group min-h-12 w-full">
     <!-- Index or Remove button -->
     <FrappeListCell
-      class="justify-center text-gray-600 dark:text-gray-400"
+      class="justify-center text-ink-gray-6"
       @mouseenter="isIndexHovered = true"
       @mouseleave="isIndexHovered = false"
     >
-      <span v-if="readOnly">
+      <span v-if="!canRemoveRow">
         {{ row.idx + 1 }}
       </span>
       <FrappeButton
@@ -40,6 +37,7 @@
         :size="size"
         :df="df"
         :value="row[df.fieldname]"
+        :read-only="readOnly ? true : undefined"
         @change="(value) => onChange(df, value)"
       />
     </FrappeListCell>
@@ -49,9 +47,10 @@
         :padding="false"
         :background="false"
         size="sm"
+        :title="t`Edit row`"
         @click="openRowQuickEdit"
       >
-        <Icon name="edit" class="w-4 h-4 text-gray-600 dark:text-gray-400" />
+        <Icon name="edit" class="w-4 h-4 text-ink-gray-6" />
       </Button>
     </FrappeListCell>
 
@@ -98,12 +97,13 @@ export default {
     tableFields: Array,
     size: String,
     readOnly: Boolean,
+    canRemoveRow: Boolean,
     canEditRow: {
       type: Boolean,
       default: false,
     },
   },
-  emits: ['remove', 'change'],
+  emits: ['remove', 'change', 'editrow'],
   data: () => ({
     isIndexHovered: false,
     isDeleteFocused: false,
@@ -139,10 +139,12 @@ export default {
     },
     openRowQuickEdit() {
       if (!this.row) return;
-      this.$parent.$emit('editrow', this.row);
+      this.$emit('editrow', this.row);
     },
     focusFirstInput() {
-      const firstControl = this.$el.querySelector('.form-control, input, textarea, select');
+      const firstControl = this.$el.querySelector(
+        '.form-control, input, textarea, select'
+      );
       if (firstControl) {
         firstControl.focus();
       }

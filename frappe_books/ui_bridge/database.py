@@ -182,6 +182,9 @@ class BooksDatabaseBridge:
 		doc = frappe.get_doc({"doctype": target, **self._target_values(source_schema, values)})
 		if values.get("name"):
 			doc.name = values["name"]
+			name_field = schema_mapping()[source_schema]["fields"].get("name")
+			if name_field and name_field != "name":
+				doc.set(name_field, values["name"])
 		self._set_docstatus(doc, values)
 		doc.insert(set_name=values.get("name"))
 		return self._to_source_document(source_schema, doc)
@@ -323,6 +326,9 @@ class BooksDatabaseBridge:
 		meta = frappe.get_meta(target)
 		mapped = {}
 		for source_name, value in values.items():
+			if meta.is_tree and source_name in {"lft", "rgt"}:
+				# Frappe maintains nested-set indices when the document is saved.
+				continue
 			if source_name in SOURCE_META_TO_TARGET or source_name in {
 				"submitted",
 				"cancelled",

@@ -242,6 +242,14 @@ export class DocHandler {
     }
   }
 
+  refreshSchema(schemaName: string) {
+    for (const name of Object.keys(this.fyo.schemaMap)) {
+      for (const doc of Object.values(this.docs.get(name) ?? {})) {
+        doc?.refreshSchema(schemaName);
+      }
+    }
+  }
+
   #getFromCache(schemaName: string, name: string): Doc | undefined {
     const docMap = this.docs.get(schemaName);
     return docMap?.[name];

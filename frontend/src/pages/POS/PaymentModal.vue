@@ -73,7 +73,7 @@
 
         <div
           v-if="showSettlementAmount"
-          class="flex items-center justify-between gap-4 rounded-lg px-3 py-2.5"
+          class="flex items-center justify-between gap-4 rounded-6 px-3 py-2.5"
           :class="settlementClasses"
           role="status"
         >
@@ -214,9 +214,7 @@ export default defineComponent({
       return (this.sinvDoc.grandTotal ?? fyo.pesa(0)).sub(this.paidAmount);
     },
     paidChange(): Money {
-      return this.paidAmount.sub(
-        this.sinvDoc.grandTotal ?? fyo.pesa(0)
-      );
+      return this.paidAmount.sub(this.sinvDoc.grandTotal ?? fyo.pesa(0));
     },
     showBalanceAmount(): boolean {
       return this.paidAmount.float > 0 && this.balanceAmount.isPositive();
@@ -224,8 +222,8 @@ export default defineComponent({
     showPaidChange(): boolean {
       return Boolean(
         !this.sinvDoc.isReturn &&
-          this.isPaymentMethodCash &&
-          this.paidChange.isPositive()
+        this.isPaymentMethodCash &&
+        this.paidChange.isPositive()
       );
     },
     showSettlementAmount(): boolean {
@@ -251,7 +249,7 @@ export default defineComponent({
 
       return Boolean(
         (this.showReferenceField && !this.transferRefNo) ||
-          (this.showClearanceDate && !this.transferClearanceDate)
+        (this.showClearanceDate && !this.transferClearanceDate)
       );
     },
   },
@@ -272,9 +270,8 @@ export default defineComponent({
         this.sinvDoc.outstandingAmount ?? this.fyo.pesa(0);
       const grandTotal = this.sinvDoc.grandTotal ?? this.fyo.pesa(0);
 
-      return (outstandingAmount.isZero()
-        ? grandTotal
-        : outstandingAmount
+      return (
+        outstandingAmount.isZero() ? grandTotal : outstandingAmount
       ).abs();
     },
     setPaymentMethodAndAmount(paymentMethod?: string) {

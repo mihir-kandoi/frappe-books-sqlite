@@ -6,7 +6,7 @@
       ref="backlink"
       icon="lucide-chevron-left"
       variant="subtle"
-      class="rounded-none border-x border-white dark:border-gray-850 dark:bg-gray-900"
+    class="rounded-none border-x border-outline-gray-1"
       :disabled="!historyState.back"
       :tooltip="t`Back`"
       :aria-label="t`Back`"
@@ -16,7 +16,7 @@
     <FrappeButton
       icon="lucide-chevron-right"
       variant="subtle"
-      class="rounded-s-none dark:bg-gray-900"
+    class="rounded-s-none"
       :disabled="!historyState.forward"
       :tooltip="t`Forward`"
       :aria-label="t`Forward`"

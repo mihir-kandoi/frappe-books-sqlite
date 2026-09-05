@@ -15,7 +15,8 @@
     v-else
     ref="input"
     :rows="df.rows ?? rows"
-    :class="textControlClasses"
+    :class="controlClasses"
+    :style="containerStyles"
     :model-value="typeof value === 'string' ? value : ''"
     :label="showLabel ? df.label : undefined"
     :description="showLabel ? df.sub_label : undefined"
@@ -41,13 +42,5 @@ export default {
   extends: Base,
   props: { rows: { type: Number, default: 3 } },
   emits: ['focus', 'input'],
-  computed: {
-    textControlClasses() {
-      return [
-        this.controlClasses,
-        "[&_[data-slot='control']]:!text-base",
-      ];
-    },
-  },
 };
 </script>

@@ -10,7 +10,7 @@
       class="custom-scroll custom-scroll-thumb1 min-h-0 flex-1 overflow-y-auto text-ink-gray-8 list-gap-4 list-row-px-3"
       @update:selection="updateSelection"
     >
-      <FrappeListHeader class="sticky top-0 z-10 bg-surface-white">
+      <FrappeListHeader class="sticky top-0 z-10 bg-surface-base">
         <FrappeListHeaderCell class="justify-end pe-2">#</FrappeListHeaderCell>
         <FrappeListHeaderCell
           v-for="column in columns"
@@ -49,7 +49,7 @@
 
     <!-- Pagination Footer -->
     <div v-if="data?.length" class="mt-auto">
-      <hr class="dark:border-gray-800" />
+      <hr class="border-outline-gray-1" />
       <Paginator
         :item-count="data.length"
         class="px-4"
@@ -63,7 +63,7 @@
       class="flex flex-col items-center justify-center my-auto"
     >
       <img src="../../assets/img/list-empty-state.svg" alt="" class="w-24" />
-      <p class="my-3 text-gray-800 dark:text-gray-200">
+      <p class="my-3 text-ink-gray-8">
         {{ t`No entries found` }}
       </p>
       <Button v-if="canCreate" type="primary" @click="$emit('makeNewDoc')">

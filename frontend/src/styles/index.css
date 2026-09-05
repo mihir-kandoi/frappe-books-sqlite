@@ -1,24 +1,4 @@
-@font-face {
-  font-family: 'Inter';
-  font-weight: 100 900;
-  font-display: swap;
-  font-style: oblique 0deg 10deg;
-  src: url('../assets/fonts/Inter.var.woff2') format('woff2');
-}
-
-* {
-  outline-color: theme('colors.pink.400');
-  font-variation-settings: 'slnt' 0deg;
-}
-.italic {
-  font-variation-settings: 'slnt' 10deg;
-}
-
-@tailwind base;
-
-@tailwind components;
-
-@tailwind utilities;
+@import 'frappe-ui/style.css';
 
 html,
 body {
@@ -26,12 +6,10 @@ body {
 }
 
 html {
-  color: theme('colors.black');
+  @apply text-ink-gray-9 bg-surface-base;
 }
 
 html.dark {
-  color: theme('colors.gray.100');
-  background-color: theme('colors.gray.900');
   color-scheme: dark;
 }
 
@@ -85,7 +63,7 @@ html.dark input[type='date']::-webkit-calendar-picker-indicator {
   justify-content: center;
 }
 
-/* Table rows belong to one continuous surface; rounded rows are for standalone lists. */
+/* Table rows belong to one continuous surface; rounded-2 rows are for standalone lists. */
 [data-slot='list'][role='table'] [data-slot='list-row'] {
   border-radius: 0;
 }
@@ -315,7 +293,7 @@ input[type='number']::-webkit-outer-spin-button {
 }
 
 .pill {
-  @apply py-0.5 px-1.5 rounded-md  text-xs;
+  @apply py-0.5 px-1.5 rounded-4  text-xs;
   width: fit-content;
   height: fit-content;
 }
