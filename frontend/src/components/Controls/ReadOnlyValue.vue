@@ -65,9 +65,6 @@ export default defineComponent({
 			if (this.textRight ?? isNumeric(this.df)) {
 				classes.push("[&_input]:text-end");
 			}
-			if (this.$slots.trailing) {
-				classes.push("[&_input]:pe-16");
-			}
 			return classes;
 		},
 	},

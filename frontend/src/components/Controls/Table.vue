@@ -172,13 +172,24 @@ export default {
     listColumns() {
       return [
         '2rem',
-        ...this.tableFields.map(() => 'minmax(0, 1fr)'),
+        ...this.fieldMinimumWidths.map((width) => `minmax(${width}rem, 1fr)`),
         ...(this.canEditRow ? ['2rem'] : []),
       ];
     },
+    fieldMinimumWidths() {
+      return this.tableFields.map((field) => {
+        if (field.fieldtype === 'Check') return 3;
+        if (field.fieldtype === 'Int') return 4;
+        if (['Link', 'DynamicLink'].includes(field.fieldtype)) return 9;
+        return this.isNumeric(field) ? 6 : 8;
+      });
+    },
     minimumWidth() {
       // Keep fields usable in narrow forms; the shared viewport scrolls them.
-      const fields = this.tableFields.length * 8;
+      const fields = this.fieldMinimumWidths.reduce(
+        (sum, width) => sum + width,
+        0
+      );
       const actions = this.canEditRow ? 4 : 2;
       const gaps = (this.listColumns.length - 1) * 0.5;
       return `${fields + actions + gaps}rem`;
