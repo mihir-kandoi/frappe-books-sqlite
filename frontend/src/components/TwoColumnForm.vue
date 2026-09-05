@@ -1,5 +1,5 @@
 <template>
-  <div class="text-sm">
+  <div class="text-base">
     <template v-for="df in formFields">
       <!-- Table Field Form (Eg: PaymentFor) -->
       <Table
@@ -18,34 +18,25 @@
       <div
         v-else
         :key="`${df.fieldname}-regular`"
-        class="grid items-center border-b border-outline-gray-1"
-        :style="{
-          ...style,
-          height: getFieldHeight(df),
-        }"
+        class="grid min-h-14 items-start gap-x-3 border-b border-outline-gray-1 px-4 py-3"
+        :style="style"
       >
-        <div class="ps-4 flex text-ink-gray-6">
+        <div class="flex min-h-8 min-w-0 items-center break-words text-ink-gray-6">
           {{ df.label }}
         </div>
 
-        <div
-          class="py-2 pe-4"
-          :class="{
-            'ps-2': df.fieldtype === 'AttachImage',
-          }"
-        >
+        <div class="min-w-0">
           <FormControl
             ref="controls"
             class="w-full"
-            size="small"
             :df="df"
             :value="doc[df.fieldname]"
-            :text-end="false"
+            :text-right="false"
             @change="async (value: DocValue) => await onChange(df, value)"
           />
           <div
             v-if="errors[df.fieldname]"
-            class="text-sm text-red-600 mt-2 ps-2"
+            class="mt-2 break-words text-p-sm text-ink-red-5"
           >
             {{ errors[df.fieldname] }}
           </div>
@@ -109,17 +100,6 @@ export default defineComponent({
     }
   },
   methods: {
-    getFieldHeight(field: Field) {
-      if (['AttachImage', 'Text'].includes(field.fieldtype)) {
-        return 'calc((var(--h-row-mid) + 1px) * 2)';
-      }
-
-      if (this.errors[field.fieldname]) {
-        return 'calc((var(--h-row-mid) + 1px) * 2)';
-      }
-
-      return 'calc(var(--h-row-mid) + 1px)';
-    },
     async onChange(field: Field, value: DocValue | Doc[] | DocValueMap[]) {
       const { fieldname } = field;
       delete this.errors[fieldname];

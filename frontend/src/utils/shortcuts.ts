@@ -56,7 +56,7 @@ export class Shortcuts {
       return;
     }
 
-    window.addEventListener('keydown', this.#keydownListener, true);
+    window.addEventListener('keydown', this.#keydownListener);
     this.#isListening = true;
   }
 
@@ -65,12 +65,12 @@ export class Shortcuts {
       return;
     }
 
-    window.removeEventListener('keydown', this.#keydownListener, true);
+    window.removeEventListener('keydown', this.#keydownListener);
     this.#isListening = false;
   }
 
   handleKeydown(event: KeyboardEvent): boolean {
-    if (this.#isEditableTarget(event)) {
+    if (event.defaultPrevented || this.#hasLocalKeyHandler(event)) {
       return false;
     }
 
@@ -131,7 +131,7 @@ export class Shortcuts {
     );
   }
 
-  #isEditableTarget(event: KeyboardEvent): boolean {
+  #hasLocalKeyHandler(event: KeyboardEvent): boolean {
     if (event.altKey || event.ctrlKey || event.metaKey) {
       return false;
     }
@@ -142,7 +142,11 @@ export class Shortcuts {
       tagName === 'input' ||
       tagName === 'select' ||
       tagName === 'textarea' ||
-      target?.contentEditable === 'true'
+      target?.contentEditable === 'true' ||
+      // Popups own navigation and dismissal before the page behind them.
+      !!target?.closest(
+        '[role="menu"], [role="listbox"], [role="dialog"], [role="alertdialog"]'
+      )
     );
   }
 

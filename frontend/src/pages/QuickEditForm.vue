@@ -40,33 +40,30 @@
     <!-- Name and image -->
     <div
       v-if="doc && (titleField || imageField)"
-      class="items-center border-b border-t border-outline-gray-1"
-      :class="imageField ? 'grid' : 'flex justify-center'"
-      :style="{
-        height: `calc(var(--h-row-mid) * ${!!imageField ? '2 + 1px' : '1'})`,
-        gridTemplateColumns: `minmax(0, 1.1fr) minmax(0, 2fr)`,
-      }"
+      class="flex min-h-14 items-center gap-3 border-b border-t border-outline-gray-1 px-4 py-3"
     >
       <AttachImage
         v-if="imageField"
-        class="ms-4"
+        class="shrink-0"
+        size="small"
         :df="imageField"
         :value="String(doc[imageField.fieldname] ?? '')"
         :letter-placeholder="letterPlaceHolder"
         @change="(value: DocValue) => valueChange(imageField as Field, value)"
       />
+      <h2
+        v-if="titleField && (doc.inserted || doc.schema.naming !== 'manual')"
+        class="min-w-0 break-words text-lg font-semibold text-ink-gray-9"
+      >
+        {{ doc[titleField.fieldname] || titleField.label }}
+      </h2>
       <FormControl
-        v-if="titleField"
+        v-else-if="titleField"
         ref="titleControl"
-        :class="!!imageField ? 'me-4' : 'w-full mx-4'"
-        :input-class="[
-          'font-semibold text-xl',
-          !!imageField ? '' : 'text-center',
-        ]"
-        size="small"
+        class="min-w-0 flex-1"
+        :border="true"
         :df="titleField"
         :value="doc[titleField.fieldname]"
-        :read-only="doc.inserted || doc.schema.naming !== 'manual'"
         @change="(value: DocValue) => valueChange(titleField as Field, value)"
       />
     </div>

@@ -22,54 +22,41 @@
           />
         </template>
         <template #item-label="{ node }">
-          <Button
-            :background="false"
-            class="min-w-0 !justify-start !px-0"
-            :class="node.isGroup ? '!font-medium' : '!font-normal'"
+          <button
+            type="button"
+            class="min-w-0 flex-1 self-stretch truncate rounded-3 bg-transparent text-start text-base text-ink-gray-8 focus-visible:outline focus-visible:outline-2 focus-visible:outline-outline-gray-3"
+            :class="node.isGroup ? 'font-medium' : 'font-normal'"
             :title="String(node.name)"
             @keydown.enter.stop
             @keydown.space.stop
             @click.stop="onClick(node as AccountItem)"
           >
             {{ node.name }}
-          </Button>
+          </button>
         </template>
         <template #item-suffix="{ node }">
-          <div class="flex items-center gap-3">
-            <div
-              class="flex gap-1 opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100"
-            >
-              <Button
-                v-if="node.isGroup"
-                :background="false"
-                size="xs"
-                @keydown.enter.stop
-                @keydown.space.stop
-                @click.stop="addAccount(node as AccountItem, 'addingAccount')"
-                >{{ t`Add Account` }}</Button
+          <div class="flex shrink-0 items-center gap-3">
+            <div @click.stop @keydown.stop>
+              <FrappeDropdown
+                :options="getAccountActions(node as AccountItem)"
+                align="end"
               >
-              <Button
-                v-if="node.isGroup"
-                :background="false"
-                size="xs"
-                @keydown.enter.stop
-                @keydown.space.stop
-                @click.stop="
-                  addAccount(node as AccountItem, 'addingGroupAccount')
-                "
-                >{{ t`Add Group` }}</Button
-              >
-              <Button
-                :background="false"
-                theme="red"
-                size="xs"
-                @keydown.enter.stop
-                @keydown.space.stop
-                @click.stop="deleteAccount(node as AccountItem)"
-                >{{
-                  node.isGroup ? t`Delete Group` : t`Delete Account`
-                }}</Button
-              >
+                <template #trigger="{ open }">
+                  <Button
+                    :background="false"
+                    :icon="true"
+                    size="xs"
+                    :title="t`Actions for ${String(node.name)}`"
+                    :class="
+                      open
+                        ? 'opacity-100'
+                        : 'opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100'
+                    "
+                  >
+                    <Icon name="more-horizontal" :size="14" />
+                  </Button>
+                </template>
+              </FrappeDropdown>
             </div>
             <span
               v-if="!node.isGroup"
@@ -122,8 +109,10 @@
 import { t } from 'fyo';
 import {
   Dialog as FrappeDialog,
+  Dropdown as FrappeDropdown,
   TextInput as FrappeTextInput,
   Tree as FrappeTree,
+  type DropdownOptions,
 } from 'frappe-ui';
 import { isCredit } from 'models/helpers';
 import { ModelNameEnum } from 'models/types';
@@ -173,6 +162,7 @@ export default defineComponent({
     FrappeTextInput,
     FrappeTree,
     FrappeDialog,
+    FrappeDropdown,
   },
   props: {
     darkMode: { type: Boolean, default: false },
@@ -227,6 +217,28 @@ export default defineComponent({
     docsPathRef.value = '';
   },
   methods: {
+    getAccountActions(account: AccountItem): DropdownOptions {
+      const actions: DropdownOptions = [];
+      if (account.isGroup) {
+        actions.push(
+          {
+            label: t`Add Account`,
+            onClick: () => this.addAccount(account, 'addingAccount'),
+          },
+          {
+            label: t`Add Group`,
+            onClick: () => this.addAccount(account, 'addingGroupAccount'),
+          }
+        );
+      }
+
+      actions.push({
+        label: account.isGroup ? t`Delete Group` : t`Delete Account`,
+        theme: 'red',
+        onClick: () => this.deleteAccount(account),
+      });
+      return actions;
+    },
     async expand() {
       await this.toggleAll(this.accounts, true);
     },
@@ -512,6 +524,15 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.books-account-tree {
+  --tree-row-height: 2.25rem;
+}
+
+.books-account-tree :deep([data-slot='row']) {
+  gap: 0.5rem;
+  padding-inline: 0.5rem;
+}
+
 .books-account-tree :deep([role='treeitem']:focus-visible) {
   outline: none;
 }

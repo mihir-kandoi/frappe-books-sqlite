@@ -169,6 +169,48 @@ test('creating a linked entry uses the search text without changing the saved li
   });
 });
 
+test('Escape dismisses account menus and dialogs without closing quick edit', async ({
+  page,
+}) => {
+  await page.evaluate(() => {
+    const app = (document.querySelector('#app') as any).__vue_app__;
+    return app.config.globalProperties.$router.push({
+      path: '/chart-of-accounts',
+      query: { edit: '1', schemaName: 'Party', name: 'Audit Saved Party' },
+    });
+  });
+  const title = page.getByRole('heading', {
+    name: partyName,
+    exact: true,
+    level: 2,
+  });
+  await expect(title).toBeVisible();
+  const actions = page.getByRole('button', {
+    name: 'Actions for Application of Funds (Assets)',
+    exact: true,
+  });
+  await actions.focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByRole('menu')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('menu')).toBeHidden();
+  await expect(title).toBeVisible();
+
+  await actions.click();
+  await page.getByRole('menuitem', { name: 'Add Account', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: 'Cancel', exact: true }).focus();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(title).toBeVisible();
+
+  await page.getByRole('button', { name: 'Close quick edit', exact: true }).focus();
+  await page.keyboard.press('Escape');
+  await expect(title).toBeHidden();
+  expect(await getPartyState(page)).toEqual({ dirty: false, address: addressName });
+});
+
 async function openFixture(page: Page, schemaName: string, name: string) {
   await page.evaluate(
     ({ schemaName, name }) => {
