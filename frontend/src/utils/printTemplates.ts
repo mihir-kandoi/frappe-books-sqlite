@@ -5,6 +5,7 @@ import { ModelNameEnum } from 'models/types';
 import { FieldTypeEnum, Schema, TargetField } from 'schemas/types';
 import { printHtml } from './browser';
 import { constructPrintDocument } from './printDocument';
+import { getPrintTemplateDocValues } from './printTemplateData';
 import { showToast } from './interactive';
 import { PrintValues } from './types';
 import { Money } from 'pesa';
@@ -370,66 +371,6 @@ function getPrintTemplateDocHints(
     hints.links = links;
   }
   return hints;
-}
-
-async function getPrintTemplateDocValues(doc: Doc, fieldnames?: string[]) {
-  const values: PrintTemplateData = {};
-  if (!(doc instanceof Doc)) {
-    return values;
-  }
-
-  let fields = doc.schema.fields;
-  if (fieldnames) {
-    fields = fields.filter((f) => fieldnames.includes(f.fieldname));
-  }
-
-  // Set Formatted Doc Data
-  for (const field of fields) {
-    const { fieldname, fieldtype, meta } = field;
-    if (fieldtype === FieldTypeEnum.Attachment || meta) {
-      continue;
-    }
-
-    const value = doc.get(fieldname);
-
-    if (!value) {
-      values[fieldname] = '';
-      continue;
-    }
-
-    if (!Array.isArray(value)) {
-      values[fieldname] = doc.fyo.format(value, field, doc);
-      continue;
-    }
-
-    const table: PrintTemplateData[] = [];
-    for (const row of value) {
-      const rowProps = await getPrintTemplateDocValues(row);
-      table.push(rowProps);
-    }
-
-    values[fieldname] = table;
-  }
-
-  values.submitted = doc.submitted;
-  values.entryType = doc.schema.name;
-  values.entryLabel = doc.schema.label;
-
-  // Set Formatted Doc Link Data
-  await doc.loadLinks();
-  const links: PrintTemplateData = {};
-  for (const [linkName, linkDoc] of Object.entries(doc.links ?? {})) {
-    if (fieldnames && !fieldnames.includes(linkName)) {
-      continue;
-    }
-
-    links[linkName] = await getPrintTemplateDocValues(linkDoc);
-  }
-
-  if (Object.keys(links).length) {
-    values.links = links;
-  }
-  return values;
 }
 
 export async function getPathAndMakePDF(

@@ -6,15 +6,18 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 
-const directory = await mkdtemp(path.join(tmpdir(), 'books-custom-form-'));
+const directory = await mkdtemp(path.join(tmpdir(), 'books-model-tests-'));
 after(() => rm(directory, { recursive: true, force: true }));
 const output = path.join(directory, 'models.cjs');
 const frontend = fileURLToPath(new URL('../..', import.meta.url));
 await build({
   absWorkingDir: frontend,
   stdin: {
-    contents:
-      "export { Fyo } from './fyo'; export { getSchemas } from './schemas';",
+    contents: `
+      export { Fyo } from './fyo';
+      export { getSchemas } from './schemas';
+      export { getPrintTemplateDocValues } from './src/utils/printTemplateData';
+    `,
     resolveDir: frontend,
   },
   bundle: true,
@@ -22,4 +25,6 @@ await build({
   format: 'cjs',
   outfile: output,
 });
-export const { Fyo, getSchemas } = createRequire(import.meta.url)(output);
+export const { Fyo, getSchemas, getPrintTemplateDocValues } = createRequire(
+  import.meta.url
+)(output);
