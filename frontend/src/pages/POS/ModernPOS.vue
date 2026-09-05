@@ -106,6 +106,7 @@
             <div class="flex-none">
               <MultiLabelLink
                 v-if="sinvDoc?.fieldMap"
+                class="w-full"
                 secondary-link="phone"
                 :border="true"
                 :value="sinvDoc?.party"
