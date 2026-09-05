@@ -79,7 +79,7 @@ export default {
         return;
       }
       const name =
-        this.linkValue || fyo.doc.getTemporaryName(fyo.schemaMap[schemaName]);
+        this.searchQuery || fyo.doc.getTemporaryName(fyo.schemaMap[schemaName]);
       const filters = await this.getCreateFilters();
       const { openQuickEdit } = await import('src/utils/ui');
 

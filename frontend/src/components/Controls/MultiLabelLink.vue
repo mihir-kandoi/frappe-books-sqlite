@@ -41,11 +41,7 @@ export default {
     }
   },
   methods: {
-    async setLinkValue(newValue, isInput) {
-      if (isInput) {
-        return (this.linkValue = newValue || '');
-      }
-
+    async setLinkValue(newValue) {
       const value = newValue ?? this.value;
       const { fieldname, target } = this.df ?? {};
       const linkDisplayField = fyo.schemaMap[target ?? '']?.linkDisplayField;
@@ -146,7 +142,7 @@ export default {
     getCreateNewOption() {
       return {
         label: t`Create`,
-        description: this.linkValue || undefined,
+        description: this.searchQuery || undefined,
         action: () => this.openNewDoc(),
         actionOnly: true,
       };
@@ -154,7 +150,7 @@ export default {
     async openNewDoc() {
       const schemaName = this.df.target;
       const name =
-        this.linkValue || fyo.doc.getTemporaryName(fyo.schemaMap[schemaName]);
+        this.searchQuery || fyo.doc.getTemporaryName(fyo.schemaMap[schemaName]);
       const filters = await this.getCreateFilters();
       const { openQuickEdit } = await import('src/utils/ui');
 

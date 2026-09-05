@@ -44,8 +44,8 @@
     @focus="onComboboxFocus"
     @blur="isFocused = false"
     @keydown.enter="onPressEnter"
+    @input="onComboboxInput"
     @update:open="onComboboxOpen"
-    @update:query="onComboboxQueryChange"
     @update:model-value="onComboboxValueChange"
   >
     <template #suffix="{ open, clear, setOpen }">
@@ -91,10 +91,7 @@
 
 <script>
 import { getOptionList } from 'fyo/utils';
-import {
-  Button as FrappeButton,
-  Combobox as FrappeCombobox,
-} from 'frappe-ui';
+import { Button as FrappeButton, Combobox as FrappeCombobox } from 'frappe-ui';
 import { FieldTypeEnum } from 'schemas/types';
 import { fuzzyMatch } from 'src/utils';
 import { getFormRoute, routeTo } from 'src/utils/ui';
@@ -112,20 +109,19 @@ export default {
     ReadOnlyValue,
   },
   extends: Base,
-  emits: ['focus', 'enter'],
+  emits: ['focus', 'enter', 'search'],
   props: {
     closeOnEnter: { type: Boolean, default: false },
     showClearButton: { type: Boolean, default: false },
   },
   data() {
     return {
-      acceptQueryChanges: false,
       isDropdownOpen: false,
       isFocused: false,
       isLoading: false,
       linkValue: '',
       suggestionRequest: 0,
-      suppressedQuery: '',
+      searchQuery: '',
       suggestions: [],
     };
   },
@@ -138,7 +134,17 @@ export default {
     },
     comboboxOptions() {
       const suggestions = [...this.suggestions];
-      if (this.value && !this.findSuggestion(this.value, suggestions)) {
+      const selected = this.findSuggestion(this.value, suggestions);
+      const displayField =
+        this.fyo.schemaMap[this.linkSchemaName]?.linkDisplayField;
+      if (selected && displayField && this.linkValue) {
+        // Loading options must not replace the selected record's display label.
+        suggestions[suggestions.indexOf(selected)] = {
+          ...selected,
+          label: this.linkValue,
+        };
+      }
+      if (this.value && !selected) {
         suggestions.unshift({
           label: this.linkValue || String(this.value),
           value: this.value,
@@ -176,7 +182,7 @@ export default {
 
       return Boolean(
         (isLink && this.df.target) ||
-          (this.df.references && this.doc?.[this.df.references])
+        (this.df.references && this.doc?.[this.df.references])
       );
     },
   },
@@ -186,14 +192,12 @@ export default {
       handler(newValue) {
         const displayValue = this.getLinkValue(newValue);
         this.setLinkValue(displayValue);
-        this.suppressedQuery = displayValue ?? '';
       },
     },
   },
   mounted() {
     const value = this.linkValue || this.value;
     this.setLinkValue(this.getLinkValue(value));
-    this.acceptQueryChanges = true;
   },
   methods: {
     async focusInputTag() {
@@ -210,7 +214,7 @@ export default {
       if (!value && !option) {
         return '';
       }
-      return option?.label || this.linkValue || String(value);
+      return option?.label || String(value);
     },
     async updateSuggestions(keyword = '') {
       const request = ++this.suggestionRequest;
@@ -306,14 +310,14 @@ export default {
         return;
       }
 
-      this.suppressedQuery = suggestion.label;
-      this.setLinkValue(suggestion.label);
+      this.searchQuery = '';
+      this.linkValue = suggestion.label;
       this.triggerChange(this.getSuggestionValue(suggestion));
     },
     clearSelection(clear, setOpen) {
-      this.suppressedQuery = '';
+      this.searchQuery = '';
       clear();
-      this.setLinkValue('');
+      this.linkValue = '';
       this.updateSuggestions();
       setOpen(true);
     },
@@ -324,26 +328,28 @@ export default {
     onComboboxOpen(isOpen) {
       this.isDropdownOpen = isOpen;
       if (isOpen) {
-        this.updateSuggestions();
+        this.updateSuggestions(this.searchQuery);
+      } else {
+        this.searchQuery = '';
       }
     },
-    onComboboxQueryChange(query) {
-      const value = String(query ?? '');
-      this.setLinkValue(value);
-      if (!this.acceptQueryChanges) {
-        return;
-      }
-      if (this.suppressedQuery === value) {
-        this.suppressedQuery = '';
+    onComboboxInput(event) {
+      if (this.isReadOnly || !(event.target instanceof HTMLInputElement)) {
         return;
       }
 
-      this.triggerChange(value);
+      const value = event.target.value;
+      this.searchQuery = value;
+      this.$emit('search', value);
+      // Link searches keep the stored ID until an option is selected.
+      if (this.df.fieldtype === FieldTypeEnum.AutoComplete) {
+        this.triggerChange(value);
+      }
       this.updateSuggestions(value);
     },
     onComboboxValueChange(value) {
       if (value == null) {
-        this.setLinkValue('');
+        this.linkValue = '';
         this.triggerChange('');
         return;
       }
@@ -354,12 +360,13 @@ export default {
         return;
       }
 
-      this.setLinkValue(String(value));
+      this.linkValue = String(value);
       this.triggerChange(value);
     },
     async onPressEnter(event) {
       await this.$nextTick();
-      const enteredValue = this.linkValue || event.target?.value || this.value;
+      const enteredValue =
+        this.searchQuery || event.target?.value || this.value;
       this.$emit('enter', enteredValue);
       if (this.closeOnEnter) {
         this.isDropdownOpen = false;

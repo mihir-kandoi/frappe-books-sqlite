@@ -41,6 +41,8 @@ jspm_packages/
 frappe_books/public/node_modules
 frappe_books/public/books/
 frappe_books/www/books.html
+frontend/test-results/
+frontend/playwright-report/
 
 # IDEs and editors
 .vscode/

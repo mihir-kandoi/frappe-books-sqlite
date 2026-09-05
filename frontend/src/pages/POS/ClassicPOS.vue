@@ -108,6 +108,7 @@
               :value="itemSearchTerm"
               :show-clear-button="true"
               :close-on-enter="true"
+              @search="(query: string) => emitEvent('handleItemSearch', query)"
               @enter="
                 (value: string) => emitEvent('handleItemSearch', value, true)
               "
