@@ -909,8 +909,12 @@ export class Doc extends Observable<DocValue | Doc[]> {
 
     let data = this.getValidDict(false, true);
     // Keep the saved timestamp until the database accepts the update.
-    data.modifiedBy = this.fyo.user || DEFAULT_USER;
-    data.modified = new Date();
+    if (this.fieldMap.modifiedBy) {
+      data.modifiedBy = this.fyo.user || DEFAULT_USER;
+    }
+    if (this.fieldMap.modified) {
+      data.modified = new Date();
+    }
     try {
       data = await this.fyo.db.update(
         this.schemaName,
