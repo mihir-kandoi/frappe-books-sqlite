@@ -18,7 +18,7 @@
     <CommandPaletteInput :placeholder="t`Type to search...`" />
 
     <!-- Search List -->
-    <CommandPaletteList>
+    <CommandPaletteList class="py-2.5 scroll-py-2.5 empty:py-0">
       <CommandPaletteItem
         v-for="(si, i) in suggestions"
         :key="`${i}-${si.label}`"
@@ -26,19 +26,15 @@
         :label="si.label"
       >
         <!-- Search List Item -->
-        <div class="flex min-w-0 flex-1 items-center justify-between">
-          <div class="flex items-center">
-            <p class="truncate text-ink-gray-8">
-              {{ si.label }}
-            </p>
-            <p
-              v-if="si.group === 'Docs'"
-              class="ms-3 truncate text-sm text-ink-gray-5"
-            >
-              {{ si.more.filter(Boolean).join(', ') }}
-            </p>
-          </div>
-        </div>
+        <span class="flex min-w-0 items-baseline gap-2">
+          <span class="truncate">{{ si.label }}</span>
+          <span
+            v-if="si.group === 'Docs'"
+            class="min-w-0 truncate text-sm text-ink-gray-5"
+          >
+            {{ si.more.filter(Boolean).join(', ') }}
+          </span>
+        </span>
         <template #suffix>
           <FrappeBadge :theme="groupThemeMap[si.group]" variant="subtle">
             {{ si.group === 'Docs' ? si.schemaLabel : groupLabelMap[si.group] }}
@@ -50,11 +46,11 @@
     <CommandPaletteEmpty>{{ t`No results` }}</CommandPaletteEmpty>
 
     <!-- Footer -->
-    <CommandPaletteFooter>
-      <div class="flex w-full flex-col gap-2 text-sm select-none">
+    <CommandPaletteFooter class="!py-3">
+      <div class="flex min-w-0 w-full flex-col gap-3 text-sm select-none">
         <!-- Group Filters -->
-        <div class="flex justify-between">
-          <div class="flex gap-1">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap gap-1.5">
             <FrappeButton
               v-for="g in searchGroups"
               :key="g"
@@ -68,20 +64,27 @@
               {{ groupLabelMap[g] }}
             </FrappeButton>
           </div>
-          <FrappeButton size="xs" variant="ghost" @click="showMore = !showMore">
+          <FrappeButton
+            class="ms-auto shrink-0"
+            size="xs"
+            variant="ghost"
+            :aria-expanded="showMore"
+            @click="showMore = !showMore"
+          >
             {{ showMore ? t`Less Filters` : t`More Filters` }}
           </FrappeButton>
         </div>
 
         <!-- Additional Filters -->
-        <div v-if="showMore" class="-mt-1">
+        <div v-if="showMore" class="flex max-h-40 flex-col gap-2 overflow-y-auto">
           <!-- Group Skip Filters -->
-          <div class="flex gap-1 text-ink-gray-8">
+          <div class="flex flex-wrap gap-1.5">
             <FrappeButton
               v-for="s in ['skipTables', 'skipTransactions'] as const"
               :key="s"
               size="xs"
               :variant="searcher?.filters[s] ? 'subtle' : 'outline'"
+              :aria-pressed="searcher?.filters[s]"
               @click="setSearchFilter(s, !searcher?.filters[s])"
             >
               {{
@@ -91,9 +94,7 @@
           </div>
 
           <!-- Schema Name Filters -->
-          <div
-            class="flex mt-1 gap-1 text-ink-blue-7 flex-wrap"
-          >
+          <div class="flex flex-wrap gap-1.5">
             <FrappeButton
               v-for="sf in schemaFilters"
               :key="sf.value"
@@ -103,6 +104,7 @@
               :variant="
                 searcher?.filters.schemaFilters[sf.value] ? 'subtle' : 'outline'
               "
+              :aria-pressed="searcher?.filters.schemaFilters[sf.value]"
               @click="
                 setSearchFilter(
                   sf.value,
@@ -116,21 +118,22 @@
         </div>
 
         <!-- Keybindings Help -->
-        <div class="flex text-sm text-ink-gray-5 justify-between items-center">
-          <div class="flex items-center gap-4">
-            <p class="flex h-7 items-center gap-1">
+        <div
+          class="flex flex-wrap items-center justify-between gap-2 text-ink-gray-5"
+        >
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <p class="flex h-7 items-center gap-1 whitespace-nowrap">
               <FrappeKeyboardShortcut combo="ArrowUp" />
               <FrappeKeyboardShortcut combo="ArrowDown" />
               {{ t`Navigate` }}
             </p>
-            <p class="flex h-7 items-center gap-1">
+            <p class="flex h-7 items-center gap-1 whitespace-nowrap">
               <FrappeKeyboardShortcut combo="Enter" /> {{ t`Select` }}
             </p>
-            <p class="flex h-7 items-center gap-1">
+            <p class="flex h-7 items-center gap-1 whitespace-nowrap">
               <FrappeKeyboardShortcut combo="Escape" /> {{ t`Close` }}
             </p>
             <FrappeButton
-              class="h-7"
               size="xs"
               variant="ghost"
               icon-left="lucide-circle-help"
@@ -140,29 +143,17 @@
             </FrappeButton>
           </div>
 
-          <p v-if="searcher?.numSearches" class="ms-auto">
-            {{ t`${suggestions.length} out of ${searcher.numSearches}` }}
-          </p>
-
-          <div
-            v-if="(searcher?.numSearches ?? 0) > 50"
-            class="border border-outline-gray-1 rounded-2 flex justify-self-end ms-2"
-          >
-            <template
-              v-for="c in allowedLimits.filter(
-                (c) => c < (searcher?.numSearches ?? 0) || c === -1
-              )"
-              :key="c + '-count'"
-            >
-              <FrappeButton
-                class="w-9"
-                size="xs"
-                :variant="limit === c ? 'subtle' : 'ghost'"
-                @click="limit = Number(c)"
-              >
-                {{ c === -1 ? t`All` : c }}
-              </FrappeButton>
-            </template>
+          <div class="ms-auto flex items-center gap-2 whitespace-nowrap">
+            <p v-if="searchResults.length">
+              {{ t`${suggestions.length} out of ${searchResults.length}` }}
+            </p>
+            <FrappeTabButtons
+              v-if="searchResults.length > 50"
+              v-model="limit"
+              :aria-label="t`Result limit`"
+              size="sm"
+              :options="limitOptions"
+            />
           </div>
         </div>
       </div>
@@ -185,6 +176,7 @@ import {
   Badge as FrappeBadge,
   Button as FrappeButton,
   KeyboardShortcut as FrappeKeyboardShortcut,
+  TabButtons as FrappeTabButtons,
 } from 'frappe-ui';
 import {
   CommandPalette,
@@ -211,6 +203,7 @@ export default defineComponent({
     FrappeBadge,
     FrappeButton,
     FrappeKeyboardShortcut,
+    FrappeTabButtons,
   },
   setup() {
     return {
@@ -230,6 +223,17 @@ export default defineComponent({
     };
   },
   computed: {
+    limitOptions() {
+      return this.allowedLimits
+        .filter(
+          (limit) =>
+            limit < this.searchResults.length || limit === this.limit || limit === -1
+        )
+        .map((value) => ({
+          value,
+          label: value === -1 ? this.t`All` : String(value),
+        }));
+    },
     groupLabelMap(): Record<SearchGroup, string> {
       return getGroupLabelMap();
     },
@@ -270,19 +274,19 @@ export default defineComponent({
         Recent: 'gray',
       };
     },
-    suggestions(): SearchItems {
+    searchResults(): SearchItems {
       // The web app keeps Search in a shallow ref; track filter mutations here.
       this.filterRevision;
       if (!this.searcher) {
         return [];
       }
 
-      const suggestions = this.searcher.search(this.inputValue);
-      if (this.limit === -1) {
-        return suggestions;
-      }
-
-      return suggestions.slice(0, this.limit);
+      return this.searcher.search(this.inputValue);
+    },
+    suggestions(): SearchItems {
+      return this.limit === -1
+        ? this.searchResults
+        : this.searchResults.slice(0, this.limit);
     },
   },
   async mounted() {
