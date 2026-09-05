@@ -23,11 +23,16 @@
           <span class="lucide-chevron-left size-4 rtl-rotate-180" />
         </template>
       </FrappeButton>
-      <div class="flex items-center gap-1 rounded-2 bg-surface-gray-2">
+      <div
+        class="grid items-center gap-1 rounded-4 bg-surface-gray-2 px-1 text-base tabular-nums focus-within:outline focus-within:outline-2 focus-within:outline-outline-gray-3"
+        :style="{
+          gridTemplateColumns: `${pageNumberWidth} auto ${pageNumberWidth}`,
+        }"
+      >
         <FrappeTextInput
           type="number"
           aria-label="Page number"
-          class="w-12 [&_input]:text-end"
+          class="min-w-0 [&_input]:text-center [&_input]:tabular-nums"
           variant="ghost"
           size="sm"
           :model-value="pageNo"
@@ -36,10 +41,10 @@
           @change="(e) => setPageNo(e.target.value)"
           @input="(e) => setPageNo(e.target.value)"
         />
-        <p class="text-ink-gray-5">/</p>
-        <p class="w-7">
+        <span class="text-ink-gray-5">/</span>
+        <span class="text-center">
           {{ maxPages }}
-        </p>
+        </span>
       </div>
       <FrappeButton
         variant="ghost"
@@ -99,6 +104,9 @@ export default defineComponent({
   computed: {
     maxPages() {
       return Math.ceil(this.itemCount / this.count);
+    },
+    pageNumberWidth() {
+      return `calc(${String(this.maxPages).length}ch + 1rem)`;
     },
     filteredCounts() {
       return this.allowedCounts.filter(this.filterCount);
