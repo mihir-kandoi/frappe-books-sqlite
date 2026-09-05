@@ -28,19 +28,17 @@
         class="border-b border-outline-gray-1 p-4 overflow-auto"
       >
         <!-- Header with count and schema label -->
-        <FrappeButton
-          class="!h-auto w-full !justify-between !px-0 text-start"
-          :class="entries[sn].collapsed ? '' : 'pb-4'"
-          variant="ghost"
-          :icon-right="entries[sn].collapsed ? 'lucide-chevron-down' : 'lucide-chevron-up'"
-          :aria-expanded="!entries[sn].collapsed"
-          @click="entries[sn].collapsed = !entries[sn].collapsed"
-        >
-          <h2 class="text-base text-ink-gray-6 font-semibold select-none">
-            {{ fyo.schemaMap[sn]?.label ?? sn
-            }}<span class="font-normal">{{ ` – ${entries[sn].details.length}` }}</span>
-          </h2>
-        </FrappeButton>
+        <div class="-mx-2" :class="entries[sn].collapsed ? '' : 'mb-4'">
+          <DisclosureButton
+            :expanded="!entries[sn].collapsed"
+            @toggle="entries[sn].collapsed = !entries[sn].collapsed"
+          >
+            <h2 class="text-base text-ink-gray-6 font-semibold select-none">
+              {{ fyo.schemaMap[sn]?.label ?? sn
+              }}<span class="font-normal">{{ ` – ${entries[sn].details.length}` }}</span>
+            </h2>
+          </DisclosureButton>
+        </div>
 
         <!-- Entry list -->
         <div
@@ -150,11 +148,11 @@ import { Doc } from 'fyo/model/doc';
 import { isPesa } from 'fyo/utils';
 import {
   Badge as FrappeBadge,
-  Button as FrappeButton,
   ItemListRow as FrappeItemListRow,
 } from 'frappe-ui';
 import { ModelNameEnum } from 'models/types';
 import Button from 'src/components/Button.vue';
+import DisclosureButton from 'src/components/DisclosureButton.vue';
 import Icon from 'src/components/Icon.vue';
 import { getLinkedEntries } from 'src/utils/doc';
 import { shortcutsKey } from 'src/utils/injectionKeys';
@@ -164,7 +162,7 @@ import { PropType, defineComponent, inject } from 'vue';
 const COMPONENT_NAME = 'LinkedEntries';
 
 export default defineComponent({
-  components: { Button, FrappeBadge, FrappeButton, FrappeItemListRow, Icon },
+  components: { Button, FrappeBadge, DisclosureButton, FrappeItemListRow, Icon },
   props: { doc: { type: Object as PropType<Doc>, required: true } },
   emits: ['close'],
   setup() {

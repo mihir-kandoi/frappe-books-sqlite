@@ -8,20 +8,19 @@
       <template v-for="g in groups" :key="g.label">
         <div class="p-4 w-full">
           <!-- Shortcut Group Header -->
-          <FrappeButton
-            class="mb-4 !h-auto w-full !justify-between !px-0 text-start"
-            variant="ghost"
-            :icon-right="g.collapsed ? 'lucide-chevron-down' : 'lucide-chevron-up'"
-            :aria-expanded="!g.collapsed"
-            @click="g.collapsed = !g.collapsed"
-          >
-            <span class="flex flex-col items-start">
-              <strong>{{ g.label }}</strong>
-              <span class="text-base font-normal text-ink-gray-6">
-                {{ g.description }}
+          <div class="-mx-2 mb-4">
+            <DisclosureButton
+              :expanded="!g.collapsed"
+              @toggle="g.collapsed = !g.collapsed"
+            >
+              <span class="flex flex-col items-start gap-1">
+                <strong>{{ g.label }}</strong>
+                <span class="text-base font-normal text-ink-gray-6">
+                  {{ g.description }}
+                </span>
               </span>
-            </span>
-          </FrappeButton>
+            </DisclosureButton>
+          </div>
           <!-- Shortcuts -->
           <div v-if="!g.collapsed" class="flex flex-col gap-4">
             <div
@@ -50,9 +49,9 @@
 </template>
 <script lang="ts">
 import { t } from 'fyo';
-import { Button as FrappeButton } from 'frappe-ui';
 import { ShortcutKey } from 'src/utils/ui';
 import { defineComponent } from 'vue';
+import DisclosureButton from './DisclosureButton.vue';
 import FormHeader from './FormHeader.vue';
 import ShortcutKeys from './ShortcutKeys.vue';
 
@@ -64,7 +63,7 @@ type Group = {
 };
 
 export default defineComponent({
-  components: { FormHeader, ShortcutKeys, FrappeButton },
+  components: { FormHeader, ShortcutKeys, DisclosureButton },
   data() {
     return { groups: [] } as { groups: Group[] };
   },

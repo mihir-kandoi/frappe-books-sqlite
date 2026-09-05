@@ -33,8 +33,6 @@
         @setup-canceled="leaveBooks"
       />
       <Desk v-else class="flex-1" :dark-mode="darkMode" />
-      <Dialogs />
-      <ToastProvider />
     </div>
   </FrappeUIProvider>
 </template>
@@ -61,10 +59,8 @@ import {
 } from 'vue';
 import {
   Button as FrappeButton,
-  Dialogs,
   FrappeUIProvider,
   Spinner as FrappeSpinner,
-  ToastProvider,
 } from 'frappe-ui';
 import { call } from './api';
 
@@ -72,12 +68,10 @@ export default defineComponent({
   name: 'WebApp',
   components: {
     Desk,
-    Dialogs,
     FrappeButton,
     FrappeSpinner,
     FrappeUIProvider,
     SetupWizard,
-    ToastProvider,
   },
   setup() {
     const keys = useKeys();

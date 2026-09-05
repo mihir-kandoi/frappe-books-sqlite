@@ -1,25 +1,22 @@
 <template>
   <div :class="level > 0 ? 'ms-2 ps-2 border-l border-outline-gray-1' : ''">
     <template v-for="r of rows" :key="r.key">
-      <FrappeButton
+      <DisclosureButton
         v-if="r.isCollapsible"
-        class="!h-auto w-full !justify-start !px-0 text-start text-ink-gray-6"
-        variant="ghost"
-        size="sm"
-        :icon-right="r.collapsed ? 'lucide-chevron-down' : 'lucide-chevron-up'"
-        :aria-expanded="!r.collapsed"
-        @click="r.collapsed = !r.collapsed"
+        class="text-ink-gray-6"
+        :expanded="!r.collapsed"
+        @toggle="r.collapsed = !r.collapsed"
       >
-        <span class="min-w-0 overflow-auto whitespace-nowrap no-scrollbar">
-          {{ getKey(r) }}
+        <span class="flex min-w-0 flex-wrap items-center gap-2">
+          <span class="min-w-0 break-all">{{ getKey(r) }}</span>
+          <FrappeBadge :theme="Array.isArray(r.value) ? 'blue' : 'red'" variant="subtle" size="sm">
+            {{ Array.isArray(r.value) ? t`Array` : t`Object` }}
+          </FrappeBadge>
         </span>
-        <FrappeBadge :theme="Array.isArray(r.value) ? 'blue' : 'red'" variant="subtle" size="sm">
-          {{ Array.isArray(r.value) ? t`Array` : t`Object` }}
-        </FrappeBadge>
-      </FrappeButton>
+      </DisclosureButton>
       <div
         v-else
-        class="flex gap-2 px-0 py-1.5 text-sm text-ink-gray-6 whitespace-nowrap overflow-auto no-scrollbar"
+        class="flex gap-2 px-2 py-1.5 text-sm text-ink-gray-6 whitespace-nowrap overflow-auto no-scrollbar"
       >
         <div>{{ getKey(r) }}</div>
         <div class="font-semibold text-ink-gray-8">
@@ -38,7 +35,8 @@
 </template>
 <script lang="ts">
 import { PrintTemplateHint } from 'src/utils/printTemplates';
-import { Badge as FrappeBadge, Button as FrappeButton } from 'frappe-ui';
+import { Badge as FrappeBadge } from 'frappe-ui';
+import DisclosureButton from 'src/components/DisclosureButton.vue';
 import { PropType } from 'vue';
 import { defineComponent } from 'vue';
 type HintRow = {
@@ -49,7 +47,7 @@ type HintRow = {
 };
 export default defineComponent({
   name: 'TemplateBuilderHint',
-  components: { FrappeBadge, FrappeButton },
+  components: { FrappeBadge, DisclosureButton },
   props: {
     prefix: { type: String, default: '' },
     hints: {

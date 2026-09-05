@@ -211,6 +211,33 @@ test('Escape dismisses account menus and dialogs without closing quick edit', as
   expect(await getPartyState(page)).toEqual({ dirty: false, address: addressName });
 });
 
+test('one action opens one dismissible confirmation', async ({ page }) => {
+  await page.getByRole('button', { name: 'Actions', exact: true }).click();
+  await page.getByRole('menuitem', { name: 'Delete', exact: true }).click();
+  const confirmation = page.getByRole('dialog');
+  await expect(confirmation).toHaveCount(1);
+  await expect(confirmation).toBeVisible();
+  await confirmation.getByRole('button', { name: 'No', exact: true }).hover();
+  await page.keyboard.press('Escape');
+  await expect(confirmation).toHaveCount(0);
+  expect(await getPartyState(page)).toEqual({ dirty: false, address: addressName });
+});
+
+test('one notification renders once and dismisses on click', async ({ page }) => {
+  await page.evaluate(() => {
+    const app = (document.querySelector('#app') as any).__vue_app__;
+    const fyo = app._context.mixins.find((m: any) => m.computed?.fyo).computed.fyo();
+    fyo.singles.POSSettings.isShiftOpen = true;
+    return app.config.globalProperties.$router.push('/pos');
+  });
+  await page.getByRole('button', { name: 'Coupon Code', exact: true }).click();
+  const close = page.getByRole('button', { name: 'Close toast', exact: true });
+  await expect(close).toHaveCount(1);
+  await close.hover();
+  await close.click();
+  await expect(close).toHaveCount(0);
+});
+
 async function openFixture(page: Page, schemaName: string, name: string) {
   await page.evaluate(
     ({ schemaName, name }) => {

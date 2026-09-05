@@ -151,17 +151,15 @@
           :class="templateChanged ? '' : 'mt-auto'"
         >
           <!-- Value Key Toggle -->
-          <FrappeButton
-            class="!h-auto w-full !justify-between !rounded-none !p-2"
-            variant="ghost"
-            :icon-right="showHints ? 'lucide-chevron-up' : 'lucide-chevron-down'"
-            :aria-expanded="showHints"
-            @click="toggleShowHints"
+          <DisclosureButton
+            class="!rounded-none"
+            :expanded="showHints"
+            @toggle="toggleShowHints"
           >
             <h2 class="text-base text-ink-gray-9 font-semibold">
               {{ t`Key Hints` }}
             </h2>
-          </FrappeButton>
+          </DisclosureButton>
 
           <!-- Value Key Hints -->
           <Transition name="hints">
@@ -192,8 +190,9 @@ import { PrintTemplate } from 'models/baseModels/PrintTemplate';
 import { ModelNameEnum } from 'models/types';
 import { saveExportData } from 'reports/commonExporter';
 import { Field, TargetField } from 'schemas/types';
-import { Button as FrappeButton, TextInput as FrappeTextInput } from 'frappe-ui';
+import { TextInput as FrappeTextInput } from 'frappe-ui';
 import Button from 'src/components/Button.vue';
+import DisclosureButton from 'src/components/DisclosureButton.vue';
 import FormControl from 'src/components/Controls/FormControl.vue';
 import Link from 'src/components/Controls/Link.vue';
 import DropdownWithActions from 'src/components/DropdownWithActions.vue';
@@ -235,6 +234,7 @@ export default defineComponent({
   components: {
     PageHeader,
     Button,
+    DisclosureButton,
     DropdownWithActions,
     PrintContainer,
     HorizontalResizer,
@@ -247,7 +247,6 @@ export default defineComponent({
     Modal,
     SetPrintSize,
     SetType,
-    FrappeButton,
     FrappeTextInput,
   },
   provide() {

@@ -5,17 +5,11 @@
       class="-mx-2"
       :class="collapsed ? '' : 'mb-4'"
     >
-      <FrappeButton
-        class="!h-auto w-full !justify-between !px-2 text-start"
-        variant="ghost"
-        :icon-right="collapsed ? 'lucide-chevron-down' : 'lucide-chevron-up'"
-        :aria-expanded="!collapsed"
-        @click="toggleCollapsed"
-      >
+      <DisclosureButton :expanded="!collapsed" @toggle="toggleCollapsed">
         <h2 class="text-base font-semibold text-ink-gray-9">
           {{ title }}
         </h2>
-      </FrappeButton>
+      </DisclosureButton>
     </div>
     <h2 v-else-if="showTitle && title" class="mb-4 text-base font-semibold text-ink-gray-9">
       {{ title }}
@@ -78,14 +72,14 @@
 import { DocValue } from 'fyo/core/types';
 import { Doc } from 'fyo/model/doc';
 import { Field } from 'schemas/types';
-import { Button as FrappeButton } from 'frappe-ui';
+import DisclosureButton from 'src/components/DisclosureButton.vue';
 import FormControl from 'src/components/Controls/FormControl.vue';
 import Table from 'src/components/Controls/Table.vue';
 import { focusOrSelectFormControl } from 'src/utils/ui';
 import { defineComponent, PropType } from 'vue';
 
 export default defineComponent({
-  components: { FormControl, Table, FrappeButton },
+  components: { FormControl, Table, DisclosureButton },
   props: {
     title: { type: String, default: '' },
     errors: {
